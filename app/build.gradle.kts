@@ -21,14 +21,28 @@ android {
         applicationId = "io.github.daisukikaffuchino.han1meviewer"
         minSdk = 29
         targetSdk = 37
-        versionCode = 260721
-        versionName = "26.1.0"
+        versionCode = 260722
+        versionName = "26.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "VERSION_NAME", "\"${versionName}\"")
         buildConfigField("int", "VERSION_CODE", "$versionCode")
         buildConfigField("int", "SEARCH_YEAR_RANGE_END", "${Config.thisYear}")
+
+        externalNativeBuild {
+            cmake {
+                cppFlags("-std=c++17")
+                abiFilters += "arm64-v8a"
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 
     splits {
@@ -106,6 +120,7 @@ dependencies {
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.documentfile)
+    implementation(libs.androidx.glance.appwidget)
     implementation(libs.startup.runtime)
     implementation(libs.androidx.material.icons.extended)
 

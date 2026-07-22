@@ -10,9 +10,10 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
-import android.os.Build
 import android.graphics.Rect
 import android.graphics.drawable.Icon
+import android.os.Build
+import android.util.Base64
 import android.util.Log
 import android.util.Rational
 import android.view.ContextThemeWrapper
@@ -25,7 +26,12 @@ import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -37,8 +43,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.window.Dialog
 import androidx.core.view.isVisible
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
@@ -51,6 +60,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import cn.jzvd.JZMediaInterface
 import cn.jzvd.Jzvd
 import coil.load
+import io.github.daisukikaffuchino.han1meviewer.BuildConfig
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.getHanimeVideoLink
@@ -73,18 +83,17 @@ import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.CommentViewModel
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.VideoViewModel
 import io.github.daisukikaffuchino.han1meviewer.ui.util.rememberCopyTextToClipboard
 import io.github.daisukikaffuchino.han1meviewer.ui.util.rememberShareText
-import io.github.daisukikaffuchino.han1meviewer.util.checkBadGuy
 import io.github.daisukikaffuchino.han1meviewer.util.loadAssetAs
 import io.github.daisukikaffuchino.utils.OrientationManager
 import io.github.daisukikaffuchino.utils.dp
 import io.github.daisukikaffuchino.utils.showShortToast
 import io.github.daisukikaffuchino.utils.startActivity
 import io.github.daisukikaffuchino.utils.statusBarHeight
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
+@Suppress("DEPRECATION")
 @Composable
 fun VideoRouteHostScreen(
     activity: MainActivity,
@@ -119,6 +128,7 @@ fun VideoRouteHostScreen(
     val stringLongPressShare = remember(activity) {
         activity.getString(R.string.long_press_share_to_copy)
     }
+    var showDialog by remember { mutableStateOf(false) }
 
     DisposableEffect(activity) {
         val window = activity.window
@@ -128,30 +138,20 @@ fun VideoRouteHostScreen(
         val previousLightStatusBars = controller.isAppearanceLightStatusBars
         val previousLightNavigationBars = controller.isAppearanceLightNavigationBars
         val previousStatusBarContrastEnforced =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                window.isStatusBarContrastEnforced
-            } else {
-                null
-            }
+            window.isStatusBarContrastEnforced
         val previousNavigationBarContrastEnforced =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                window.isNavigationBarContrastEnforced
-            } else {
-                null
-            }
+            window.isNavigationBarContrastEnforced
 
         onDispose {
             window.statusBarColor = previousStatusBarColor
             window.navigationBarColor = previousNavigationBarColor
             controller.isAppearanceLightStatusBars = previousLightStatusBars
             controller.isAppearanceLightNavigationBars = previousLightNavigationBars
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                previousStatusBarContrastEnforced?.let {
-                    window.isStatusBarContrastEnforced = it
-                }
-                previousNavigationBarContrastEnforced?.let {
-                    window.isNavigationBarContrastEnforced = it
-                }
+            previousStatusBarContrastEnforced.let {
+                window.isStatusBarContrastEnforced = it
+            }
+            previousNavigationBarContrastEnforced.let {
+                window.isNavigationBarContrastEnforced = it
             }
         }
     }
@@ -163,10 +163,8 @@ fun VideoRouteHostScreen(
         window.navigationBarColor = Color.TRANSPARENT
         controller.isAppearanceLightStatusBars = false
         controller.isAppearanceLightNavigationBars = false
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            window.isStatusBarContrastEnforced = false
-            window.isNavigationBarContrastEnforced = false
-        }
+        window.isStatusBarContrastEnforced = false
+        window.isNavigationBarContrastEnforced = false
     }
 
     commentViewModel.code = route.videoCode
@@ -364,6 +362,7 @@ fun VideoRouteHostScreen(
                 onToggleFavorite = actions::toggleFavorite,
                 onRateVideo = actions::rateVideo,
                 onManageMyList = actions::updateMyListSelection,
+                onQuickCheckIn = actions::quickCheckIn,
                 onPrepareDownload = { quality, video ->
                     checkedQuality = quality
                     video?.let(actions::startDownloadFlow)
@@ -428,6 +427,7 @@ fun VideoRouteHostScreen(
                     }
                     Jzvd.goOnPlayOnPause()
                 }
+
                 else -> Unit
             }
         }
@@ -507,7 +507,6 @@ fun VideoRouteHostScreen(
         checkedQuality = null
         pendingDownloadPrompt = null
         videoTitle = null
-        checkBadGuy(activity, R.raw.akarin)
         viewModel.videoCode = route.videoCode
         viewModel.getHanimeVideo(route.videoCode, route.localUri)
     }
@@ -563,6 +562,41 @@ fun VideoRouteHostScreen(
                 }
             }
         }
+    }
+
+    @Composable
+    fun Base64Dialog(
+        onDismiss: () -> Unit
+    ) {
+        val decodedTitle = remember {
+            String(Base64.decode("562+5ZCN5qCh6aqM5aSx6LSl", Base64.DEFAULT), Charsets.UTF_8)
+        }
+        val decodedContent = remember {
+            String(
+                Base64.decode(
+                    "5L2g5Y+v6IO95bey57uP6KKr6aqX5LqG77yM5LiL6L295Yiw5LqG6KKr56+h5pS555qE5bqU55So44CC5pys5bqU55So5byA5rqQ5YWN6LS55peg5bm/5ZGK77yM5Lil56aB5aKZ5YaF5byV5rWB44CB5pCs6L+Q44CB5YCS5Y2W44CC5Lmf5pyJ5bCP5qaC546H5piv5qCh6aqM562+5ZCN55qE5Luj56CB5Ye66ZSZ5LqG77yM5aaC5p6c5L2g5piv5Zyo5a6Y5pa5R2l0aHVi5LuT5bqT5LiL6L2955qE77yM6K+36IGU57O75byA5Y+R6ICF44CC",
+                    Base64.DEFAULT
+                ), Charsets.UTF_8
+            )
+        }
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(text = decodedTitle) },
+            text = { Text(text = decodedContent) },
+            confirmButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(text = stringResource(android.R.string.ok))
+                }
+            }
+        )
+    }
+
+    if (showDialog) {
+        Base64Dialog(onDismiss = { showDialog = false })
+    }
+
+    LaunchedEffect(Unit) {
+        showDialog = !BuildConfig.DEBUG && !svc()
     }
 
     @OptIn(ExperimentalTime::class)
@@ -655,7 +689,11 @@ fun VideoRouteHostScreen(
         dismissText = activity.getString(R.string.deny),
         onConfirm = {
             showNotificationPermissionReason = false
-            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                notificationPermissionLauncher.launch(
+                    Manifest.permission.POST_NOTIFICATIONS
+                )
+            }
         },
         onDismiss = {
             showNotificationPermissionReason = false
@@ -679,6 +717,8 @@ fun VideoRouteHostScreen(
         },
     )
 }
+
+private external fun svc(): Boolean
 
 private fun createVideoPlayerView(activity: MainActivity): HJzvdStd {
     return HJzvdStd(ContextThemeWrapper(activity, activity.theme))
