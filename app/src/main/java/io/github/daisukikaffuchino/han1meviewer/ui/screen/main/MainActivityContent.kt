@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.main
 
 import android.content.Intent
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,7 +41,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.handleMainInt
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.navigateDrawerDestination
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomePageViewModel
 import io.github.daisukikaffuchino.han1meviewer.videoUrlRegex
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -119,14 +119,14 @@ fun MainActivityContent(
         }
         LaunchedEffect(viewModel) {
             viewModel.sessionExpiredMessage.collect { event ->
-                event.message?.let(::showShortToast) ?: showShortToast(event.fallbackResId)
+                event.message?.let(SonnerToast::error) ?: SonnerToast.error(event.fallbackResId)
             }
         }
         LaunchedEffect(homeState) {
             if (homeState is PageState.Error) {
                 val throwable = (homeState as PageState.Error).throwable
                 if (throwable is CloudFlareBlockedException) {
-                    Log.e("error", "被屏蔽时的处理")
+                    LogUtil.e("error", "被屏蔽时的处理")
                 }
             }
         }
@@ -156,7 +156,7 @@ fun MainActivityContent(
                 val handled = composeNavController.navigateDrawerDestination(
                     destination = destination,
                     isLoggedIn = isLoggedIn,
-                    onRequireLogin = { showShortToast(R.string.login_first) },
+                    onRequireLogin = { SonnerToast.warning(R.string.login_first) },
                 )
                 if (handled) {
                     scope.launch { drawerState.close() }

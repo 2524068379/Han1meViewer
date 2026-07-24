@@ -12,8 +12,8 @@ import io.github.daisukikaffuchino.han1meviewer.getHanimeShareText
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.search.AdvancedSearchSheet
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.search.SearchScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.SearchViewModel
-import io.github.daisukikaffuchino.han1meviewer.ui.util.rememberCopyTextToClipboard
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.rememberCopyTextToClipboard
+import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.serialization.json.Json
 
 @Composable
@@ -58,7 +58,7 @@ fun SearchRouteScreen(
         onOpenVideo = onNavigateToVideo,
         onLongPressCopy = { videoCode, title ->
             copyTextToClipboard(getHanimeShareText(title, videoCode))
-            showShortToast(R.string.copy_to_clipboard)
+            SonnerToast.success(R.string.copy_to_clipboard)
         },
         onOpenAdvancedSearch = { showAdvancedSearchSheet = true },
     )

@@ -5,7 +5,7 @@ import android.app.Notification
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.ParcelFileDescriptor
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
@@ -34,7 +34,7 @@ import io.github.daisukikaffuchino.han1meviewer.util.SafFileManager
 import io.github.daisukikaffuchino.han1meviewer.util.await
 import io.github.daisukikaffuchino.utils.createFileIfNotExists
 import io.github.daisukikaffuchino.utils.saveTo
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -189,7 +189,7 @@ class HanimeDownloadWorker(
             try {
                 // SAF 优先
                 val safUri = SafFileManager.getDownloadVideoFileUri(context, videoCode, createVideoName(hanimeName, quality, videoType))
-                Log.i(TAG,safUri.toString())
+                LogUtil.i(TAG,safUri.toString())
                 if (safUri != null) {
                     context.contentResolver.openFileDescriptor(safUri, "rw")?.closeQuietly()
                 } else {
@@ -291,11 +291,11 @@ class HanimeDownloadWorker(
                     createNewRaf(file)
                     DatabaseRepo.HanimeDownload.find(videoCode, quality)
                         ?: return@withContext run {
-                            Log.d(TAG, "entity is null, create new raf failed")
+                            LogUtil.d(TAG, "entity is null, create new raf failed")
                             val reason = context.getString(R.string.download_error_file_info)
                             showFailureNotification(reason)
                             mainScope.launch {
-                                showShortToast(
+                                SonnerToast.error(
                                     context.getString(R.string.download_task_failed_s_reason_s, hanimeName, reason)
                                 )
                             }
@@ -377,7 +377,7 @@ class HanimeDownloadWorker(
                         val reason = response.toDownloadErrorMessage(requestNeedRange)
                         showFailureNotification(reason)
                         mainScope.launch {
-                            showShortToast(context.getString(R.string.download_task_failed_s_reason_s, hanimeName, reason))
+                            SonnerToast.error(context.getString(R.string.download_task_failed_s_reason_s, hanimeName, reason))
                         }
                         result = Result.failure(workDataOf(DownloadState.STATE to DownloadState.Failed.mask))
                         return@withContext result
@@ -439,7 +439,7 @@ class HanimeDownloadWorker(
             } catch (e: Exception) {
                 result = if (e is CancellationException || e.isStoppedCancellation()) {
                     cancelDownloadNotification()
-                    mainScope.launch { showShortToast(R.string.download_error_cancelled) }
+                    mainScope.launch { SonnerToast.info(R.string.download_error_cancelled) }
                     Result.success(
                         workDataOf(DownloadState.STATE to DownloadState.Paused.mask)
                     )
@@ -447,7 +447,7 @@ class HanimeDownloadWorker(
                     val reason = e.toDownloadErrorMessage()
                     showRetryNotification(reason)
                     mainScope.launch {
-                        showShortToast(context.getString(R.string.download_task_retrying_s_reason_s, hanimeName, reason))
+                        SonnerToast.warning(context.getString(R.string.download_task_retrying_s_reason_s, hanimeName, reason))
                     }
                     shouldRetry = true
                     Result.retry()
@@ -456,7 +456,7 @@ class HanimeDownloadWorker(
                     showFailureNotification(reason)
                     e.printStackTrace()
                     mainScope.launch {
-                        showShortToast(context.getString(R.string.download_task_failed_s_reason_s, hanimeName, reason))
+                        SonnerToast.error(context.getString(R.string.download_task_failed_s_reason_s, hanimeName, reason))
                     }
                     Result.failure(
                         workDataOf(DownloadState.STATE to DownloadState.Failed.mask)

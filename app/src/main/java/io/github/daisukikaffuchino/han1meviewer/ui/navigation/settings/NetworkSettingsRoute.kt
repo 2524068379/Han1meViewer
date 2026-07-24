@@ -3,7 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -37,7 +37,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.NetworkSettin
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.NetworkSettingsUiState
 import io.github.daisukikaffuchino.utils.ActivityManager
 import io.github.daisukikaffuchino.utils.applicationContext
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import okhttp3.Request
 import java.net.InetAddress
 import java.util.concurrent.Executors
@@ -158,7 +158,7 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
                         )
                     )
                 }.onFailure { throwable ->
-                    Log.w("DOH_TEST", "lookup failed for $host: ${throwable.message}")
+                    LogUtil.w("DOH_TEST", "lookup failed for $host: ${throwable.message}")
                     dohTestResults.add(
                         DohTestResultUi(
                             host = host,
@@ -306,7 +306,7 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
             executor.execute {
                 val ipList = HDns().getCDNList(host)
                 Handler(Looper.getMainLooper()).post {
-                    Log.i("delayTest", ipList.toString())
+                    LogUtil.i("delayTest", ipList.toString())
                     delayResults.clear()
                     delayResults.addAll(ipList.map { DelayResultUi(it, -1) })
                     scheduleNextTest(ipList)
@@ -326,7 +326,7 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
                 else -> false
             }
             if (!valid) {
-                showShortToast(R.string.invalid_ip_or_port)
+                SonnerToast.warning(R.string.invalid_ip_or_port)
                 return@NetworkSettingsScreen
             }
             if (type == HProxySelector.TYPE_SOCKS) {

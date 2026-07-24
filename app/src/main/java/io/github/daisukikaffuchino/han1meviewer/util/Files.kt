@@ -4,14 +4,14 @@ import android.content.ActivityNotFoundException
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import io.github.daisukikaffuchino.han1meviewer.FILE_PROVIDER_AUTHORITY
 import io.github.daisukikaffuchino.han1meviewer.HJson
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.utils.applicationContext
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -50,7 +50,7 @@ fun Context.openDownloadedHanimeVideoLocally(
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            showShortToast(R.string.action_not_support)
+            SonnerToast.warning(R.string.action_not_support)
             e.printStackTrace()
         }
     } else {
@@ -67,7 +67,7 @@ fun Context.openDownloadedHanimeVideoLocally(
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            showShortToast(R.string.action_not_support)
+            SonnerToast.warning(R.string.action_not_support)
             e.printStackTrace()
         }
     }
@@ -101,7 +101,7 @@ suspend fun InputStream.copyTo(
                 }
                 bytes = read(buffer)
             }
-            Log.i("progress", bytesCopied.toString())
+            LogUtil.i("progress", bytesCopied.toString())
             bytesCopied
         }
     }
