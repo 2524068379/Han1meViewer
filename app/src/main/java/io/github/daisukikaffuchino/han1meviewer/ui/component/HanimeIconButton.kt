@@ -8,6 +8,8 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconButtonShapes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 /** Icon button variants with a shared expressive pressed-shape transition. */
 @Composable
@@ -19,8 +21,12 @@ fun IconButton(
     shapes: IconButtonShapes = IconButtonDefaults.shapes(),
     content: @Composable () -> Unit,
 ) {
+    val view = LocalView.current
     androidx.compose.material3.IconButton(
-        onClick = onClick,
+        onClick = {
+            VibrationUtil.performHapticFeedback(view)
+            onClick()
+        },
         modifier = modifier,
         enabled = enabled,
         colors = colors,
@@ -38,8 +44,12 @@ fun FilledIconButton(
     shapes: IconButtonShapes = IconButtonDefaults.shapes(),
     content: @Composable () -> Unit,
 ) {
+    val view = LocalView.current
     androidx.compose.material3.FilledIconButton(
-        onClick = onClick,
+        onClick = {
+            VibrationUtil.performHapticFeedback(view)
+            onClick()
+        },
         modifier = modifier,
         enabled = enabled,
         colors = colors,
@@ -57,8 +67,12 @@ fun FilledTonalIconButton(
     shapes: IconButtonShapes = IconButtonDefaults.shapes(),
     content: @Composable () -> Unit,
 ) {
+    val view = LocalView.current
     androidx.compose.material3.FilledTonalIconButton(
-        onClick = onClick,
+        onClick = {
+            VibrationUtil.performHapticFeedback(view)
+            onClick()
+        },
         modifier = modifier,
         enabled = enabled,
         colors = colors,
@@ -76,8 +90,12 @@ fun OutlinedIconButton(
     shapes: IconButtonShapes = IconButtonDefaults.shapes(),
     content: @Composable () -> Unit,
 ) {
+    val view = LocalView.current
     androidx.compose.material3.OutlinedIconButton(
-        onClick = onClick,
+        onClick = {
+            VibrationUtil.performHapticFeedback(view)
+            onClick()
+        },
         modifier = modifier,
         enabled = enabled,
         colors = colors,

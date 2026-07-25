@@ -1,6 +1,5 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.navigation.main
 
-import android.view.HapticFeedbackConstants
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -37,7 +36,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadS
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadSettingsRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.AboutSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.AppearanceSettingsRoute
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DataSettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DataPrivacySettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframeSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframeSettingsRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframesRoute
@@ -53,7 +52,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.OpenSourc
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.PlayerSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.PlayerSettingsRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsScaffold
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.PrivacySettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.InterfaceInteractionSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SharedHKeyframesRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SharedHKeyframesRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.VideoPlaybackSettingsRoute
@@ -64,6 +63,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.account.AccountScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.materialSharedAxisXIn
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.materialSharedAxisXOut
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.UserAccountViewModel
+import io.github.daisukikaffuchino.utils.VibrationUtil
 import kotlinx.serialization.json.Json
 
 private const val PredictiveBackOffsetFactor = 0.10f
@@ -195,8 +195,10 @@ fun MainNavHost(
                     onOpenPlayerSettings = { navController.navigateSafely(PlayerSettingsRoute) },
                     onOpenNetworkDownload = { navController.navigateSafely(NetworkDownloadSettingsRoute) },
                     onOpenAppearance = { navController.navigateSafely(AppearanceSettingsRoute) },
-                    onOpenPrivacy = { navController.navigateSafely(PrivacySettingsRoute) },
-                    onOpenData = { navController.navigateSafely(DataSettingsRoute) },
+                    onOpenInterfaceInteraction = {
+                        navController.navigateSafely(InterfaceInteractionSettingsRoute)
+                    },
+                    onOpenDataPrivacy = { navController.navigateSafely(DataPrivacySettingsRoute) },
                     onOpenAbout = { navController.navigateSafely(AboutSettingsRoute) },
                 )
             }
@@ -227,19 +229,19 @@ fun MainNavHost(
                 )
             }
         }
-        composable<PrivacySettingsRoute> {
+        composable<InterfaceInteractionSettingsRoute> {
             SettingsScaffold(navController, HomeSettingsRoute) {
                 HomeSettingsRouteScreen(
                     activity = activity,
-                    page = HomeSettingsPage.Privacy,
+                    page = HomeSettingsPage.InterfaceInteraction,
                 )
             }
         }
-        composable<DataSettingsRoute> {
+        composable<DataPrivacySettingsRoute> {
             SettingsScaffold(navController, HomeSettingsRoute) {
                 HomeSettingsRouteScreen(
                     activity = activity,
-                    page = HomeSettingsPage.Data,
+                    page = HomeSettingsPage.DataPrivacy,
                 )
             }
         }
@@ -255,7 +257,6 @@ fun MainNavHost(
             }
         }
         composable<OpenSourceLicensesRoute> {
-            val view = LocalView.current
             var searchMode by remember { mutableStateOf(false) }
             BackHandler(enabled = searchMode) {
                 searchMode = false
@@ -281,10 +282,7 @@ fun MainNavHost(
                     ) {
                         IconButton(
                             shapes = IconButtonDefaults.shapes(),
-                            onClick = {
-                                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                                searchMode = true
-                            },
+                            onClick = { searchMode = true },
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.Search,
@@ -336,11 +334,17 @@ fun MainNavHost(
         }
         composable<HKeyframesRoute> {
             var showImportDialog by remember { mutableStateOf(false) }
+            val view = LocalView.current
             SettingsScaffold(
                 navController = navController,
                 fallbackDestination = VideoPlaybackSettingsRoute,
                 floatingActionButton = {
-                    FloatingActionButton(onClick = { showImportDialog = true }) {
+                    FloatingActionButton(
+                        onClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            showImportDialog = true
+                        },
+                    ) {
                         Icon(
                             imageVector = Icons.Filled.Add,
                             contentDescription = stringResource(R.string.h_keyframes_import_shared),

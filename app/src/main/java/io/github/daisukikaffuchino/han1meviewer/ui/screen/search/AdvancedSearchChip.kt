@@ -12,7 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 @Composable
 fun AdvancedSearchChip(
@@ -22,6 +24,7 @@ fun AdvancedSearchChip(
     onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit,
 ) {
+    val view = LocalView.current
     val containerColor = if (checked) {
         MaterialTheme.colorScheme.primary
     } else {
@@ -44,8 +47,16 @@ fun AdvancedSearchChip(
             modifier = Modifier
                 .fillMaxWidth()
                 .combinedClickable(
-                    onClick = onClick,
-                    onLongClick = onLongClick,
+                    onClick = {
+                        VibrationUtil.performHapticFeedback(view)
+                        onClick()
+                    },
+                    onLongClick = onLongClick?.let { action ->
+                        {
+                            VibrationUtil.performHapticFeedback(view)
+                            action()
+                        }
+                    },
                 )
                 .padding(horizontal = 14.dp, vertical = 12.dp),
             contentAlignment = androidx.compose.ui.Alignment.Center,

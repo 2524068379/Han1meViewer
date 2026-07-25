@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeTopAppBar
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 /**
  * 渲染首页顶部栏，包含抽屉入口、搜索入口和新番列表入口。
@@ -43,6 +45,7 @@ fun HomePageTopBar(
     onNavigateToPreview: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val view = LocalView.current
     HanimeTopAppBar(
         modifier = modifier,
         title = {
@@ -52,7 +55,10 @@ fun HomePageTopBar(
                     .height(48.dp)
                     .clip(RoundedCornerShape(28.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .clickable(onClick = onSearchClick)
+                    .clickable {
+                        VibrationUtil.performHapticFeedback(view)
+                        onSearchClick()
+                    }
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart,
             ) {

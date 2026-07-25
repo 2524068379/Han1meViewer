@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -57,6 +58,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
 import io.github.daisukikaffuchino.utils.rememberCopyTextToClipboard
 import io.github.daisukikaffuchino.han1meviewer.util.DisplayTextLocalizer
 import io.github.daisukikaffuchino.utils.SonnerToast
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 
 /**
@@ -82,6 +84,7 @@ fun VideoCardItem(
     val iconSize = dimensionResource(id = R.dimen.view_view_and_time_icon_size)
     val imageAspectRatio = if (isHorizontalCard) 16f / 9f else 3f / 4f
     val context = LocalContext.current
+    val view = LocalView.current
     val copyTextToClipboard = rememberCopyTextToClipboard()
     val interactionSource = remember { MutableInteractionSource() }
     val indication = LocalIndication.current
@@ -109,8 +112,14 @@ fun VideoCardItem(
                         enabled = !isPlaying,
                         interactionSource = interactionSource,
                         indication = indication,
-                        onClick = { onClickVideosItem(videoItem.videoCode) },
-                        onLongClick = { showContextMenu = true },
+                        onClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            onClickVideosItem(videoItem.videoCode)
+                        },
+                        onLongClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            showContextMenu = true
+                        },
                     ),
             ) {
                 Box(

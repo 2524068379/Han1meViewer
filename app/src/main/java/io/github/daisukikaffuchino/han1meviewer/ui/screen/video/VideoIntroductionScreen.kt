@@ -41,7 +41,7 @@ import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticButton as Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -53,7 +53,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -67,6 +67,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -100,6 +101,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.theme.VideoNormalCardMinWidth
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.VideoSimplifiedCardMinWidth
 import io.github.daisukikaffuchino.han1meviewer.util.DisplayTextLocalizer
 import io.github.daisukikaffuchino.utils.SonnerToast
+import io.github.daisukikaffuchino.utils.VibrationUtil
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format
@@ -426,6 +428,7 @@ private fun DownloadQualityDialog(
     onOpenOfficial: () -> Unit,
     onSelectQuality: (String) -> Unit,
 ) {
+    val view = LocalView.current
     val qualities = videoUrls.keys.toList()
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -439,6 +442,7 @@ private fun DownloadQualityDialog(
                             .selectable(
                                 selected = false,
                                 onClick = {
+                                    VibrationUtil.performHapticFeedback(view)
                                     if (quality == io.github.daisukikaffuchino.han1meviewer.HanimeResolution.RES_UNKNOWN) {
                                         onOpenOfficial()
                                     } else {
@@ -589,6 +593,7 @@ private fun MyListDialog(
     onDismiss: () -> Unit,
     onConfirm: (List<Boolean>) -> Unit,
 ) {
+    val view = LocalView.current
     var selectedStates by remember(myList.myListInfo) {
         mutableStateOf(myList.myListInfo.map { it.isSelected })
     }
@@ -618,6 +623,7 @@ private fun MyListDialog(
                                 .toggleable(
                                     value = selectedStates[index],
                                     onValueChange = { checked ->
+                                        VibrationUtil.performHapticFeedback(view)
                                         selectedStates =
                                             selectedStates.toMutableList().also { it[index] = checked }
                                     },
@@ -665,6 +671,7 @@ private fun PlaylistBottomSheet(
     onDismiss: () -> Unit,
     onOpenVideo: (HanimeInfo) -> Unit,
 ) {
+    val view = LocalView.current
     val playingIndex = remember(playlist) {
         playlist.video.indexOfFirst { it.isPlaying }.coerceAtLeast(0)
     }
@@ -731,7 +738,10 @@ private fun PlaylistBottomSheet(
                             )
                             .combinedClickable(
                                 enabled = !item.isPlaying,
-                                onClick = { onOpenVideo(item) },
+                                onClick = {
+                                    VibrationUtil.performHapticFeedback(view)
+                                    onOpenVideo(item)
+                                },
                                 onLongClick = null,
                             )
                             .padding(8.dp),
@@ -815,6 +825,7 @@ private fun ArtistSection(
     onOpenArtist: () -> Unit,
     onToggleSubscribe: () -> Unit,
 ) {
+    val view = LocalView.current
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -824,7 +835,13 @@ private fun ArtistSection(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .combinedClickable(onClick = onOpenArtist, onLongClick = null)
+                .combinedClickable(
+                    onClick = {
+                        VibrationUtil.performHapticFeedback(view)
+                        onOpenArtist()
+                    },
+                    onLongClick = null,
+                )
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -854,7 +871,10 @@ private fun ArtistSection(
             artist.post?.let {
                 if (artist.isSubscribed) {
                     OutlinedButton(
-                        onClick = onToggleSubscribe,
+                        onClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            onToggleSubscribe()
+                        },
                         colors = ButtonDefaults.outlinedButtonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -867,7 +887,9 @@ private fun ArtistSection(
                         Text(text = stringResource(R.string.subscribed))
                     }
                 } else {
-                    Button(onClick = onToggleSubscribe) {
+                    Button(
+                        onClick = onToggleSubscribe,
+                    ) {
                         Text(text = stringResource(R.string.subscribe))
                     }
                 }
@@ -988,6 +1010,7 @@ private fun VideoRatingButtons(
     video: HanimeVideo,
     onRateVideo: (Boolean) -> Unit,
 ) {
+    val view = LocalView.current
     val likeContentColor by animateColorAsState(
         targetValue = if (video.isFav) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
         label = "LikeColor"
@@ -1025,7 +1048,12 @@ private fun VideoRatingButtons(
                 .height(32.dp)
                 .clip(RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp))
                 .background(likeContainerColor)
-                .combinedClickable(onClick = { onRateVideo(true) })
+                .combinedClickable(
+                    onClick = {
+                        VibrationUtil.performHapticFeedback(view)
+                        onRateVideo(true)
+                    },
+                )
                 .padding(start = 10.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -1057,7 +1085,12 @@ private fun VideoRatingButtons(
                 .size(width = 34.dp, height = 32.dp)
                 .clip(RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp))
                 .background(dislikeContainerColor)
-                .combinedClickable(onClick = { onRateVideo(false) }),
+                .combinedClickable(
+                    onClick = {
+                        VibrationUtil.performHapticFeedback(view)
+                        onRateVideo(false)
+                    },
+                ),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -1158,13 +1191,22 @@ private fun VideoActionButton(
     onClick: () -> Unit,
     onLongClick: (() -> Unit)? = null,
 ) {
+    val view = LocalView.current
     Column(
         modifier = Modifier
             .widthIn(min = 76.dp)
             .clip(androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
             .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick,
+                onClick = {
+                    VibrationUtil.performHapticFeedback(view)
+                    onClick()
+                },
+                onLongClick = onLongClick?.let { action ->
+                    {
+                        VibrationUtil.performHapticFeedback(view)
+                        action()
+                    }
+                },
             )
             .padding(horizontal = 10.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -1299,6 +1341,7 @@ private fun SectionHeader(
     actionText: String? = null,
     onActionClick: (() -> Unit)? = null,
 ) {
+    val view = LocalView.current
     Column(
         modifier = Modifier.padding(start = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -1324,7 +1367,9 @@ private fun SectionHeader(
                 }
             }
             if (!actionText.isNullOrBlank() && onActionClick != null) {
-                TextButton(onClick = onActionClick) {
+                TextButton(
+                    onClick = onActionClick,
+                ) {
                     Text(actionText)
                 }
             }

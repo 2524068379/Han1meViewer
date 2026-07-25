@@ -3,7 +3,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.settings
 
 import android.os.Build
-import android.view.HapticFeedbackConstants
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -49,7 +48,6 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -187,7 +185,7 @@ private fun PickerContainer(
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = HanimeDefaults.Colors.card,
-        shape = HanimeDefaults.Corners.medium,
+        shape = HanimeDefaults.buttonShape,
     ) {
         Column(
             modifier = Modifier.padding(vertical = 16.dp),
@@ -352,7 +350,6 @@ private fun PickerOption(
     shapes: ButtonShapes = HanimeDefaults.shapes(),
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val view = LocalView.current
     val interactionSource = remember { MutableInteractionSource() }
     val shape = animatedShape(shapes, interactionSource)
     Column(
@@ -361,10 +358,7 @@ private fun PickerOption(
             .clip(shape)
             .immediateClickable(
                 interactionSource = interactionSource,
-                onClick = {
-                    view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                    onClick()
-                },
+                onClick = onClick,
             )
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

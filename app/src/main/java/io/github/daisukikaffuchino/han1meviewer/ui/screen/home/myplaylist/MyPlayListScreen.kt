@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -37,6 +38,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffo
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MyPlayListViewModel
 import io.github.daisukikaffuchino.utils.SonnerToast
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 /**
  * 播放列表页面 Screen 层。
@@ -63,6 +65,7 @@ fun PlaylistScreen(
     var isRefreshing by remember { mutableStateOf(false) }
     val refreshState = rememberPullToRefreshState()
     val context = LocalContext.current
+    val view = LocalView.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var temporarilyHideSheetForNavigation by rememberSaveable { mutableStateOf(false) }
     var showCreatePlaylistDialog by rememberSaveable { mutableStateOf(false) }
@@ -126,7 +129,12 @@ fun PlaylistScreen(
         onBack = navigateBack,
         scrollBehavior = scrollBehavior,
         floatingActionButton = {
-            FloatingActionButton(onClick = { showCreatePlaylistDialog = true }) {
+            FloatingActionButton(
+                onClick = {
+                    VibrationUtil.performHapticFeedback(view)
+                    showCreatePlaylistDialog = true
+                },
+            ) {
                 Icon(
                     Icons.Default.Add,
                     contentDescription = stringResource(R.string.create_new_playlist)

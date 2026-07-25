@@ -32,6 +32,7 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,6 +54,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.MoveGrou
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.toDisplayGroups
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.toFlatNodeList
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.toNodeList
+import io.github.daisukikaffuchino.utils.VibrationUtil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -311,6 +313,7 @@ private fun DownloadFabMenu(
     onImportDownloaded: () -> Unit,
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
+    val view = LocalView.current
     val visible = !multiSelectMode && (currentPage != 0 || hasDownloadingItems)
 
     LaunchedEffect(currentPage, multiSelectMode, hasDownloadingItems) {
@@ -326,7 +329,12 @@ private fun DownloadFabMenu(
             FloatingActionButtonMenu(
                 expanded = expanded,
                 button = {
-                    FloatingActionButton(onClick = { expanded = !expanded }) {
+                    FloatingActionButton(
+                        onClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            expanded = !expanded
+                        },
+                    ) {
                         Icon(
                             painter = painterResource(
                                 if (expanded) R.drawable.ic_close else R.drawable.ic_menu,
@@ -346,6 +354,7 @@ private fun DownloadFabMenu(
                             )
                         },
                         onClick = {
+                            VibrationUtil.performHapticFeedback(view)
                             onResumeAll()
                             expanded = false
                         },
@@ -359,6 +368,7 @@ private fun DownloadFabMenu(
                             )
                         },
                         onClick = {
+                            VibrationUtil.performHapticFeedback(view)
                             onPauseAll()
                             expanded = false
                         },
@@ -373,6 +383,7 @@ private fun DownloadFabMenu(
                             )
                         },
                         onClick = {
+                            VibrationUtil.performHapticFeedback(view)
                             onToggleMultiSelect()
                             expanded = false
                         },
@@ -386,6 +397,7 @@ private fun DownloadFabMenu(
                             )
                         },
                         onClick = {
+                            VibrationUtil.performHapticFeedback(view)
                             onCreateGroup()
                             expanded = false
                         },
@@ -399,6 +411,7 @@ private fun DownloadFabMenu(
                             )
                         },
                         onClick = {
+                            VibrationUtil.performHapticFeedback(view)
                             onImportDownloaded()
                             expanded = false
                         },

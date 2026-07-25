@@ -127,6 +127,10 @@ fun PlayerSettingsScreen(
             )
             SettingNavigationItem(
                 title = stringResource(R.string.long_press_speed_multiplier),
+                summary = stringResource(
+                    R.string.long_press_speed_summary,
+                    state.longPressSpeedTimesLabel,
+                ),
                 valueText = state.longPressSpeedTimesLabel,
                 iconRes = R.drawable.ic_touch_long,
                 onClick = { activeDialog = PlayerChoiceDialog.LongPressSpeed },

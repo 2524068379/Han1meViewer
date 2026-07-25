@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,6 +25,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyConten
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 @Composable
 fun SharedHKeyframesScreen(
@@ -65,13 +67,17 @@ private fun SharedEntityCard(
     entity: HKeyframeEntity,
     onOpenVideo: () -> Unit,
 ) {
+    val view = LocalView.current
     Card(
         shape = HanimeDefaults.Corners.large,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Column(
             modifier = Modifier
-                .clickable(onClick = onOpenVideo)
+                .clickable {
+                    VibrationUtil.performHapticFeedback(view)
+                    onOpenVideo()
+                }
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {

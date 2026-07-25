@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,6 +38,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakePlaylists
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.RetryableImage
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 /**
  * 播放列表项组件。
@@ -54,6 +56,7 @@ fun PlaylistItem(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
+    val view = LocalView.current
     val interactionSource = remember { MutableInteractionSource() }
     val indication = LocalIndication.current
     val pressed by interactionSource.collectIsPressedAsState()
@@ -72,7 +75,10 @@ fun PlaylistItem(
                 enabled = onClick != null,
                 interactionSource = interactionSource,
                 indication = indication,
-                onClick = { onClick?.invoke() },
+                onClick = {
+                    VibrationUtil.performHapticFeedback(view)
+                    onClick?.invoke()
+                },
                 onLongClick = {},
             ),
         ) {

@@ -42,8 +42,8 @@ enum class HomeSettingsPage {
     VideoPlayback,
     NetworkDownload,
     Appearance,
-    Privacy,
-    Data,
+    InterfaceInteraction,
+    DataPrivacy,
     About,
 }
 
@@ -62,6 +62,7 @@ fun HomeSettingsScreen(
     onVideoQualityChange: (String) -> Unit,
     onDarkModeChange: (String) -> Unit,
     onUseDynamicColorChange: (Boolean) -> Unit,
+    onHapticFeedbackChange: (Boolean) -> Unit,
     onThemeAccentColorChange: (Int) -> Unit,
     onAppPaletteStyleChange: (Int) -> Unit,
     onAllowPipModeChange: (Boolean) -> Unit,
@@ -301,6 +302,31 @@ fun HomeSettingsScreen(
                     }
                 }
                 item {
+                    SettingsSection(stringResource(R.string.app_lang)) {
+                        SettingNavigationItem(
+                            title = stringResource(R.string.app_lang),
+                            summary = stringResource(R.string.app_lang_sum),
+                            valueText = state.appLanguageLabel,
+                            iconRes = R.drawable.ic_setting_lang,
+                            onClick = { activeDialog = HomeSettingsChoiceDialog.AppLanguage },
+                        )
+                    }
+                }
+            }
+
+            HomeSettingsPage.InterfaceInteraction -> {
+                item {
+                    SettingsSegmentedGroup {
+                        SettingSwitchItem(
+                            title = stringResource(R.string.haptic_feedback),
+                            summary = stringResource(R.string.haptic_feedback_summary),
+                            checked = state.hapticFeedbackEnabled,
+                            iconRes = R.drawable.ic_touch_long,
+                            onCheckedChange = onHapticFeedbackChange,
+                        )
+                    }
+                }
+                item {
                     SettingsSection(stringResource(R.string.settings_layout_content)) {
                         SettingNavigationItem(
                             title = stringResource(R.string.horizontal_card_count_title),
@@ -359,20 +385,9 @@ fun HomeSettingsScreen(
                         )
                     }
                 }
-                item {
-                    SettingsSection(stringResource(R.string.app_lang)) {
-                        SettingNavigationItem(
-                            title = stringResource(R.string.app_lang),
-                            summary = stringResource(R.string.app_lang_sum),
-                            valueText = state.appLanguageLabel,
-                            iconRes = R.drawable.ic_setting_lang,
-                            onClick = { activeDialog = HomeSettingsChoiceDialog.AppLanguage },
-                        )
-                    }
-                }
             }
 
-            HomeSettingsPage.Privacy -> {
+            HomeSettingsPage.DataPrivacy -> {
                 item {
                     SettingsSection(stringResource(R.string.privacy)) {
                         SettingSwitchItem(
@@ -398,9 +413,6 @@ fun HomeSettingsScreen(
                         )
                     }
                 }
-            }
-
-            HomeSettingsPage.Data -> {
                 item {
                     SettingsSection(stringResource(R.string.settings_data)) {
                         SettingNavigationItem(
@@ -511,6 +523,7 @@ private fun HomeSettingsScreenPreview() {
             onVideoQualityChange = {},
             onDarkModeChange = {},
             onUseDynamicColorChange = {},
+            onHapticFeedbackChange = {},
             onThemeAccentColorChange = {},
             onAppPaletteStyleChange = {},
             onAllowPipModeChange = {},
@@ -560,6 +573,7 @@ private fun previewHomeSettingsState() = HomeSettingsUiState(
     disableComments = false,
     collapseDownloadedGroup = false,
     useDynamicColor = false,
+    hapticFeedbackEnabled = false,
     useLockScreen = false,
     fakeLauncherIconName = "Han1meViewer",
     cacheSummary = "12 MB",

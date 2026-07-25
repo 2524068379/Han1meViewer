@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -53,6 +54,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeHomePageVideos
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
 import io.github.daisukikaffuchino.utils.formatFileSize
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 /**
  * 下载中任务卡片。
@@ -72,6 +74,7 @@ fun DownloadingItemCard(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val view = LocalView.current
     val interactionSource = remember { MutableInteractionSource() }
     val indication = LocalIndication.current
     val pressed by interactionSource.collectIsPressedAsState()
@@ -92,7 +95,10 @@ fun DownloadingItemCard(
                     interactionSource = interactionSource,
                     indication = indication,
                     onClick = {},
-                    onLongClick = onDelete,
+                    onLongClick = {
+                        VibrationUtil.performHapticFeedback(view)
+                        onDelete()
+                    },
                 )
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),

@@ -19,7 +19,7 @@ import androidx.compose.material3.Icon
 import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -140,7 +140,10 @@ fun VideoCommentCard(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                TextButton(onClick = onThumbUp, colors = ButtonDefaults.textButtonColors()) {
+                TextButton(
+                    onClick = onThumbUp,
+                    colors = ButtonDefaults.textButtonColors(),
+                ) {
                     Icon(
                         painter = painterResource(
                             if (comment.post.likeCommentStatus) {
@@ -154,7 +157,10 @@ fun VideoCommentCard(
                     Text(comment.realLikesCount?.toString().orEmpty())
                 }
 
-                TextButton(onClick = onThumbDown, colors = ButtonDefaults.textButtonColors()) {
+                TextButton(
+                    onClick = onThumbDown,
+                    colors = ButtonDefaults.textButtonColors(),
+                ) {
                     Icon(
                         painter = painterResource(
                             if (comment.post.unlikeCommentStatus) {
@@ -167,7 +173,9 @@ fun VideoCommentCard(
                     )
                 }
 
-                TextButton(onClick = onReply) {
+                TextButton(
+                    onClick = onReply,
+                ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_reply),
                         contentDescription = null,
@@ -177,7 +185,9 @@ fun VideoCommentCard(
             }
 
             if (comment.hasMoreReplies && onViewMoreReplies != null) {
-                TextButton(onClick = onViewMoreReplies) {
+                TextButton(
+                    onClick = onViewMoreReplies,
+                ) {
                     Text(stringResource(R.string.view_more_replies, comment.replyCount ?: 0))
                 }
             }

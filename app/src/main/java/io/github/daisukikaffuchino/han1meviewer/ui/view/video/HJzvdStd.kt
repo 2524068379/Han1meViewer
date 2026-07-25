@@ -47,7 +47,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -97,6 +97,7 @@ import io.github.daisukikaffuchino.utils.findActivityOrNull
 import io.github.daisukikaffuchino.utils.navBarHeight
 import io.github.daisukikaffuchino.utils.statusBarHeight
 import io.github.daisukikaffuchino.utils.SonnerToast
+import io.github.daisukikaffuchino.utils.VibrationUtil
 import io.github.daisukikaffuchino.utils.removeItself
 import java.util.Timer
 import kotlin.math.absoluteValue
@@ -373,7 +374,10 @@ class HJzvdStd @JvmOverloads constructor(
                         val mi: JZMediaInterface? = mediaInterface
                         if (mi != null && mi.isPlaying) {
                             setSpeedInternal(videoSpeed * userDefLongPressSpeedTimes)
-                            textureViewContainer.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                            VibrationUtil.performHapticFeedback(
+                                textureViewContainer,
+                                HapticFeedbackConstants.LONG_PRESS,
+                            )
                             isSpeedGestureDetected = true
                         }
                     }

@@ -48,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.painterResource
@@ -71,6 +72,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeCommentList
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.util.parseTimeStrToMinutes
 import io.github.daisukikaffuchino.han1meviewer.util.safeSortedBy
+import io.github.daisukikaffuchino.utils.VibrationUtil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -104,6 +106,7 @@ fun CommentScreen(
     val comments by commentsFlow.collectAsStateWithLifecycle()
     val state by commentStateFlow.collectAsStateWithLifecycle()
     val sortType by currentSortType.collectAsStateWithLifecycle()
+    val view = LocalView.current
     val containerSize = LocalWindowInfo.current.containerSize
     val maxScreenWidth = containerSize.width.dp
 
@@ -227,7 +230,10 @@ fun CommentScreen(
                                     contentDescription = null,
                                 )
                             },
-                            onClick = { showCommentBar = true },
+                            onClick = {
+                                VibrationUtil.performHapticFeedback(view)
+                                showCommentBar = true
+                            },
                         )
                     }
                 }

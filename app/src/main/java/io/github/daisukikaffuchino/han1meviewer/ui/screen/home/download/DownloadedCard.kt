@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.Button
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticButton as Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +57,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeDownloadedNodes
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
 import io.github.daisukikaffuchino.utils.formatFileSize
+import io.github.daisukikaffuchino.utils.VibrationUtil
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
@@ -76,6 +78,7 @@ fun DownloadGroupHeader(
     onToggle: () -> Unit,
     onRename: () -> Unit,
 ) {
+    val view = LocalView.current
     val interactionSource = remember { MutableInteractionSource() }
     val indication = LocalIndication.current
     val pressed by interactionSource.collectIsPressedAsState()
@@ -93,8 +96,14 @@ fun DownloadGroupHeader(
                 .combinedClickable(
                     interactionSource = interactionSource,
                     indication = indication,
-                    onClick = onToggle,
-                    onLongClick = onRename,
+                    onClick = {
+                        VibrationUtil.performHapticFeedback(view)
+                        onToggle()
+                    },
+                    onLongClick = {
+                        VibrationUtil.performHapticFeedback(view)
+                        onRename()
+                    },
                 )
                 .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -122,7 +131,10 @@ fun DownloadGroupHeader(
                 )
             }
             AssistChip(
-                onClick = onToggle,
+                onClick = {
+                    VibrationUtil.performHapticFeedback(view)
+                    onToggle()
+                },
                 label = {
                     Text(
                         if (header.isExpanded) stringResource(R.string.collapse)
@@ -168,6 +180,7 @@ fun DownloadedVideoCard(
     isSelected: Boolean = false,
     onToggleSelect: (() -> Unit)? = null,
 ) {
+    val view = LocalView.current
     val addedTime = if (!LocalInspectionMode.current) {
         remember(item.video.addDate) {
             Instant.fromEpochMilliseconds(item.video.addDate)
@@ -194,6 +207,7 @@ fun DownloadedVideoCard(
                 interactionSource = interactionSource,
                 indication = indication,
                 onClick = {
+                    VibrationUtil.performHapticFeedback(view)
                     if (isMultiSelect) {
                         onToggleSelect?.invoke()
                     } else {
@@ -201,7 +215,10 @@ fun DownloadedVideoCard(
                     }
                 },
                 onLongClick = {
-                    if (!isMultiSelect) onMoveGroup()
+                    if (!isMultiSelect) {
+                        VibrationUtil.performHapticFeedback(view)
+                        onMoveGroup()
+                    }
                 },
             ),
         ) {
@@ -237,7 +254,10 @@ fun DownloadedVideoCard(
                         ) {
                             Checkbox(
                                 checked = isSelected,
-                                onCheckedChange = { onToggleSelect?.invoke() },
+                                onCheckedChange = {
+                                    VibrationUtil.performHapticFeedback(view)
+                                    onToggleSelect?.invoke()
+                                },
                                 modifier = Modifier.size(32.dp),
                             )
                         }
@@ -268,7 +288,10 @@ fun DownloadedVideoCard(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Surface(
-                            onClick = onOpenVideo,
+                            onClick = {
+                                VibrationUtil.performHapticFeedback(view)
+                                onOpenVideo()
+                            },
                             shape = MaterialTheme.shapes.small,
                             color = MaterialTheme.colorScheme.tertiaryContainer
                         ) {

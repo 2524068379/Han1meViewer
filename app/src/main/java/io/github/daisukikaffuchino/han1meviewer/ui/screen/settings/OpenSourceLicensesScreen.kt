@@ -81,6 +81,7 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.animatedShape
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.fadeScale
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 private data class DisplayLicense(
     val name: String,
@@ -341,7 +342,7 @@ private fun LicenseLibraryItem(
                 interactionSource = interactionSource,
                 indication = ripple(color = MaterialTheme.colorScheme.primary),
                 onClick = {
-                    view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                    VibrationUtil.performHapticFeedback(view, HapticFeedbackConstants.CLOCK_TICK)
                     onClick()
                 },
             ),
@@ -442,7 +443,7 @@ private fun LicenseContentDialog(
         confirmButton = {
             FilledTonalButton(
                 onClick = {
-                    view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                    VibrationUtil.performHapticFeedback(view, HapticFeedbackConstants.CLOCK_TICK)
                     onDismiss()
                 },
                 shapes = ButtonDefaults.shapes(),

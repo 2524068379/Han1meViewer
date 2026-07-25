@@ -22,8 +22,8 @@ fun SettingsMainScreen(
     onOpenPlayerSettings: () -> Unit,
     onOpenNetworkDownload: () -> Unit,
     onOpenAppearance: () -> Unit,
-    onOpenPrivacy: () -> Unit,
-    onOpenData: () -> Unit,
+    onOpenInterfaceInteraction: () -> Unit,
+    onOpenDataPrivacy: () -> Unit,
     onOpenAbout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -33,6 +33,24 @@ fun SettingsMainScreen(
         contentPadding = PaddingValues(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        item {
+            SettingNavigationItem(
+                title = stringResource(R.string.settings_appearance),
+                summary = stringResource(R.string.settings_appearance_summary),
+                iconRes = R.drawable.ic_palette,
+                shapes = HanimeDefaults.cardShapes(),
+                onClick = onOpenAppearance,
+            )
+        }
+        item {
+            SettingNavigationItem(
+                title = stringResource(R.string.settings_interface_interaction),
+                summary = stringResource(R.string.settings_interface_interaction_summary),
+                iconRes = R.drawable.ic_interests,
+                shapes = HanimeDefaults.cardShapes(),
+                onClick = onOpenInterfaceInteraction,
+            )
+        }
         item {
             SettingNavigationItem(
                 title = stringResource(R.string.settings_video_playback),
@@ -46,7 +64,7 @@ fun SettingsMainScreen(
             SettingNavigationItem(
                 title = stringResource(R.string.player_settings),
                 summary = stringResource(R.string.settings_player_summary),
-                iconRes = R.drawable.ic_play_circle,
+                iconRes = R.drawable.ic_dvr,
                 shapes = HanimeDefaults.cardShapes(),
                 onClick = onOpenPlayerSettings,
             )
@@ -62,29 +80,11 @@ fun SettingsMainScreen(
         }
         item {
             SettingNavigationItem(
-                title = stringResource(R.string.settings_appearance),
-                summary = stringResource(R.string.settings_appearance_summary),
-                iconRes = R.drawable.ic_palette,
-                shapes = HanimeDefaults.cardShapes(),
-                onClick = onOpenAppearance,
-            )
-        }
-        item {
-            SettingNavigationItem(
-                title = stringResource(R.string.privacy),
-                summary = stringResource(R.string.settings_privacy_summary),
-                iconRes = R.drawable.ic_admin_panel_settings,
-                shapes = HanimeDefaults.cardShapes(),
-                onClick = onOpenPrivacy,
-            )
-        }
-        item {
-            SettingNavigationItem(
-                title = stringResource(R.string.settings_data),
-                summary = stringResource(R.string.settings_data_summary),
+                title = stringResource(R.string.settings_data_privacy),
+                summary = stringResource(R.string.settings_data_privacy_summary),
                 iconRes = R.drawable.ic_data_table,
                 shapes = HanimeDefaults.cardShapes(),
-                onClick = onOpenData,
+                onClick = onOpenDataPrivacy,
             )
         }
         item {

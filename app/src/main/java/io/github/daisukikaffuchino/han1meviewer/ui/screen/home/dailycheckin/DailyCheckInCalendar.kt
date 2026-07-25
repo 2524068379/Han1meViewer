@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.daisukikaffuchino.han1meviewer.R
+import io.github.daisukikaffuchino.utils.VibrationUtil
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -53,6 +55,7 @@ fun CalendarGrid(
     onDateLongClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val view = LocalView.current
     val firstDayOfMonth = yearMonth.atDay(1)
     val daysInMonth = yearMonth.lengthOfMonth()
     val firstDayOfWeek = firstDayOfMonth.dayOfWeek.value
@@ -121,8 +124,14 @@ fun CalendarGrid(
                         shape = RoundedCornerShape(10.dp)
                     )
                     .combinedClickable(
-                        onClick = { onDateClick(date) },
-                        onLongClick = { onDateLongClick(date) }
+                        onClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            onDateClick(date)
+                        },
+                        onLongClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            onDateLongClick(date)
+                        },
                     ),
                 contentAlignment = Alignment.Center
             ) {

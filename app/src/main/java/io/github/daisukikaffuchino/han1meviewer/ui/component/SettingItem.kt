@@ -2,7 +2,6 @@
 
 package io.github.daisukikaffuchino.han1meviewer.ui.component
 
-import android.view.HapticFeedbackConstants
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -29,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,7 +48,6 @@ private fun SettingSurface(
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
-    val view = LocalView.current
     val interactionSource = remember { MutableInteractionSource() }
     val containerColor = animateColorAsState(
         targetValue = if (selected) {
@@ -73,7 +70,6 @@ private fun SettingSurface(
                 enabled = enabled,
                 interactionSource = interactionSource,
                 onClick = {
-                    view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                     onClick()
                 },
             )

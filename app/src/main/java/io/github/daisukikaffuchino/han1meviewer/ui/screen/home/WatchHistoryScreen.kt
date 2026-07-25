@@ -62,6 +62,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -92,6 +93,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberVideoGridColum
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.SpacingNormal
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
+import io.github.daisukikaffuchino.utils.VibrationUtil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -268,6 +270,7 @@ private fun WatchHistoryClearFab(
     visible: Boolean,
     onClick: () -> Unit,
 ) {
+    val view = LocalView.current
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn() + slideInVertically { it / 2 },
@@ -284,7 +287,10 @@ private fun WatchHistoryClearFab(
                         contentDescription = null,
                     )
                 },
-                onClick = onClick,
+                onClick = {
+                    VibrationUtil.performHapticFeedback(view)
+                    onClick()
+                },
             )
         }
     }
@@ -525,8 +531,12 @@ private fun OnlineHistorySortChip(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
+    val view = LocalView.current
     AssistChip(
-        onClick = onClick,
+        onClick = {
+            VibrationUtil.performHapticFeedback(view)
+            onClick()
+        },
         label = { Text(text) },
         colors = AssistChipDefaults.assistChipColors(
             containerColor = if (selected) {
@@ -550,6 +560,7 @@ private fun WatchHistoryCard(
     onClick: () -> Unit,
     onDeleteClick: () -> Unit,
 ) {
+    val view = LocalView.current
     val fixTimestamp = { ts: Long -> if (ts < 9999999999L) ts * 1000 else ts }
     val dateFormatter = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
     val watchDate =
@@ -575,7 +586,10 @@ private fun WatchHistoryCard(
                 .combinedClickable(
                     interactionSource = interactionSource,
                     indication = indication,
-                    onClick = onClick,
+                    onClick = {
+                        VibrationUtil.performHapticFeedback(view)
+                        onClick()
+                    },
                     onLongClick = {},
                 )
                 .padding(12.dp),
@@ -638,7 +652,10 @@ private fun WatchHistoryCard(
                     horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
                 ) {
                     AssistChip(
-                        onClick = onClick,
+                        onClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            onClick()
+                        },
                         label = {
                             Text(
                                 stringResource(R.string.watch_history_resume_watch),
