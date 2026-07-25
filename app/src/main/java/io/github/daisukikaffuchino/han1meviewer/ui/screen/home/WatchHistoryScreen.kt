@@ -154,6 +154,7 @@ fun WatchHistoryTabScreen(
     HanimeScaffold(
         title = stringResource(R.string.watch_history),
         onBack = onBack,
+        contentHorizontalPadding = 0.dp,
         floatingActionButton = {
             WatchHistoryClearFab(
                 visible = pagerState.currentPage == 0 &&

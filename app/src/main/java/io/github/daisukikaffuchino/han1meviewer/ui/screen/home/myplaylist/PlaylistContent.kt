@@ -89,7 +89,7 @@ fun PlaylistContent(
             LazyVerticalGrid(
                 state = gridState,
                 columns = GridCells.Fixed(getColumnCount(180)),
-                contentPadding = PaddingValues(8.dp),
+                contentPadding = PaddingValues(vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {

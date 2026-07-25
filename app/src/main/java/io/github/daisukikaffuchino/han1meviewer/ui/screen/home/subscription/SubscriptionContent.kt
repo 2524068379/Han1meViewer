@@ -115,7 +115,7 @@ fun SubscriptionContent(
             state = gridState,
             columns = GridCells.Fixed(videoColumns),
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(SpacingNormal),
+            contentPadding = PaddingValues(vertical = SpacingNormal),
             horizontalArrangement = Arrangement.spacedBy(SpacingNormal),
             verticalArrangement = Arrangement.spacedBy(SpacingNormal)
         ) {
@@ -143,9 +143,7 @@ fun SubscriptionContent(
 
             item(span = { GridItemSpan(videoColumns) }) {
                 HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     thickness = 1.dp,
                     color = MaterialTheme.colorScheme.outlineVariant
                 )

@@ -52,7 +52,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeHomePageVideos
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
-import io.github.daisukikaffuchino.utils.formatFileSizeV2
+import io.github.daisukikaffuchino.utils.formatFileSize
 
 /**
  * 下载中任务卡片。
@@ -167,9 +167,10 @@ fun DownloadingItemCard(
                     Text(
                         text = stringResource(
                             R.string.download_progress_size,
-                            item.downloadedLength.formatFileSizeV2(),
-                            item.length.formatFileSizeV2(),
+                            item.downloadedLength.formatFileSize(),
+                            item.length.formatFileSize(),
                         ),
+                        maxLines = 1,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

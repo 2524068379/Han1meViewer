@@ -64,7 +64,7 @@ private fun ScanCookieContent(
             CookieGuideDialog { showGuide = false }
         }
 
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(vertical = 16.dp)) {
             OutlinedTextField(
                 value = scannedText.value,
                 onValueChange = { scannedText.value = it },

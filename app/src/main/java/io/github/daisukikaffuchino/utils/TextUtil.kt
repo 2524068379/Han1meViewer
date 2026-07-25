@@ -8,11 +8,11 @@ fun String.decodeFromStringByBase64(flag: Int = Base64.DEFAULT): String {
     return String(Base64.decode(toByteArray(), flag))
 }
 
-private val SI_UNITS = arrayOf("B", "kB", "MB", "GB", "TB")
+private val SI_UNITS = arrayOf("B", "K", "M", "G", "T")
 private val IEC_UNITS = arrayOf("B", "KiB", "MiB", "GiB", "TiB")
 
-fun Long.formatFileSizeV2(
-    useSi: Boolean = false,
+fun Long.formatFileSize(
+    useSi: Boolean = true,
     @IntRange(from = 0) decimalPlaces: Int = 1,
     stripTrailingZeros: Boolean = true,
 ): String {
@@ -36,9 +36,9 @@ fun Long.formatFileSizeV2(
 }
 
 fun Long.formatBytesPerSecond(
-    useSi: Boolean = false,
+    useSi: Boolean = true,
     @IntRange(from = 0) decimalPlaces: Int = 1,
     stripTrailingZeros: Boolean = true,
 ): String {
-    return formatFileSizeV2(useSi, decimalPlaces, stripTrailingZeros) + "/s"
+    return formatFileSize(useSi, decimalPlaces, stripTrailingZeros) + "/s"
 }

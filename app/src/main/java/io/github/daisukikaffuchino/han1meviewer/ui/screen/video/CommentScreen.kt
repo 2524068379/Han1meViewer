@@ -68,6 +68,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyConten
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.ErrorContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeCommentList
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.util.parseTimeStrToMinutes
 import io.github.daisukikaffuchino.han1meviewer.util.safeSortedBy
 import kotlinx.coroutines.flow.Flow
@@ -95,6 +96,7 @@ fun CommentScreen(
     onViewMoreReplies: (VideoComments.VideoComment) -> Unit,
     onSortChange: (CommentSortType) -> Unit,
     onComposeComment: (String) -> Unit,
+    listContentPadding: PaddingValues = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
     initialFirstVisibleItemIndex: Int = 0,
     initialFirstVisibleItemScrollOffset: Int = 0,
     onCommentScrollChange: (Int, Int) -> Unit = { _, _ -> },
@@ -205,6 +207,7 @@ fun CommentScreen(
 
     Scaffold(
         modifier = modifier.widthIn(max = maxScreenWidth),
+        containerColor = HanimeDefaults.Colors.Background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             if (isAlreadyLogin) {
@@ -283,7 +286,7 @@ fun CommentScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .nestedScroll(nestedScrollInterop),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+                            contentPadding = listContentPadding,
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             if (sortedComments.size >= 3) {

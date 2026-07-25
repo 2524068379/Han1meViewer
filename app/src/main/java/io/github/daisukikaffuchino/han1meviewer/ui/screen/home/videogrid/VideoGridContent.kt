@@ -40,7 +40,7 @@ fun VideoGridContent(
         columns = GridCells.Fixed(videoColumns),
         state = gridState,
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(SpacingNormal),
+        contentPadding = PaddingValues(vertical = SpacingNormal),
         horizontalArrangement = Arrangement.spacedBy(SpacingNormal),
         verticalArrangement = Arrangement.spacedBy(SpacingNormal)
     ) {

@@ -1,13 +1,19 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings
 
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeTopAppBar
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 
 @Composable
 fun SettingsScaffold(
@@ -39,8 +45,15 @@ fun SettingsScaffold(
                 )
             }
         },
+        contentHorizontalPadding = 0.dp,
         floatingActionButton = floatingActionButton,
     ) {
-        content()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = HanimeDefaults.screenHorizontalPadding),
+        ) {
+            content()
+        }
     }
 }

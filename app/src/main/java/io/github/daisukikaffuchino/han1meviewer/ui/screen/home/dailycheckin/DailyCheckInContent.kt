@@ -80,7 +80,6 @@ fun DailyCheckInContent(
             .fillMaxSize()
             .padding(paddingValues)
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp)
     ) {
         TodayCheckInCard(
             today = uiState.today,

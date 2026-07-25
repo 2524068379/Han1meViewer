@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.verticalBounce
@@ -28,6 +29,7 @@ fun HanimeScaffold(
     title: String,
     onBack: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    contentHorizontalPadding: Dp = HanimeDefaults.screenHorizontalPadding,
     subtitle: (@Composable () -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null,
@@ -46,6 +48,7 @@ fun HanimeScaffold(
             )
         },
         modifier = modifier,
+        contentHorizontalPadding = contentHorizontalPadding,
         floatingActionButton = floatingActionButton,
         snackbarHost = snackbarHost,
         content = content,
@@ -58,6 +61,7 @@ fun HanimeScaffold(
     title: @Composable () -> Unit,
     onBack: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    contentHorizontalPadding: Dp = HanimeDefaults.screenHorizontalPadding,
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null,
     floatingActionButton: @Composable () -> Unit = {},
@@ -74,6 +78,7 @@ fun HanimeScaffold(
             )
         },
         modifier = modifier,
+        contentHorizontalPadding = contentHorizontalPadding,
         floatingActionButton = floatingActionButton,
         snackbarHost = snackbarHost,
         content = content,
@@ -84,6 +89,7 @@ fun HanimeScaffold(
 fun HanimeScaffold(
     topBar: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    contentHorizontalPadding: Dp = HanimeDefaults.screenHorizontalPadding,
     floatingActionButton: @Composable () -> Unit = {},
     snackbarHost: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
@@ -104,7 +110,7 @@ fun HanimeScaffold(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(horizontal = HanimeDefaults.screenHorizontalPadding),
+                    .padding(horizontal = contentHorizontalPadding),
             ) {
                 content(PaddingValues())
             }

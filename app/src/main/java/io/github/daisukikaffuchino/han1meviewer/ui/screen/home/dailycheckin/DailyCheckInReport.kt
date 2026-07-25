@@ -128,7 +128,6 @@ fun ContributionReportDialog(
                     .fillMaxSize()
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 12.dp)
             ) {
                 if (viewMode == "year") {
                     YearContributionView(

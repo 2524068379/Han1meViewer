@@ -20,10 +20,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -61,7 +61,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyVerticalGr
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.RetryableImage
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.SpacingNormal
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.VideoNormalCardMinWidth
-import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MyPlayListViewModelV2
+import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MyPlayListViewModel
 import io.github.daisukikaffuchino.utils.SonnerToast
 
 /**
@@ -83,7 +83,7 @@ fun PlaylistBottomSheet(
     playListTitle: String,
     onClickItem: (String) -> Unit,
     onLongClickItem: (String, String) -> Unit,
-    vm: MyPlayListViewModelV2,
+    vm: MyPlayListViewModel,
     context: Context,
 ) {
     val playlistState by vm.playlistStateFlow.collectAsState()
@@ -145,13 +145,11 @@ fun PlaylistBottomSheet(
                     gridState = gridState,
                     listCode = currentCode,
                     playlist = playlist,
-                    onDismiss = onDismiss,
                     playListTitle = currentTitle,
                     playlistDesc = vm.playlistDesc,
                     playlistState = playlistState,
                     onClickItem = onClickItem,
-                    onLongClickItem = onLongClickItem,
-                    vm = vm,
+                    viewModel = vm,
                     context = context,
                 )
                 if (playlist.isEmpty()) {
@@ -202,13 +200,11 @@ private fun PlaylistSheetContent(
     gridState: LazyGridState,
     listCode: String,
     playlist: List<HanimeInfo>,
-    onDismiss: () -> Unit,
     playListTitle: String,
     playlistDesc: kotlinx.coroutines.flow.StateFlow<String?>,
     playlistState: PageLoadingState<*>,
     onClickItem: (String) -> Unit,
-    onLongClickItem: (String, String) -> Unit,
-    vm: MyPlayListViewModelV2,
+    viewModel: MyPlayListViewModel,
     context: Context,
 ) {
     var showDeletePlaylistConfirm by remember { mutableStateOf(false) }
@@ -274,29 +270,23 @@ private fun PlaylistSheetContent(
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-                    Button(
+                    FilledIconButton(
                         onClick = { showDeletePlaylistConfirm = true },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                        modifier = Modifier.size(40.dp),
-                        contentPadding = PaddingValues(0.dp)
+                        modifier = Modifier.size(40.dp)
                     ) {
                         Icon(
                             painterResource(R.drawable.ic_delete),
-                            stringResource(R.string.delete),
-                            tint = Color.White
+                            stringResource(R.string.delete)
                         )
                     }
                     Spacer(Modifier.width(8.dp))
-                    Button(
+                    FilledTonalIconButton(
                         onClick = { showEditPlaylistDialog = true },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.7f)),
-                        modifier = Modifier.size(40.dp),
-                        contentPadding = PaddingValues(0.dp)
+                        modifier = Modifier.size(40.dp)
                     ) {
                         Icon(
                             painterResource(R.drawable.ic_edit_square),
-                            stringResource(R.string.edit),
-                            tint = Color.Red
+                            stringResource(R.string.edit)
                         )
                     }
                 }
@@ -309,7 +299,7 @@ private fun PlaylistSheetContent(
                 initialTitle = playListTitle,
                 initialDescription = desc.orEmpty(),
                 onConfirm = { title, description ->
-                    vm.modifyPlaylist(listCode, title, description, false)
+                    viewModel.modifyPlaylist(listCode, title, description, false)
                 },
                 onDismiss = { showEditPlaylistDialog = false },
             )
@@ -338,7 +328,7 @@ private fun PlaylistSheetContent(
                 }
 
                 item(span = { GridItemSpan(columns) }) {
-                    if (playlistState is PageLoadingState.Loading && vm.currentPage > 1) {
+                    if (playlistState is PageLoadingState.Loading && viewModel.currentPage > 1) {
                         Box(
                             Modifier
                                 .fillMaxWidth()
@@ -361,7 +351,7 @@ private fun PlaylistSheetContent(
                             Text(
                                 stringResource(
                                     R.string.load_complete_with_pages,
-                                    vm.currentPage - 1
+                                    viewModel.currentPage - 1
                                 ),
                                 style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
                             )
@@ -370,7 +360,6 @@ private fun PlaylistSheetContent(
                 }
             }
 
-            val currentListCode = listCode
             LaunchedEffect(gridState, playlistState) {
                 snapshotFlow { gridState.layoutInfo }.collect { layoutInfo ->
                     val totalItems = layoutInfo.totalItemsCount
@@ -378,10 +367,10 @@ private fun PlaylistSheetContent(
                     if (lastVisibleItem >= totalItems - 3 &&
                         playlistState !is PageLoadingState.Loading &&
                         playlistState !is PageLoadingState.NoMoreData &&
-                        !vm.isLoadingMore
+                        !viewModel.isLoadingMore
                     ) {
-                        vm.currentPage++
-                        vm.getPlaylistItems(vm.currentPage, currentListCode)
+                        viewModel.currentPage++
+                        viewModel.getPlaylistItems(viewModel.currentPage, listCode)
                     }
                 }
             }
@@ -395,7 +384,7 @@ private fun PlaylistSheetContent(
                     confirmText = context.getString(R.string.confirm),
                     dismissText = context.getString(R.string.cancel),
                     onConfirm = {
-                        vm.deleteFromPlaylist(
+                        viewModel.deleteFromPlaylist(
                             code,
                             videoCode,
                             index
@@ -412,7 +401,7 @@ private fun PlaylistSheetContent(
                 confirmText = context.getString(R.string.confirm),
                 dismissText = context.getString(R.string.cancel),
                 onConfirm = {
-                    vm.modifyPlaylist(
+                    viewModel.modifyPlaylist(
                         listCode,
                         playListTitle,
                         desc.orEmpty(),

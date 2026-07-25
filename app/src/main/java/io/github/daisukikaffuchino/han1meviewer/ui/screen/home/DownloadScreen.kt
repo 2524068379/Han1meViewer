@@ -205,6 +205,7 @@ fun DownloadScreen(
     HanimeScaffold(
         title = stringResource(R.string.download),
         onBack = onBack,
+        contentHorizontalPadding = 0.dp,
         floatingActionButton = {
             DownloadFabMenu(
                 currentPage = uiState.currentPage,
@@ -321,9 +322,7 @@ private fun DownloadFabMenu(
         enter = fadeIn() + slideInVertically { it / 2 },
         exit = fadeOut() + slideOutVertically { it / 2 },
     ) {
-        Box(
-            modifier = Modifier.padding(8.dp)
-        ) {
+
             FloatingActionButtonMenu(
                 expanded = expanded,
                 button = {
@@ -406,7 +405,7 @@ private fun DownloadFabMenu(
                     )
                 }
             }
-        }
+
     }
 }
 

@@ -216,7 +216,7 @@ private fun AccountContent(
             .fillMaxSize()
             .verticalScroll(scrollState)
             .padding(contentPadding)
-            .padding(horizontal = 16.dp, vertical = 20.dp),
+            .padding(vertical = 20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         Card(
@@ -471,7 +471,7 @@ private fun AccountContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         OutlinedButton(
             onClick = onLogout,
