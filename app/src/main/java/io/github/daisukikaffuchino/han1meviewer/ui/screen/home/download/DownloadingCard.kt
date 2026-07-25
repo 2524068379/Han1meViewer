@@ -21,9 +21,9 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LoadingIndicator
@@ -76,7 +76,7 @@ fun DownloadingItemCard(
     val indication = LocalIndication.current
     val pressed by interactionSource.collectIsPressedAsState()
     val cardShape = shapeByInteraction(
-        shapes = HanimeDefaults.largerShapes(),
+        shapes = HanimeDefaults.cardShapes(),
         pressed = pressed,
         animationSpec = HanimeDefaults.shapesDefaultAnimationSpec,
     )

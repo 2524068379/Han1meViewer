@@ -41,7 +41,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ripple
@@ -239,7 +239,7 @@ fun OpenSourceLicensesScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(HanimeDefaults.settingsItemPadding),
+                    verticalArrangement = Arrangement.spacedBy(HanimeDefaults.Spacing.small),
                 ) {
                     item { Spacer(Modifier.size(4.dp)) }
                     items(
@@ -332,7 +332,7 @@ private fun LicenseLibraryItem(
 ) {
     val view = LocalView.current
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = animatedShape(HanimeDefaults.largerShapes(), interactionSource)
+    val shape = animatedShape(HanimeDefaults.cardShapes(), interactionSource)
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -346,15 +346,15 @@ private fun LicenseLibraryItem(
                 },
             ),
         shape = shape,
-        color = HanimeDefaults.Colors.Container,
+        color = HanimeDefaults.Colors.card,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(
-                    horizontal = HanimeDefaults.settingsItemHorizontalPadding,
-                    vertical = HanimeDefaults.settingsItemVerticalPadding,
+                    horizontal = HanimeDefaults.Spacing.itemHorizontal,
+                    vertical = HanimeDefaults.Spacing.itemVertical,
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -401,7 +401,7 @@ private fun LicenseEmptyTip(
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .padding(HanimeDefaults.screenHorizontalPadding)
+            .padding(HanimeDefaults.Spacing.contentHorizontal)
             .size(size)
             .clip(MaterialShapes.Cookie7Sided.toShape())
             .background(containerColor),

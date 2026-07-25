@@ -186,15 +186,15 @@ private fun PickerContainer(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = HanimeDefaults.Colors.Container,
-        shape = HanimeDefaults.defaultShape,
+        color = HanimeDefaults.Colors.card,
+        shape = HanimeDefaults.Corners.medium,
     ) {
         Column(
             modifier = Modifier.padding(vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Column(
-                modifier = Modifier.padding(horizontal = HanimeDefaults.settingsItemHorizontalPadding),
+                modifier = Modifier.padding(horizontal = HanimeDefaults.Spacing.itemHorizontal),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 Text(title, style = MaterialTheme.typography.titleMedium)

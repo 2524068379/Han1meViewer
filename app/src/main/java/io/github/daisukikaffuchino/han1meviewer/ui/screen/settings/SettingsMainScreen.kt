@@ -38,7 +38,7 @@ fun SettingsMainScreen(
                 title = stringResource(R.string.settings_video_playback),
                 summary = stringResource(R.string.settings_video_playback_summary),
                 iconRes = R.drawable.ic_video_settings,
-                shapes = HanimeDefaults.largerShapes(),
+                shapes = HanimeDefaults.cardShapes(),
                 onClick = onOpenVideoPlayback,
             )
         }
@@ -47,7 +47,7 @@ fun SettingsMainScreen(
                 title = stringResource(R.string.player_settings),
                 summary = stringResource(R.string.settings_player_summary),
                 iconRes = R.drawable.ic_play_circle,
-                shapes = HanimeDefaults.largerShapes(),
+                shapes = HanimeDefaults.cardShapes(),
                 onClick = onOpenPlayerSettings,
             )
         }
@@ -56,7 +56,7 @@ fun SettingsMainScreen(
                 title = stringResource(R.string.settings_network_download),
                 summary = stringResource(R.string.settings_network_download_summary),
                 iconRes = R.drawable.ic_captive_portal,
-                shapes = HanimeDefaults.largerShapes(),
+                shapes = HanimeDefaults.cardShapes(),
                 onClick = onOpenNetworkDownload,
             )
         }
@@ -64,8 +64,8 @@ fun SettingsMainScreen(
             SettingNavigationItem(
                 title = stringResource(R.string.settings_appearance),
                 summary = stringResource(R.string.settings_appearance_summary),
-                iconRes = R.drawable.ic_theme,
-                shapes = HanimeDefaults.largerShapes(),
+                iconRes = R.drawable.ic_palette,
+                shapes = HanimeDefaults.cardShapes(),
                 onClick = onOpenAppearance,
             )
         }
@@ -74,7 +74,7 @@ fun SettingsMainScreen(
                 title = stringResource(R.string.privacy),
                 summary = stringResource(R.string.settings_privacy_summary),
                 iconRes = R.drawable.ic_admin_panel_settings,
-                shapes = HanimeDefaults.largerShapes(),
+                shapes = HanimeDefaults.cardShapes(),
                 onClick = onOpenPrivacy,
             )
         }
@@ -83,7 +83,7 @@ fun SettingsMainScreen(
                 title = stringResource(R.string.settings_data),
                 summary = stringResource(R.string.settings_data_summary),
                 iconRes = R.drawable.ic_data_table,
-                shapes = HanimeDefaults.largerShapes(),
+                shapes = HanimeDefaults.cardShapes(),
                 onClick = onOpenData,
             )
         }
@@ -92,7 +92,7 @@ fun SettingsMainScreen(
                 title = stringResource(R.string.about),
                 summary = stringResource(R.string.settings_about_summary),
                 iconRes = R.drawable.ic_info,
-                shapes = HanimeDefaults.largerShapes(),
+                shapes = HanimeDefaults.cardShapes(),
                 onClick = onOpenAbout,
             )
         }

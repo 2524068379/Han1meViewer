@@ -56,7 +56,7 @@ private fun SettingSurface(
         targetValue = if (selected) {
             MaterialTheme.colorScheme.secondaryContainer
         } else {
-            HanimeDefaults.Colors.Container
+            HanimeDefaults.Colors.card
         },
         animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
         label = "setting-container-color",
@@ -101,8 +101,8 @@ private fun SettingRow(
             .fillMaxWidth()
             .animateContentSize()
             .padding(
-                horizontal = HanimeDefaults.settingsItemHorizontalPadding,
-                vertical = HanimeDefaults.settingsItemVerticalPadding,
+                horizontal = HanimeDefaults.Spacing.itemHorizontal,
+                vertical = HanimeDefaults.Spacing.itemVertical,
             )
     } else {
         Modifier.fillMaxWidth().animateContentSize()
@@ -117,7 +117,7 @@ private fun SettingRow(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = contentAlpha),
                 modifier = Modifier
-                    .padding(end = HanimeDefaults.settingsItemHorizontalPadding)
+                    .padding(end = HanimeDefaults.Spacing.itemHorizontal)
                     .size(24.dp),
             )
         }
@@ -172,7 +172,7 @@ fun SettingSwitchItem(
                         modifier = Modifier.size(SwitchDefaults.IconSize),
                     )
                 },
-                modifier = Modifier.padding(start = HanimeDefaults.settingsItemHorizontalPadding / 2),
+                modifier = Modifier.padding(start = HanimeDefaults.Spacing.itemHorizontal / 2),
             )
         }
     }
@@ -250,8 +250,8 @@ fun SettingSliderItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    horizontal = HanimeDefaults.settingsItemHorizontalPadding,
-                    vertical = HanimeDefaults.settingsItemVerticalPadding,
+                    horizontal = HanimeDefaults.Spacing.itemHorizontal,
+                    vertical = HanimeDefaults.Spacing.itemVertical,
                 ),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {

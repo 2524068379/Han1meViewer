@@ -207,7 +207,7 @@ fun CommentScreen(
 
     Scaffold(
         modifier = modifier.widthIn(max = maxScreenWidth),
-        containerColor = HanimeDefaults.Colors.Background,
+        containerColor = HanimeDefaults.Colors.pageSurface,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             if (isAlreadyLogin) {

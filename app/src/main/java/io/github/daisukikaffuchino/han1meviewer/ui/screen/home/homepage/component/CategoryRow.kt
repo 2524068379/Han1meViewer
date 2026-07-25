@@ -87,6 +87,7 @@ fun CategoryRow(
                     modifier = Modifier.width(cardWidth),
                     videoItem = video,
                     isHorizontalCard = true,
+                    isHomePage = true,
                     onClickVideosItem = onVideoClick,
                     onLongClickVideosItem = onVideoLongClick
                 )

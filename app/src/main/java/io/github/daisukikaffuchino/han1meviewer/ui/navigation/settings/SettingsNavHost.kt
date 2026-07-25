@@ -51,7 +51,7 @@ fun SettingsScaffold(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = HanimeDefaults.screenHorizontalPadding),
+                .padding(horizontal = HanimeDefaults.Spacing.contentHorizontal),
         ) {
             content()
         }

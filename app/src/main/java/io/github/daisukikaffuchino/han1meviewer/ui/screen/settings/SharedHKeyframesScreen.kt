@@ -66,7 +66,7 @@ private fun SharedEntityCard(
     onOpenVideo: () -> Unit,
 ) {
     Card(
-        shape = HanimeDefaults.screenContainerShape,
+        shape = HanimeDefaults.Corners.large,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Column(

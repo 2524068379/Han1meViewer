@@ -1,11 +1,12 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.component.appbar
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -29,7 +30,7 @@ fun HanimeScaffold(
     title: String,
     onBack: (() -> Unit)?,
     modifier: Modifier = Modifier,
-    contentHorizontalPadding: Dp = HanimeDefaults.screenHorizontalPadding,
+    contentHorizontalPadding: Dp = HanimeDefaults.Spacing.contentHorizontal,
     subtitle: (@Composable () -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null,
@@ -61,7 +62,7 @@ fun HanimeScaffold(
     title: @Composable () -> Unit,
     onBack: (() -> Unit)?,
     modifier: Modifier = Modifier,
-    contentHorizontalPadding: Dp = HanimeDefaults.screenHorizontalPadding,
+    contentHorizontalPadding: Dp = HanimeDefaults.Spacing.contentHorizontal,
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null,
     floatingActionButton: @Composable () -> Unit = {},
@@ -89,7 +90,7 @@ fun HanimeScaffold(
 fun HanimeScaffold(
     topBar: @Composable () -> Unit,
     modifier: Modifier = Modifier,
-    contentHorizontalPadding: Dp = HanimeDefaults.screenHorizontalPadding,
+    contentHorizontalPadding: Dp = HanimeDefaults.Spacing.contentHorizontal,
     floatingActionButton: @Composable () -> Unit = {},
     snackbarHost: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
@@ -99,9 +100,9 @@ fun HanimeScaffold(
         topBar = topBar,
         floatingActionButton = floatingActionButton,
         snackbarHost = snackbarHost,
-        containerColor = HanimeDefaults.Colors.Background,
+        containerColor = HanimeDefaults.Colors.pageSurface,
     ) { innerPadding ->
-        androidx.compose.foundation.layout.Box(
+        Box(
             modifier = Modifier
                 .verticalBounce()
                 .fillMaxSize(),

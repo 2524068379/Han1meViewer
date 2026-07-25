@@ -10,7 +10,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 /** Shared plain container surface used by cards and settings items. */
 @Composable
 fun CardContainerSurface(
-    shape: Shape,
+    shape: Shape = HanimeDefaults.Corners.large,
     modifier: Modifier = Modifier,
     color: Color? = null,
     content: @Composable () -> Unit,
@@ -18,7 +18,7 @@ fun CardContainerSurface(
     Surface(
         modifier = modifier,
         shape = shape,
-        color = color ?: HanimeDefaults.Colors.Container,
+        color = color ?: HanimeDefaults.Colors.card,
         content = content,
     )
 }

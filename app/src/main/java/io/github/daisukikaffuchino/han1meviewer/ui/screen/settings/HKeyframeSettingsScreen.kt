@@ -96,7 +96,7 @@ private fun HKeyframeSettingsContent(
                 onCheckedChange = onHKeyframesEnableChange,
             )
         }
-        Spacer(Modifier.size(HanimeDefaults.settingsItemPadding))
+        Spacer(Modifier.size(HanimeDefaults.Spacing.small))
 
         HKeyframeAnimatedSection(
             visible = state.hKeyframesEnable,
@@ -123,7 +123,7 @@ private fun HKeyframeSettingsContent(
             SettingsAnimatedVisibility(visible = state.sharedHKeyframesEnable) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(
-                        HanimeDefaults.settingsSegmentedItemPadding,
+                        HanimeDefaults.Spacing.extraSmall,
                     ),
                 ) {
                     SettingSwitchItem(
@@ -179,7 +179,7 @@ private fun HKeyframeAnimatedSection(
         ) {
             SettingsSectionTitle(titleRes = titleRes)
             SettingsSegmentedGroup(content = content)
-            Spacer(Modifier.size(HanimeDefaults.settingsItemPadding))
+            Spacer(Modifier.size(HanimeDefaults.Spacing.small))
         }
     }
 }

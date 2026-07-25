@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -115,7 +115,7 @@ fun HanimeTopAppBar(
     TopAppBar(
         modifier = modifier,
         colors = colors ?: topAppBarColors(
-            containerColor = HanimeDefaults.Colors.Background,
+            containerColor = HanimeDefaults.Colors.pageSurface,
             scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
         ),

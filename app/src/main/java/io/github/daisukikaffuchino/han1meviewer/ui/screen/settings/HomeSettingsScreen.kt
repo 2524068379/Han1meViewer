@@ -181,7 +181,7 @@ fun HomeSettingsScreen(
             .animateContentSize(),
         enableItemAnimation = false,
         contentPadding = PaddingValues(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(HanimeDefaults.settingsItemPadding),
+        verticalArrangement = Arrangement.spacedBy(HanimeDefaults.Spacing.small),
     ) {
         when (page) {
             HomeSettingsPage.VideoPlayback -> {
@@ -272,7 +272,7 @@ fun HomeSettingsScreen(
                             summary = stringResource(R.string.dynamic_color_summary),
                             checked = state.useDynamicColor,
                             enabled = state.dynamicColorEnabled,
-                            iconRes = R.drawable.ic_theme,
+                            iconRes = R.drawable.ic_palette,
                             onCheckedChange = onUseDynamicColorChange,
                         )
                         SettingsAnimatedVisibility(
@@ -406,13 +406,13 @@ fun HomeSettingsScreen(
                         SettingNavigationItem(
                             title = stringResource(R.string.backup_export_title),
                             summary = stringResource(R.string.backup_export_summary),
-                            iconRes = R.drawable.ic_backup,
+                            iconRes = R.drawable.ic_export,
                             onClick = onExportBackup,
                         )
                         SettingNavigationItem(
                             title = stringResource(R.string.backup_import_title),
                             summary = stringResource(R.string.backup_import_summary),
-                            iconRes = R.drawable.ic_restore,
+                            iconRes = R.drawable.ic_download,
                             onClick = onImportBackup,
                         )
                         SettingNavigationItem(
@@ -470,7 +470,7 @@ fun HomeSettingsScreen(
                         SettingNavigationItem(
                             title = stringResource(R.string.open_source_license),
                             summary = stringResource(R.string.open_source_license_summary),
-                            iconRes = R.drawable.ic_xml,
+                            iconRes = R.drawable.ic_gavel,
                             onClick = onOpenOpenSourceLicense,
                         )
                     }

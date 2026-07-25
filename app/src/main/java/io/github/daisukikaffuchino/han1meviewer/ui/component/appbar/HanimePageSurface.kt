@@ -14,8 +14,8 @@ fun HanimePageSurface(
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = HanimeDefaults.Colors.Background,
-        shape = HanimeDefaults.screenContainerShape,
+        color = HanimeDefaults.Colors.pageSurface,
+        shape = HanimeDefaults.Corners.large,
         content = content,
     )
 }

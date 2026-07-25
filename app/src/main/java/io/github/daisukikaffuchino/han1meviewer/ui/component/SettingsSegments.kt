@@ -36,7 +36,7 @@ fun AnimatedLazyListScope.segmentedGroup(
     item {
         SettingsSegmentedGroup(modifier = modifier, content = content)
     }
-    item { Spacer(Modifier.size(HanimeDefaults.settingsItemPadding)) }
+    item { Spacer(Modifier.size(HanimeDefaults.Spacing.small)) }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -47,7 +47,7 @@ fun SettingsSegmentedGroup(
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(
-            HanimeDefaults.settingsSegmentedItemPadding,
+            HanimeDefaults.Spacing.extraSmall,
         ),
         modifier = modifier
             .fillMaxWidth()
@@ -82,7 +82,7 @@ fun AnimatedLazyListScope.segmentedSection(
         item { SettingsSectionTitle(titleRes = titleRes, title = title) }
     }
     content()
-    item { Spacer(Modifier.size(HanimeDefaults.settingsItemPadding)) }
+    item { Spacer(Modifier.size(HanimeDefaults.Spacing.small)) }
 }
 
 @Composable
@@ -99,7 +99,7 @@ fun SettingsSectionTitle(
                 top = 12.dp,
                 bottom = 8.dp,
             )
-            .padding(horizontal = HanimeDefaults.screenVerticalPadding),
+            .padding(horizontal = HanimeDefaults.Spacing.contentVertical),
     )
 }
 

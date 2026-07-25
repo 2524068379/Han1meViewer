@@ -197,7 +197,7 @@ private fun HKeyframeEntityCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = HanimeDefaults.screenContainerShape,
+        shape = HanimeDefaults.Corners.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),

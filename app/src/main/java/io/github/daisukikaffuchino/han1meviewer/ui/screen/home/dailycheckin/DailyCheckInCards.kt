@@ -17,7 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -177,11 +177,13 @@ fun TodayCheckInCard(
                             onClick = onClear,
                             modifier = Modifier
                                 .size(40.dp),
-                            shape = RoundedCornerShape(
-                                topStart = 4.dp,
-                                bottomStart = 4.dp,
-                                topEnd = 50.dp,
-                                bottomEnd = 50.dp
+                            shapes = IconButtonDefaults.shapes(
+                                shape = RoundedCornerShape(
+                                    topStart = 4.dp,
+                                    bottomStart = 4.dp,
+                                    topEnd = 50.dp,
+                                    bottomEnd = 50.dp
+                                ),
                             ),
                             colors = IconButtonDefaults.filledTonalIconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.primary

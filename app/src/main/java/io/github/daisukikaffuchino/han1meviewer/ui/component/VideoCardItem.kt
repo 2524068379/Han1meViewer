@@ -72,6 +72,7 @@ fun VideoCardItem(
     modifier: Modifier = Modifier,
     videoItem: VideoItemType,
     isHorizontalCard: Boolean = true,
+    isHomePage: Boolean = false,
     isWatched: Boolean = false,
     isPlaying: Boolean = false,
     onClickVideosItem: (String) -> Unit,
@@ -88,7 +89,7 @@ fun VideoCardItem(
     var showContextMenu by remember { mutableStateOf(false) }
     val currentArtist = videoItem.currentArtist?.takeIf { it.isNotBlank() }
     val cardShape = shapeByInteraction(
-        shapes = HanimeDefaults.largerShapes(),
+        shapes = HanimeDefaults.cardShapes(),
         pressed = pressed,
         animationSpec = HanimeDefaults.shapesDefaultAnimationSpec,
     )
@@ -97,6 +98,7 @@ fun VideoCardItem(
             .fillMaxWidth()
             .animateContentSize(),
         shape = cardShape,
+        color = if (isHomePage) HanimeDefaults.Colors.homeVideoCard else HanimeDefaults.Colors.card,
     ) {
         Box {
             Column(
