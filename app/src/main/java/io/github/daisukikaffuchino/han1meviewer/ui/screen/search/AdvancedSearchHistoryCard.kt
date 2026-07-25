@@ -77,7 +77,7 @@ fun AdvancedSearchHistoryCard(
             }
             IconButton(onClick = onDelete) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_baseline_delete_24),
+                    painter = painterResource(R.drawable.ic_delete),
                     contentDescription = stringResource(R.string.delete),
                 )
             }

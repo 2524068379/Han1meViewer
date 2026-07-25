@@ -190,7 +190,7 @@ fun HomeSettingsScreen(
                         SettingNavigationItem(
                             title = stringResource(R.string.video_language),
                             valueText = state.videoLanguageLabel,
-                            iconRes = R.drawable.baseline_simp_to_trad_24,
+                            iconRes = R.drawable.ic_simp_to_trad,
                             onClick = { activeDialog = HomeSettingsChoiceDialog.VideoLanguage },
                         )
                         SettingNavigationItem(
@@ -210,14 +210,14 @@ fun HomeSettingsScreen(
                             title = stringResource(R.string.resume_playback_title),
                             summary = stringResource(R.string.resume_playback_summary),
                             checked = state.allowResumePlayback,
-                            iconRes = R.drawable.ic_baseline_skip_24,
+                            iconRes = R.drawable.ic_skip,
                             onCheckedChange = onAllowResumePlaybackChange,
                         )
                         SettingSwitchItem(
                             title = stringResource(R.string.show_played_indicator),
                             summary = stringResource(R.string.show_played_indicator_summary),
                             checked = state.showPlayedIndicator,
-                            iconRes = R.drawable.ic_baseline_history_24,
+                            iconRes = R.drawable.ic_history,
                             onCheckedChange = onShowPlayedIndicatorChange,
                         )
                     }
@@ -237,13 +237,13 @@ fun HomeSettingsScreen(
                             title = stringResource(R.string.disable_mobile_data_warning),
                             summary = stringResource(R.string.disable_mobile_data_warning_summary),
                             checked = state.disableMobileDataWarning,
-                            iconRes = R.drawable.baseline_mobile_data_24,
+                            iconRes = R.drawable.ic_mobile_data,
                             onCheckedChange = onDisableMobileDataWarningChange,
                         )
                         SettingNavigationItem(
                             title = stringResource(R.string.apply_deep_links),
                             summary = stringResource(R.string.apply_deep_links_summary),
-                            iconRes = R.drawable.baseline_add_link_24,
+                            iconRes = R.drawable.ic_add_link,
                             onClick = onOpenApplyDeepLinks,
                         )
                     }
@@ -257,7 +257,7 @@ fun HomeSettingsScreen(
                             title = stringResource(R.string.collapse_downloaded_groups),
                             summary = stringResource(R.string.collapse_downloaded_groups_summary),
                             checked = state.collapseDownloadedGroup,
-                            iconRes = R.drawable.ic_baseline_fold_24,
+                            iconRes = R.drawable.ic_fold,
                             onCheckedChange = onCollapseDownloadedGroupChange,
                         )
                     }
@@ -272,7 +272,7 @@ fun HomeSettingsScreen(
                             summary = stringResource(R.string.dynamic_color_summary),
                             checked = state.useDynamicColor,
                             enabled = state.dynamicColorEnabled,
-                            iconRes = R.drawable.ic_baseline_theme_24,
+                            iconRes = R.drawable.ic_theme,
                             onCheckedChange = onUseDynamicColorChange,
                         )
                         SettingsAnimatedVisibility(
@@ -306,21 +306,21 @@ fun HomeSettingsScreen(
                             title = stringResource(R.string.horizontal_card_count_title),
                             summary = stringResource(R.string.horizontal_card_count_summary),
                             valueText = state.horizontalCardCountSummary,
-                            iconRes = R.drawable.baseline_row_24,
+                            iconRes = R.drawable.ic_row,
                             onClick = { showHorizontalCardCountDialog = true },
                         )
                         SettingSwitchItem(
                             title = stringResource(R.string.search_artist_ignore_video_type),
                             summary = stringResource(R.string.search_artist_ignore_video_type_summary),
                             checked = state.searchArtistIgnoreVideoType,
-                            iconRes = R.drawable.baseline_prohibit_24,
+                            iconRes = R.drawable.ic_prohibit,
                             onCheckedChange = onSearchArtistIgnoreVideoTypeChange,
                         )
                         SettingSwitchItem(
                             title = stringResource(R.string.disable_predictive_back_title),
                             summary = stringResource(R.string.temporarily_unavailable),
                             checked = state.disablePredictiveBack,
-                            iconRes = R.drawable.swipe_right_24px,
+                            iconRes = R.drawable.ic_swipe_right,
                             onCheckedChange = onDisablePredictiveBackChange,
                             enabled = false,
                         )
@@ -328,14 +328,14 @@ fun HomeSettingsScreen(
                             title = stringResource(R.string.tablet_mode),
                             summary = stringResource(R.string.tablet_mode_summary),
                             checked = state.tabletMode,
-                            iconRes = R.drawable.ic_baseline_tablet_24,
+                            iconRes = R.drawable.ic_tablet,
                             onCheckedChange = onTabletModeChange,
                         )
                         SettingSwitchItem(
                             title = stringResource(R.string.enable_check_in_feature),
                             summary = stringResource(R.string.enable_check_in_feature_summary),
                             checked = state.checkInEnabled,
-                            iconRes = R.drawable.ic_baseline_thumb_up_off_alt_24,
+                            iconRes = R.drawable.ic_thumb_up_off_alt,
                             onCheckedChange = onCheckInEnabledChange,
                         )
                         SettingsAnimatedVisibility(visible = state.tabletMode) {
@@ -343,7 +343,7 @@ fun HomeSettingsScreen(
                                 title = stringResource(R.string.search_grid_columns_title),
                                 summary = stringResource(R.string.search_grid_columns_summary),
                                 valueText = state.searchGridColumnsSummary,
-                                iconRes = R.drawable.baseline_grid_24,
+                                iconRes = R.drawable.ic_grid,
                                 onClick = { showSearchGridColumnsDialog = true },
                             )
                         }
@@ -354,7 +354,7 @@ fun HomeSettingsScreen(
                                 state.homeCategoryItems.size - state.hiddenHomeCategoryKeys.size,
                                 state.homeCategoryItems.size,
                             ),
-                            iconRes = R.drawable.baseline_sort_24,
+                            iconRes = R.drawable.ic_sort,
                             onClick = { showHomeCategoryDialog = true },
                         )
                     }
@@ -386,7 +386,7 @@ fun HomeSettingsScreen(
                             title = stringResource(R.string.fake_app_icon),
                             summary = stringResource(R.string.select_fake_icon),
                             valueText = state.fakeLauncherIconName,
-                            iconRes = R.drawable.ic_baseline_mask,
+                            iconRes = R.drawable.ic_mask,
                             onClick = onOpenFakeLauncherIcon,
                         )
                         SettingSwitchItem(
@@ -406,19 +406,19 @@ fun HomeSettingsScreen(
                         SettingNavigationItem(
                             title = stringResource(R.string.backup_export_title),
                             summary = stringResource(R.string.backup_export_summary),
-                            iconRes = R.drawable.baseline_backup_24,
+                            iconRes = R.drawable.ic_backup,
                             onClick = onExportBackup,
                         )
                         SettingNavigationItem(
                             title = stringResource(R.string.backup_import_title),
                             summary = stringResource(R.string.backup_import_summary),
-                            iconRes = R.drawable.baseline_restore_24,
+                            iconRes = R.drawable.ic_restore,
                             onClick = onImportBackup,
                         )
                         SettingNavigationItem(
                             title = stringResource(R.string.clear_cache),
                             summary = state.cacheSummary,
-                            iconRes = R.drawable.ic_baseline_clear_all_24,
+                            iconRes = R.drawable.ic_clear_all,
                             onClick = onClearCache,
                         )
                     }
@@ -431,18 +431,18 @@ fun HomeSettingsScreen(
                         SettingInfoItem(
                             title = stringResource(R.string.version),
                             summary = state.versionSummary,
-                            iconRes = R.drawable.ic_baseline_info_24,
+                            iconRes = R.drawable.ic_info,
                         )
                         SettingNavigationItem(
                             title = stringResource(R.string.developer),
                             summary = "@daisukiKaffuChino",
-                            iconRes = R.drawable.person_24px,
+                            iconRes = R.drawable.ic_person,
                             onClick = { uriHandler.openUri("https://github.com/daisukiKaffuChino") },
                         )
                         SettingNavigationItem(
                             title = stringResource(R.string.user_terms),
                             summary = stringResource(R.string.user_terms_summary),
-                            iconRes = R.drawable.inbox_text_24px,
+                            iconRes = R.drawable.ic_inbox_text,
                             onClick = { showUsageTerms = true },
                         )
                     }
@@ -458,19 +458,19 @@ fun HomeSettingsScreen(
                         SettingNavigationItem(
                             title = stringResource(R.string.submit_bug),
                             summary = stringResource(R.string.submit_bug_summary),
-                            iconRes = R.drawable.baseline_bug_report_24,
+                            iconRes = R.drawable.ic_bug_report,
                             onClick = onSubmitBug,
                         )
                         SettingNavigationItem(
                             title = stringResource(R.string.forum),
                             summary = stringResource(R.string.forum_summary),
-                            iconRes = R.drawable.baseline_forum_24,
+                            iconRes = R.drawable.ic_forum,
                             onClick = onOpenForum,
                         )
                         SettingNavigationItem(
                             title = stringResource(R.string.open_source_license),
                             summary = stringResource(R.string.open_source_license_summary),
-                            iconRes = R.drawable.ic_oss,
+                            iconRes = R.drawable.ic_xml,
                             onClick = onOpenOpenSourceLicense,
                         )
                     }

@@ -209,19 +209,19 @@ fun NetworkSettingsScreen(
                 SettingNavigationItem(
                     title = stringResource(R.string.domain_name),
                     valueText = state.domainDisplay,
-                    iconRes = R.drawable.baseline_domain_24,
+                    iconRes = R.drawable.ic_domain,
                     onClick = { showDomainDialog = true },
                 )
                 SettingNavigationItem(
                     title = stringResource(R.string.custom_mirror_site),
                     summary = if (useCustomMirrorSite && customMirrorSite.isNotBlank()) customMirrorSite else stringResource(R.string.custom_mirror_site_hint),
-                    iconRes = R.drawable.baseline_domain_24,
+                    iconRes = R.drawable.ic_domain,
                     onClick = { showCustomMirrorSiteDialog = true },
                 )
                 SettingNavigationItem(
                     title = stringResource(R.string.proxy),
                     summary = state.proxySummary,
-                    iconRes = R.drawable.baseline_vpn_24,
+                    iconRes = R.drawable.ic_vpn,
                     onClick = { showProxyDialog = true },
                 )
             }
@@ -232,13 +232,13 @@ fun NetworkSettingsScreen(
                     title = stringResource(R.string.use_built_in_hosts),
                     summary = stringResource(R.string.use_built_in_hosts_summary),
                     checked = state.useBuiltInHosts,
-                    iconRes = R.drawable.baseline_hosts_24,
+                    iconRes = R.drawable.ic_hosts,
                     onCheckedChange = onUseBuiltInHostsChange,
                 )
                 SettingNavigationItem(
                     title = stringResource(R.string.custom_hosts),
                     summary = if (customHostsData.isBlank()) stringResource(R.string.custom_hosts_empty_summary) else customHostsData.take(60),
-                    iconRes = R.drawable.baseline_edit_24,
+                    iconRes = R.drawable.ic_edit_square,
                     onClick = { showCustomHostsDialog = true },
                 )
                 SettingNavigationItem(
@@ -254,7 +254,7 @@ fun NetworkSettingsScreen(
                 SettingNavigationItem(
                     title = stringResource(R.string.view_node_latency),
                     summary = state.delaySummary,
-                    iconRes = R.drawable.baseline_delay_24,
+                    iconRes = R.drawable.ic_delay,
                     onClick = onOpenDelayTest,
                 )
                 SettingNavigationItem(
@@ -542,7 +542,7 @@ private fun DohDialog(
                     title = stringResource(R.string.doh_preset),
                     valueText = DohConfig.presets.firstOrNull { it.key == presetValue }?.title
                         ?: stringResource(R.string.custom),
-                    iconRes = R.drawable.baseline_domain_24,
+                    iconRes = R.drawable.ic_domain,
                     onClick = { showPresetDialog = true },
                 )
 

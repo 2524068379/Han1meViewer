@@ -164,7 +164,7 @@ fun VideoCardItem(
                     ) {
                         videoItem.views?.let {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_baseline_play_circle_outline_24),
+                                painter = painterResource(id = R.drawable.ic_play_circle),
                                 contentDescription = null,
                                 tint = Color.White,
                                 modifier = Modifier.size(iconSize),
@@ -180,7 +180,7 @@ fun VideoCardItem(
                         Spacer(modifier = Modifier.weight(1f))
                         videoItem.duration?.let {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_baseline_access_time_24),
+                                painter = painterResource(id = R.drawable.ic_access_time),
                                 contentDescription = null,
                                 tint = Color.White,
                                 modifier = Modifier.size(iconSize),
@@ -211,7 +211,7 @@ fun VideoCardItem(
                                     .padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
                                 Icon(
-                                    painter = painterResource(id = R.drawable.ic_baseline_play_circle_outline_24),
+                                    painter = painterResource(id = R.drawable.ic_play_circle),
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.onPrimary,
                                     modifier = Modifier.size(18.dp)
@@ -261,7 +261,7 @@ fun VideoCardItem(
                 ) {
                     videoItem.reviews?.takeIf { it.isNotEmpty() }?.let { reviewsText ->
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_thumb_up_off_alt_24),
+                            painter = painterResource(id = R.drawable.ic_thumb_up_off_alt),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(iconSize),

@@ -113,7 +113,7 @@ fun ContributionReportDialog(
                 }
                 FilledIconButton(onClick = onToggleFullscreen) {
                     Icon(
-                        painter = painterResource(R.drawable.baseline_screen_rotation_24),
+                        painter = painterResource(R.drawable.ic_screen_rotation),
                         contentDescription = if (isFullscreen)
                             stringResource(R.string.report_portrait)
                         else
@@ -163,17 +163,17 @@ fun ContributionReportDialog(
                     StatsCard(
                         items = listOf(
                             StatsItem(
-                                R.drawable.calendar_month_24px,
+                                R.drawable.ic_calendar_month,
                                 stringResource(R.string.report_total),
                                 totalCount.toString(),
                             ),
                             StatsItem(
-                                R.drawable.alarm_24px,
+                                R.drawable.ic_alarm,
                                 stringResource(R.string.report_days),
                                 totalDays.toString(),
                             ),
                             StatsItem(
-                                R.drawable.calendar_view_week_24px,
+                                R.drawable.ic_calendar_view_week,
                                 stringResource(R.string.report_max_day),
                                 maxDay.toString(),
                             ),
@@ -274,7 +274,7 @@ fun YearContributionView(
         ) {
             IconButton(onClick = { onYearChange(year - 1) }) {
                 Icon(
-                    painterResource(R.drawable.previous_double_arrow_24),
+                    painterResource(R.drawable.ic_chevron_left),
                     stringResource(R.string.previous_year)
                 )
             }
@@ -288,7 +288,7 @@ fun YearContributionView(
                 enabled = year < today.year
             ) {
                 Icon(
-                    painterResource(R.drawable.next_double_arrow_24),
+                    painterResource(R.drawable.ic_chevron_right),
                     stringResource(R.string.next_year)
                 )
             }
@@ -401,7 +401,7 @@ fun MonthContributionView(
                 }
             }) {
                 Icon(
-                    painterResource(R.drawable.previous_double_arrow_24),
+                    painterResource(R.drawable.ic_chevron_left),
                     stringResource(R.string.previous_month)
                 )
             }
@@ -426,7 +426,7 @@ fun MonthContributionView(
                 enabled = YearMonth.of(year, month).isBefore(YearMonth.now())
             ) {
                 Icon(
-                    painterResource(R.drawable.next_double_arrow_24),
+                    painterResource(R.drawable.ic_chevron_right),
                     stringResource(R.string.next_month)
                 )
             }

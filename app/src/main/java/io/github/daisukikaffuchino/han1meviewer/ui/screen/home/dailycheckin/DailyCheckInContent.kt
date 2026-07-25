@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -96,17 +95,17 @@ fun DailyCheckInContent(
         StatsCard(
             items = listOf(
                 StatsItem(
-                    R.drawable.calendar_month_24px,
+                    R.drawable.ic_calendar_month,
                     stringResource(R.string.this_month_checkin),
                     stringResource(R.string.days, animatedCheckedDays),
                 ),
                 StatsItem(
-                    R.drawable.alarm_24px,
+                    R.drawable.ic_alarm,
                     stringResource(R.string.has_cum_days),
                     stringResource(R.string.counts, animatedMonthlyTotal),
                 ),
                 StatsItem(
-                    R.drawable.calendar_view_week_24px,
+                    R.drawable.ic_calendar_view_week,
                     stringResource(R.string.best_streak),
                     "${animatedBestStreak}${stringResource(R.string.day_unit)}",
                 ),
@@ -127,14 +126,14 @@ fun DailyCheckInContent(
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { onEvent(DailyCheckInEvent.OnPreviousMonth) }) {
-                    Icon(painterResource(R.drawable.previous_double_arrow_24), "previous")
+                    Icon(painterResource(R.drawable.ic_chevron_left), "previous")
                 }
                 Text(
                     text = uiState.currentMonth.format(DateTimeFormatter.ofPattern("yyyy-MM")),
                     style = MaterialTheme.typography.titleMedium
                 )
                 IconButton(onClick = { onEvent(DailyCheckInEvent.OnNextMonth) }) {
-                    Icon(painterResource(R.drawable.next_double_arrow_24), "next")
+                    Icon(painterResource(R.drawable.ic_chevron_right), "next")
                 }
             }
         }

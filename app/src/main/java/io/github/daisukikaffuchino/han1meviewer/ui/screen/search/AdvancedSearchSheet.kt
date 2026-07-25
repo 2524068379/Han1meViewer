@@ -728,7 +728,7 @@ private fun AdvancedSearchActionSection(
             modifier = Modifier.size(60.dp),
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_baseline_search_24),
+                painter = painterResource(R.drawable.ic_search),
                 contentDescription = stringResource(R.string.search),
             )
         }

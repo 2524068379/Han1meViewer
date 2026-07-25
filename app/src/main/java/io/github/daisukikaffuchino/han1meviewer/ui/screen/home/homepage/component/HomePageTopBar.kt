@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -77,7 +76,7 @@ fun HomePageTopBar(
         navigationIcon = {
             IconButton(onClick = onOpenDrawer) {
                 Icon(
-                    painter = painterResource(R.drawable.menu_24px),
+                    painter = painterResource(R.drawable.ic_menu),
                     contentDescription = stringResource(R.string.open_menu),
                 )
             }
@@ -85,7 +84,7 @@ fun HomePageTopBar(
         actions = {
             IconButton(onClick = onNavigateToPreview) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_baseline_newspaper_24),
+                    painter = painterResource(R.drawable.ic_newspaper),
                     contentDescription = stringResource(R.string.hanime_list),
                 )
             }

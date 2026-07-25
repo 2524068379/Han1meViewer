@@ -42,6 +42,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.dataOrNull
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeTopAppBar
+import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimePageSurface
 import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageEmpty
 import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageError
 import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageLoading
@@ -69,11 +70,8 @@ fun GetchuPreviewScreen(
     }
     LaunchedEffect(dateCode) { viewModel.getPreview(dateCode) }
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
+    HanimePageSurface {
+        Column(Modifier.fillMaxSize()) {
         HanimeTopAppBar(
             title = {
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -140,6 +138,7 @@ fun GetchuPreviewScreen(
                     imageLoader = imageLoader
                 )
             }
+        }
         }
     }
 }

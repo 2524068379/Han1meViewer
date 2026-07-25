@@ -168,7 +168,7 @@ fun VideoGridScreen(
         actions = {
             IconButton(onClick = { showHelpDialog = true }) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_baseline_help_24),
+                    painter = painterResource(R.drawable.ic_help),
                     contentDescription = stringResource(R.string.help),
                 )
             }

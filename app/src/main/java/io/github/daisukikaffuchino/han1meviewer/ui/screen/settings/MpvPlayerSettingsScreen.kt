@@ -104,41 +104,41 @@ fun MpvPlayerSettingsScreen(
                 SettingNavigationItem(
                     title = stringResource(R.string.mpv_profile),
                     valueText = state.profileDisplay,
-                    iconRes = R.drawable.baseline_render_24,
+                    iconRes = R.drawable.ic_render,
                     onClick = onOpenProfileDialog,
                 )
                 SettingSwitchItem(
                     title = stringResource(R.string.enable_gpu_next),
                     summary = stringResource(R.string.enable_gpu_next_summary),
                     checked = state.enableGpuNextRenderer,
-                    iconRes = R.drawable.baseline_chip_24,
+                    iconRes = R.drawable.ic_chip,
                     onCheckedChange = onEnableGpuNextRendererChange,
                 )
                 SettingSwitchItem(
                     title = stringResource(R.string.mpv_interpolation),
                     summary = stringResource(R.string.mpv_interpolation_summary),
                     checked = state.interpolation,
-                    iconRes = R.drawable.baseline_frame_inter_24,
+                    iconRes = R.drawable.ic_frame_inter,
                     onCheckedChange = onInterpolationChange,
                 )
                 SettingSwitchItem(
                     title = stringResource(R.string.mpv_deband),
                     summary = stringResource(R.string.mpv_deband_summary),
                     checked = state.deband,
-                    iconRes = R.drawable.baseline_deband_24,
+                    iconRes = R.drawable.ic_deband,
                     onCheckedChange = onDebandChange,
                 )
                 SettingSwitchItem(
                     title = stringResource(R.string.mpv_framedrop),
                     summary = stringResource(R.string.mpv_framedrop_summary),
                     checked = state.framedrop,
-                    iconRes = R.drawable.baseline_frame_jump_24,
+                    iconRes = R.drawable.ic_frame_jump,
                     onCheckedChange = onFramedropChange,
                 )
                 SettingNavigationItem(
                     title = stringResource(R.string.mpv_hwdec),
                     summary = state.hwdecDisplay,
-                    iconRes = R.drawable.baseline_decoder_24,
+                    iconRes = R.drawable.ic_decoder,
                     onClick = onOpenHwdecDialog,
                 )
             }
@@ -152,14 +152,14 @@ fun MpvPlayerSettingsScreen(
                     value = state.cacheSecs,
                     valueRange = 10..120,
                     step = 5,
-                    iconRes = R.drawable.baseline_cache_24,
+                    iconRes = R.drawable.ic_cache,
                     onValueChange = onCacheSecsChange,
                 )
                 SettingSwitchItem(
                     title = stringResource(R.string.mpv_tls_verify),
                     summary = stringResource(R.string.mpv_tls_verify_summary),
                     checked = state.tlsVerify,
-                    iconRes = R.drawable.baseline_cert_24,
+                    iconRes = R.drawable.ic_cert,
                     onCheckedChange = onTlsVerifyChange,
                 )
                 SettingSliderItem(
@@ -167,7 +167,7 @@ fun MpvPlayerSettingsScreen(
                     summary = state.networkTimeoutSummary,
                     value = state.networkTimeout,
                     valueRange = 5..30,
-                    iconRes = R.drawable.baseline_overtime_24,
+                    iconRes = R.drawable.ic_overtime,
                     onValueChange = onNetworkTimeoutChange,
                 )
             }
@@ -178,7 +178,7 @@ fun MpvPlayerSettingsScreen(
                 SettingNavigationItem(
                     title = stringResource(R.string.custom_parameters),
                     summary = state.customParams.ifBlank { stringResource(R.string.custom_parameters_summary) },
-                    iconRes = R.drawable.baseline_custom_24,
+                    iconRes = R.drawable.ic_custom,
                     onClick = onOpenCustomParamsDialog,
                 )
             }

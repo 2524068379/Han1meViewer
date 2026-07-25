@@ -281,7 +281,7 @@ private fun PlaylistSheetContent(
                         contentPadding = PaddingValues(0.dp)
                     ) {
                         Icon(
-                            painterResource(R.drawable.ic_baseline_delete_24),
+                            painterResource(R.drawable.ic_delete),
                             stringResource(R.string.delete),
                             tint = Color.White
                         )
@@ -294,7 +294,7 @@ private fun PlaylistSheetContent(
                         contentPadding = PaddingValues(0.dp)
                     ) {
                         Icon(
-                            painterResource(R.drawable.baseline_edit_24),
+                            painterResource(R.drawable.ic_edit_square),
                             stringResource(R.string.edit),
                             tint = Color.Red
                         )

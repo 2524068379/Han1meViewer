@@ -779,7 +779,7 @@ private fun PlaylistBottomSheet(
                                     horizontalArrangement = Arrangement.spacedBy(3.dp),
                                 ) {
                                     Icon(
-                                        painter = painterResource(id = R.drawable.ic_baseline_access_time_24),
+                                        painter = painterResource(id = R.drawable.ic_access_time),
                                         contentDescription = null,
                                         tint = metaColor,
                                         modifier = Modifier.size(13.dp),
@@ -1109,20 +1109,20 @@ private fun ActionSection(
     ) {
         if (checkInEnabled) {
             VideoActionButton(
-                iconRes = R.drawable.ic_baseline_check_circle_24,
+                iconRes = R.drawable.ic_check_circle,
                 label = stringResource(R.string.quick_checkin),
                 onClick = onQuickCheckIn,
             )
         }
         if (hasOriginalComic && onOpenOriginalComic != null) {
             VideoActionButton(
-                iconRes = R.drawable.ic_baseline_book,
+                iconRes = R.drawable.ic_book,
                 label = stringResource(R.string.original_comic),
                 onClick = onOpenOriginalComic,
             )
         }
         VideoActionButton(
-            iconRes = if (isFav) R.drawable.ic_baseline_favorite_24 else R.drawable.ic_baseline_favorite_border_24,
+            iconRes = if (isFav) R.drawable.ic_favorite else R.drawable.ic_favorite_border,
             label = if (isFav) stringResource(R.string.liked) else stringResource(R.string.add_to_fav),
             onClick = onToggleFavorite,
         )
@@ -1132,18 +1132,18 @@ private fun ActionSection(
             onClick = onManageMyList,
         )
         VideoActionButton(
-            iconRes = R.drawable.ic_baseline_download_24,
+            iconRes = R.drawable.ic_download,
             label = stringResource(R.string.download),
             onClick = onDownload,
         )
         VideoActionButton(
-            iconRes = R.drawable.baseline_share_24,
+            iconRes = R.drawable.ic_share,
             label = stringResource(R.string.share),
             onClick = onShare,
             onLongClick = onCopyShareText,
         )
         VideoActionButton(
-            iconRes = R.drawable.ic_baseline_language_24,
+            iconRes = R.drawable.ic_language,
             label = stringResource(R.string.jump_to_webpage),
             onClick = onOpenWebPage,
         )

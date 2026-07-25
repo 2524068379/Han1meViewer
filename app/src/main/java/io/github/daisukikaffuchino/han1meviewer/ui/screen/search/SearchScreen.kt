@@ -91,6 +91,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.VideoCardItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeTopAppBar
+import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimePageSurface
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyVerticalGrid
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeHomePageVideos
@@ -330,11 +331,8 @@ fun SearchScreen(
     // 返回键：有焦点时先关键盘
     BackHandler(enabled = isSearchFocused) { focusMgr.clearFocus(); kb?.hide() }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
+    HanimePageSurface(modifier = modifier) {
+        Column(modifier = Modifier.fillMaxSize()) {
         SearchAppBar(searchQuery, { searchQuery = it }, onSearch = {
             val q = searchQuery.trim()
             val shouldSearch = q.isNotBlank() || hasAdvancedFilters()
@@ -436,6 +434,7 @@ fun SearchScreen(
                         })
                 }
             }
+        }
         }
     }
 }

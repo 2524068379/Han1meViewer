@@ -279,7 +279,7 @@ private fun WatchHistoryClearFab(
                 text = { Text(stringResource(R.string.watch_history_clear_all)) },
                 icon = {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_delete_24),
+                        painter = painterResource(R.drawable.ic_delete),
                         contentDescription = null,
                     )
                 },
@@ -623,11 +623,11 @@ private fun WatchHistoryCard(
                     overflow = TextOverflow.Ellipsis,
                 )
                 WatchHistoryMeta(
-                    iconRes = R.drawable.ic_baseline_access_time_24,
+                    iconRes = R.drawable.ic_access_time,
                     label = stringResource(R.string.watch_history_watched_at, watchDate),
                 )
                 WatchHistoryMeta(
-                    iconRes = R.drawable.ic_baseline_play_circle_outline_24,
+                    iconRes = R.drawable.ic_play_circle,
                     label = stringResource(R.string.watch_history_released_at, releaseDate),
                 )
                 Row(
@@ -646,7 +646,7 @@ private fun WatchHistoryCard(
                         },
                         leadingIcon = {
                             Icon(
-                                painter = painterResource(R.drawable.ic_baseline_history_24),
+                                painter = painterResource(R.drawable.ic_history),
                                 contentDescription = null,
                                 modifier = Modifier.size(14.dp),
                             )

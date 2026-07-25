@@ -178,7 +178,7 @@ fun DailyCheckInScreen(
                 onClick = { showReport = true }
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.event_note_24px),
+                    painter = painterResource(R.drawable.ic_event_note),
                     contentDescription = null,
                     modifier = Modifier.size(20.dp)
                 )

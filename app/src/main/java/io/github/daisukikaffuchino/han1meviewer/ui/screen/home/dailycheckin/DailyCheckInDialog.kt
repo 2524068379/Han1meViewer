@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -117,7 +116,7 @@ fun CheckInDialog(
                         )
                     }
                     IconButton(onClick = onDismiss) {
-                        Icon(painter = painterResource(R.drawable.close_24px), "close")
+                        Icon(painter = painterResource(R.drawable.ic_close), "close")
                     }
                 }
 
@@ -346,7 +345,7 @@ fun ExistingRecordItem(
                     modifier = Modifier.size(28.dp)
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_delete_24),
+                        painter = painterResource(R.drawable.ic_delete),
                         contentDescription = stringResource(R.string.delete),
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)

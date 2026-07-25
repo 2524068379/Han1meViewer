@@ -89,7 +89,7 @@ fun HanimeTopAppBar(
                     shapes = IconButtonDefaults.shapes(),
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_arrow_back_24),
+                        painter = painterResource(R.drawable.ic_arrow_back),
                         contentDescription = stringResource(R.string.back),
                     )
                 }

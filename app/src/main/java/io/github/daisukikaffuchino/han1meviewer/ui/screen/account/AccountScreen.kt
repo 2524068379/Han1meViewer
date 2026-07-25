@@ -45,7 +45,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -57,7 +56,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -260,7 +258,7 @@ private fun AccountContent(
                             LoadingIndicator(modifier = Modifier.size(16.dp))
                         } else {
                             Icon(
-                                painter = painterResource(R.drawable.ic_baseline_edit_24),
+                                painter = painterResource(R.drawable.ic_edit),
                                 contentDescription = stringResource(R.string.change_avatar),
                                 modifier = Modifier.size(18.dp)
                             )

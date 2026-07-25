@@ -3,12 +3,12 @@ package io.github.daisukikaffuchino.han1meviewer.ui.component.appbar
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -95,14 +95,19 @@ fun HanimeScaffold(
         snackbarHost = snackbarHost,
         containerColor = HanimeDefaults.Colors.Background,
     ) { innerPadding ->
-        Surface(
+        androidx.compose.foundation.layout.Box(
             modifier = Modifier
                 .verticalBounce()
                 .fillMaxSize(),
-            color = HanimeDefaults.Colors.Background,
-            shape = HanimeDefaults.screenContainerShape,
         ) {
-            content(innerPadding)
+            HanimePageSurface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = HanimeDefaults.screenHorizontalPadding),
+            ) {
+                content(PaddingValues())
+            }
         }
     }
 }
@@ -124,13 +129,13 @@ private fun HanimeScaffoldPreview() {
             actions = {
                 FilledIconButton(onClick = { }, enabled = true) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_play_arrow_24),
+                        painter = painterResource(R.drawable.ic_play_arrow),
                         contentDescription = stringResource(R.string.start_all),
                     )
                 }
                 FilledIconButton(onClick = { }, enabled = false) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_pause_24),
+                        painter = painterResource(R.drawable.ic_pause),
                         contentDescription = stringResource(R.string.pause_all),
                     )
                 }

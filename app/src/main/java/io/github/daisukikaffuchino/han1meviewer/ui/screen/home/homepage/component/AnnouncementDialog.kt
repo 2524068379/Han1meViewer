@@ -83,7 +83,7 @@ fun AnnouncementDialog(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_alert_24),
+                        painter = painterResource(R.drawable.ic_alert),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(32.dp),

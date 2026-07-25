@@ -220,7 +220,7 @@ fun CommentScreen(
                             text = { Text(stringResource(R.string.comment)) },
                             icon = {
                                 Icon(
-                                    painter = painterResource(R.drawable.ic_baseline_reply_24),
+                                    painter = painterResource(R.drawable.ic_reply),
                                     contentDescription = null,
                                 )
                             },

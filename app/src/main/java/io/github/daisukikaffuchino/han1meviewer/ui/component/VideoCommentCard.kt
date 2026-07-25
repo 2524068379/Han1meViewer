@@ -123,7 +123,7 @@ fun VideoCommentCard(
 
                 IconButton(onClick = onReport, modifier = Modifier.size(36.dp)) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_report_24),
+                        painter = painterResource(R.drawable.ic_report),
                         contentDescription = stringResource(R.string.report_reason_hint),
                         tint = MaterialTheme.colorScheme.primary
                     )
@@ -144,9 +144,9 @@ fun VideoCommentCard(
                     Icon(
                         painter = painterResource(
                             if (comment.post.likeCommentStatus) {
-                                R.drawable.ic_baseline_thumb_up_alt_24
+                                R.drawable.ic_thumb_up_alt
                             } else {
-                                R.drawable.ic_baseline_thumb_up_off_alt_24
+                                R.drawable.ic_thumb_up_off_alt
                             }
                         ),
                         contentDescription = null,
@@ -158,9 +158,9 @@ fun VideoCommentCard(
                     Icon(
                         painter = painterResource(
                             if (comment.post.unlikeCommentStatus) {
-                                R.drawable.ic_baseline_thumb_down_alt_24
+                                R.drawable.ic_thumb_down_alt
                             } else {
-                                R.drawable.ic_baseline_thumb_down_off_alt_24
+                                R.drawable.ic_thumb_down_off_alt
                             }
                         ),
                         contentDescription = null,
@@ -169,7 +169,7 @@ fun VideoCommentCard(
 
                 TextButton(onClick = onReply) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_reply_24),
+                        painter = painterResource(R.drawable.ic_reply),
                         contentDescription = null,
                     )
                     Text(stringResource(R.string.reply))

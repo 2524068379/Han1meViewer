@@ -37,7 +37,7 @@ fun SettingsMainScreen(
             SettingNavigationItem(
                 title = stringResource(R.string.settings_video_playback),
                 summary = stringResource(R.string.settings_video_playback_summary),
-                iconRes = R.drawable.video_settings_24px,
+                iconRes = R.drawable.ic_video_settings,
                 shapes = HanimeDefaults.largerShapes(),
                 onClick = onOpenVideoPlayback,
             )
@@ -46,7 +46,7 @@ fun SettingsMainScreen(
             SettingNavigationItem(
                 title = stringResource(R.string.player_settings),
                 summary = stringResource(R.string.settings_player_summary),
-                iconRes = R.drawable.ic_baseline_play_circle_outline_24,
+                iconRes = R.drawable.ic_play_circle,
                 shapes = HanimeDefaults.largerShapes(),
                 onClick = onOpenPlayerSettings,
             )
@@ -64,7 +64,7 @@ fun SettingsMainScreen(
             SettingNavigationItem(
                 title = stringResource(R.string.settings_appearance),
                 summary = stringResource(R.string.settings_appearance_summary),
-                iconRes = R.drawable.ic_baseline_theme_24,
+                iconRes = R.drawable.ic_theme,
                 shapes = HanimeDefaults.largerShapes(),
                 onClick = onOpenAppearance,
             )
@@ -73,7 +73,7 @@ fun SettingsMainScreen(
             SettingNavigationItem(
                 title = stringResource(R.string.privacy),
                 summary = stringResource(R.string.settings_privacy_summary),
-                iconRes = R.drawable.admin_panel_settings_24px,
+                iconRes = R.drawable.ic_admin_panel_settings,
                 shapes = HanimeDefaults.largerShapes(),
                 onClick = onOpenPrivacy,
             )
@@ -82,7 +82,7 @@ fun SettingsMainScreen(
             SettingNavigationItem(
                 title = stringResource(R.string.settings_data),
                 summary = stringResource(R.string.settings_data_summary),
-                iconRes = R.drawable.data_table_24px,
+                iconRes = R.drawable.ic_data_table,
                 shapes = HanimeDefaults.largerShapes(),
                 onClick = onOpenData,
             )
@@ -91,7 +91,7 @@ fun SettingsMainScreen(
             SettingNavigationItem(
                 title = stringResource(R.string.about),
                 summary = stringResource(R.string.settings_about_summary),
-                iconRes = R.drawable.ic_baseline_info_24,
+                iconRes = R.drawable.ic_info,
                 shapes = HanimeDefaults.largerShapes(),
                 onClick = onOpenAbout,
             )

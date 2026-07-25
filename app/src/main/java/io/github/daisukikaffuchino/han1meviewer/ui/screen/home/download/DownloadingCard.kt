@@ -198,7 +198,7 @@ fun DownloadingItemCard(
                                 modifier = Modifier.size(36.dp)
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.ic_baseline_pause_24),
+                                    painter = painterResource(R.drawable.ic_pause),
                                     contentDescription = stringResource(R.string.pause_all),
                                     modifier = Modifier.size(20.dp)
                                 )

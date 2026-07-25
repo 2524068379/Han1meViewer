@@ -330,7 +330,7 @@ private fun DownloadFabMenu(
                     FloatingActionButton(onClick = { expanded = !expanded }) {
                         Icon(
                             painter = painterResource(
-                                if (expanded) R.drawable.close_24px else R.drawable.menu_24px,
+                                if (expanded) R.drawable.ic_close else R.drawable.ic_menu,
                             ),
                             contentDescription = stringResource(if (expanded) R.string.close else R.string.download),
                         )
@@ -342,7 +342,7 @@ private fun DownloadFabMenu(
                         text = { Text(stringResource(R.string.start_all)) },
                         icon = {
                             Icon(
-                                painter = painterResource(R.drawable.ic_baseline_play_arrow_24),
+                                painter = painterResource(R.drawable.ic_play_arrow),
                                 contentDescription = null,
                             )
                         },
@@ -355,7 +355,7 @@ private fun DownloadFabMenu(
                         text = { Text(stringResource(R.string.pause_all)) },
                         icon = {
                             Icon(
-                                painter = painterResource(R.drawable.ic_baseline_pause_24),
+                                painter = painterResource(R.drawable.ic_pause),
                                 contentDescription = null,
                             )
                         },
@@ -369,7 +369,7 @@ private fun DownloadFabMenu(
                         text = { Text(stringResource(R.string.edit)) },
                         icon = {
                             Icon(
-                                painter = painterResource(R.drawable.baseline_format_list_bulleted_24),
+                                painter = painterResource(R.drawable.ic_format_list_bulleted),
                                 contentDescription = null,
                             )
                         },
@@ -382,7 +382,7 @@ private fun DownloadFabMenu(
                         text = { Text(stringResource(R.string.create_new_group)) },
                         icon = {
                             Icon(
-                                painter = painterResource(R.drawable.baseline_add_24),
+                                painter = painterResource(R.drawable.ic_add),
                                 contentDescription = null,
                             )
                         },
@@ -395,7 +395,7 @@ private fun DownloadFabMenu(
                         text = { Text(stringResource(R.string.read_download_dir_title)) },
                         icon = {
                             Icon(
-                                painter = painterResource(R.drawable.ic_baseline_download_24),
+                                painter = painterResource(R.drawable.ic_download),
                                 contentDescription = null,
                             )
                         },

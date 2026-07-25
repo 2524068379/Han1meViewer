@@ -220,7 +220,7 @@ Column(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_switch_24),
+                        painter = painterResource(id = R.drawable.ic_switch),
                         contentDescription = stringResource(R.string.switch_site)
                     )
                 }

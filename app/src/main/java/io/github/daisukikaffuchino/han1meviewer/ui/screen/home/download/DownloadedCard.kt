@@ -102,8 +102,8 @@ fun DownloadGroupHeader(
             FilledIconButton(onClick = onToggle, modifier = Modifier.size(36.dp)) {
                 Icon(
                     painter = painterResource(
-                        if (header.isExpanded) R.drawable.ic_baseline_fold_24
-                        else R.drawable.baseline_format_list_bulleted_24
+                        if (header.isExpanded) R.drawable.ic_fold
+                        else R.drawable.ic_format_list_bulleted
                     ),
                     contentDescription = null,
                 )
@@ -306,7 +306,7 @@ fun DownloadedVideoCard(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_baseline_delete_24),
+                            painter = painterResource(R.drawable.ic_delete),
                             contentDescription = null,
                             modifier = Modifier.size(18.dp),
                         )
@@ -344,7 +344,7 @@ fun DownloadedVideoCard(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_baseline_play_arrow_24),
+                            painter = painterResource(R.drawable.ic_play_arrow),
                             contentDescription = null,
                             modifier = Modifier.size(18.dp),
                         )

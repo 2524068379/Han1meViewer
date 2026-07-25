@@ -35,7 +35,6 @@ import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
@@ -410,9 +409,9 @@ private fun LicenseEmptyTip(
         Icon(
             painter = painterResource(
                 if (searchMode) {
-                    R.drawable.ic_license_search_not_found
+                    R.drawable.ic_search_not_found
                 } else {
-                    R.drawable.ic_license_list_no_item
+                    R.drawable.ic_list_no_item
                 },
             ),
             contentDescription = null,

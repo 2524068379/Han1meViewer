@@ -55,6 +55,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyConten
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.ErrorContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.LoadingContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeTopAppBar
+import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimePageSurface
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberRandomLoadingHint
 
@@ -68,7 +69,8 @@ fun PreviewContent(
     modifier: Modifier = Modifier,
 ) {
     val loadingHint = rememberRandomLoadingHint()
-    Column(modifier = modifier.fillMaxSize()) {
+    HanimePageSurface(modifier = modifier) {
+        Column(modifier = Modifier.fillMaxSize()) {
         HanimeTopAppBar(
             title = {
                 AnimatedContent(
@@ -119,7 +121,7 @@ fun PreviewContent(
                         }
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_baseline_comment_24),
+                            painter = painterResource(R.drawable.ic_comment),
                             contentDescription = stringResource(R.string.comment),
                         )
                     }
@@ -238,6 +240,7 @@ fun PreviewContent(
                     }
                 }
             }
+        }
         }
     }
 }

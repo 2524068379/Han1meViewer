@@ -50,7 +50,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
-import java.io.OutputStream
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
@@ -595,7 +594,7 @@ class HanimeDownloadWorker(
     private fun showSuccessNotification() {
         notificationManager.notify(
             downloadId, NotificationCompat.Builder(context, DOWNLOAD_NOTIFICATION_CHANNEL)
-                .setSmallIcon(R.drawable.ic_baseline_check_circle_24)
+                .setSmallIcon(R.drawable.ic_check_circle)
                 .setContentTitle(context.getString(R.string.download_task_completed))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
@@ -608,7 +607,7 @@ class HanimeDownloadWorker(
     private fun showFileExistsFailureNotification(fileName: String) {
         notificationManager.notify(
             downloadId, NotificationCompat.Builder(context, DOWNLOAD_NOTIFICATION_CHANNEL)
-                .setSmallIcon(R.drawable.ic_baseline_cancel_24)
+                .setSmallIcon(R.drawable.ic_cancel_circle)
                 .setContentTitle(context.getString(R.string.this_data_exists))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setContentText(context.getString(R.string.download_failed_s_exists, fileName))
@@ -620,7 +619,7 @@ class HanimeDownloadWorker(
     private fun showFailureNotification(errMsg: String? = null) {
         notificationManager.notify(
             downloadId, NotificationCompat.Builder(context, DOWNLOAD_NOTIFICATION_CHANNEL)
-                .setSmallIcon(R.drawable.ic_baseline_cancel_24)
+                .setSmallIcon(R.drawable.ic_cancel_circle)
                 .setContentTitle(context.getString(R.string.download_task_failed))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
@@ -638,7 +637,7 @@ class HanimeDownloadWorker(
     private fun showRetryNotification(reason: String) {
         notificationManager.notify(
             downloadId, NotificationCompat.Builder(context, DOWNLOAD_NOTIFICATION_CHANNEL)
-                .setSmallIcon(R.drawable.ic_baseline_download_24)
+                .setSmallIcon(R.drawable.ic_download)
                 .setContentTitle(context.getString(R.string.download_task_retrying))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)

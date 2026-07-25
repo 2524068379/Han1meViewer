@@ -224,7 +224,7 @@ private fun ArtistListSection(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_arrow_forward_24),
+                        painter = painterResource(R.drawable.ic_arrow_forward),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.width(16.dp)

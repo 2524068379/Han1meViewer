@@ -108,7 +108,7 @@ internal fun CommentReplyBar(
                     modifier = Modifier.size(48.dp),
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_send_24),
+                        painter = painterResource(R.drawable.ic_send),
                         contentDescription = stringResource(R.string.submit),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(24.dp),
@@ -157,9 +157,9 @@ internal fun CommentReportDialog(
                             Icon(
                                 painter = painterResource(
                                     if (selectedReasonIndex == index) {
-                                        R.drawable.ic_baseline_check_circle_24
+                                        R.drawable.ic_check_circle
                                     } else {
-                                        R.drawable.baseline_remove_circle_24
+                                        R.drawable.ic_remove_circle
                                     }
                                 ),
                                 contentDescription = null,
