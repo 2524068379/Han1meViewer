@@ -6,7 +6,7 @@ import android.os.Looper
 import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue

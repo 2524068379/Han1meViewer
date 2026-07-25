@@ -31,15 +31,15 @@ fun ChoiceDialog(
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier.padding(
-                horizontal = HanimeDefaults.settingsItemVerticalPadding,
+                horizontal = HanimeDefaults.Spacing.itemVertical,
             ),
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(
-                    horizontal = HanimeDefaults.screenVerticalPadding,
-                    vertical = HanimeDefaults.settingsItemPadding,
+                    horizontal = HanimeDefaults.Spacing.contentVertical,
+                    vertical = HanimeDefaults.Spacing.small,
                 ),
             )
             options.forEach { (label, value) ->

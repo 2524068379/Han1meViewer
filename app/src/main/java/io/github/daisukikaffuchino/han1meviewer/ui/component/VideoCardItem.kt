@@ -18,13 +18,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,6 +35,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -59,6 +58,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
 import io.github.daisukikaffuchino.utils.rememberCopyTextToClipboard
 import io.github.daisukikaffuchino.han1meviewer.util.DisplayTextLocalizer
 import io.github.daisukikaffuchino.utils.SonnerToast
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 
 /**
@@ -74,6 +74,7 @@ fun VideoCardItem(
     modifier: Modifier = Modifier,
     videoItem: VideoItemType,
     isHorizontalCard: Boolean = true,
+    isHomePage: Boolean = false,
     isWatched: Boolean = false,
     isPlaying: Boolean = false,
     onClickVideosItem: (String) -> Unit,
@@ -83,6 +84,7 @@ fun VideoCardItem(
     val iconSize = dimensionResource(id = R.dimen.view_view_and_time_icon_size)
     val imageAspectRatio = if (isHorizontalCard) 16f / 9f else 3f / 4f
     val context = LocalContext.current
+    val view = LocalView.current
     val copyTextToClipboard = rememberCopyTextToClipboard()
     val interactionSource = remember { MutableInteractionSource() }
     val indication = LocalIndication.current
@@ -90,23 +92,16 @@ fun VideoCardItem(
     var showContextMenu by remember { mutableStateOf(false) }
     val currentArtist = videoItem.currentArtist?.takeIf { it.isNotBlank() }
     val cardShape = shapeByInteraction(
-        shapes = HanimeDefaults.largerShapes(),
+        shapes = HanimeDefaults.cardShapes(),
         pressed = pressed,
         animationSpec = HanimeDefaults.shapesDefaultAnimationSpec,
     )
-    val tonalElevation by animateDpAsState(
-        targetValue = if (pressed) 0.dp else 1.dp,
-        animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
-        label = "video-card-elevation",
-    )
-    Surface(
+    CardContainerSurface(
         modifier = modifier
             .fillMaxWidth()
             .animateContentSize(),
         shape = cardShape,
-        tonalElevation = tonalElevation,
-        color = HanimeDefaults.Colors.Container,
-        contentColor = MaterialTheme.colorScheme.onSurface,
+        color = if (isHomePage) HanimeDefaults.Colors.homeVideoCard else HanimeDefaults.Colors.card,
     ) {
         Box {
             Column(
@@ -117,8 +112,14 @@ fun VideoCardItem(
                         enabled = !isPlaying,
                         interactionSource = interactionSource,
                         indication = indication,
-                        onClick = { onClickVideosItem(videoItem.videoCode) },
-                        onLongClick = { showContextMenu = true },
+                        onClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            onClickVideosItem(videoItem.videoCode)
+                        },
+                        onLongClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            showContextMenu = true
+                        },
                     ),
             ) {
                 Box(
@@ -174,7 +175,7 @@ fun VideoCardItem(
                     ) {
                         videoItem.views?.let {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_baseline_play_circle_outline_24),
+                                painter = painterResource(id = R.drawable.ic_play_circle),
                                 contentDescription = null,
                                 tint = Color.White,
                                 modifier = Modifier.size(iconSize),
@@ -190,7 +191,7 @@ fun VideoCardItem(
                         Spacer(modifier = Modifier.weight(1f))
                         videoItem.duration?.let {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_baseline_access_time_24),
+                                painter = painterResource(id = R.drawable.ic_access_time),
                                 contentDescription = null,
                                 tint = Color.White,
                                 modifier = Modifier.size(iconSize),
@@ -221,7 +222,7 @@ fun VideoCardItem(
                                     .padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
                                 Icon(
-                                    painter = painterResource(id = R.drawable.ic_baseline_play_circle_outline_24),
+                                    painter = painterResource(id = R.drawable.ic_play_circle),
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.onPrimary,
                                     modifier = Modifier.size(18.dp)
@@ -271,7 +272,7 @@ fun VideoCardItem(
                 ) {
                     videoItem.reviews?.takeIf { it.isNotEmpty() }?.let { reviewsText ->
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_thumb_up_off_alt_24),
+                            painter = painterResource(id = R.drawable.ic_thumb_up_off_alt),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(iconSize),

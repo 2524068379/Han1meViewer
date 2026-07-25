@@ -21,7 +21,7 @@ import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.view.video.HJzvdStd
 import io.github.daisukikaffuchino.utils.formatBytesPerSecond
-import io.github.daisukikaffuchino.utils.formatFileSizeV2
+import io.github.daisukikaffuchino.utils.formatFileSize
 import io.github.daisukikaffuchino.utils.SonnerToast
 
 internal fun saveBoolean(key: String, value: Boolean) {
@@ -44,7 +44,7 @@ internal fun buildDomainOptions(context: Context): List<Pair<String, String>> = 
 )
 
 internal fun generateClearCacheSummary(context: Context, size: Long): CharSequence {
-    return context.getString(R.string.cache_usage_summary, size.formatFileSizeV2()).parseAsHtml()
+    return context.getString(R.string.cache_usage_summary, size.formatFileSize()).parseAsHtml()
 }
 
 internal fun toPrettySensitivityString(

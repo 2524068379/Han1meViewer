@@ -13,11 +13,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticButton as Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -77,7 +77,7 @@ fun TodayCheckInCard(
 
             // 左下角装饰图标
             Icon(
-                painter = painterResource(R.drawable.ic_baseline_thumb_up_off_alt_24),
+                painter = painterResource(R.drawable.ic_thumb_up_off_alt),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.12f),
                 modifier = Modifier
@@ -146,7 +146,7 @@ fun TodayCheckInCard(
                         )
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.check_24px),
+                            painter = painterResource(R.drawable.ic_check),
                             contentDescription = null,
                             modifier = Modifier.size(18.dp)
                         )
@@ -177,18 +177,20 @@ fun TodayCheckInCard(
                             onClick = onClear,
                             modifier = Modifier
                                 .size(40.dp),
-                            shape = RoundedCornerShape(
-                                topStart = 4.dp,
-                                bottomStart = 4.dp,
-                                topEnd = 50.dp,
-                                bottomEnd = 50.dp
+                            shapes = IconButtonDefaults.shapes(
+                                shape = RoundedCornerShape(
+                                    topStart = 4.dp,
+                                    bottomStart = 4.dp,
+                                    topEnd = 50.dp,
+                                    bottomEnd = 50.dp
+                                ),
                             ),
                             colors = IconButtonDefaults.filledTonalIconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
                             Icon(
-                                painter = painterResource(R.drawable.ic_baseline_delete_24),
+                                painter = painterResource(R.drawable.ic_delete),
                                 modifier = Modifier.size(width = 20.dp, height = 20.dp),
                                 contentDescription = stringResource(
                                     R.string.clear_checkin
@@ -293,9 +295,9 @@ private fun PreviewTodayCheckInCard() {
 private fun PreviewStatsCard() {
     StatsCard(
         items = listOf(
-            StatsItem(R.drawable.calendar_month_24px, "Monthly", "15 days"),
-            StatsItem(R.drawable.alarm_24px, "Total", "42 times"),
-            StatsItem(R.drawable.calendar_view_week_24px, "Streak", "7 days"),
+            StatsItem(R.drawable.ic_calendar_month, "Monthly", "15 days"),
+            StatsItem(R.drawable.ic_alarm, "Total", "42 times"),
+            StatsItem(R.drawable.ic_calendar_view_week, "Streak", "7 days"),
         ),
     )
 }

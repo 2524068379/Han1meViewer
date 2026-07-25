@@ -92,11 +92,11 @@ private fun HKeyframeSettingsContent(
                 title = stringResource(R.string.h_keyframes_enable),
                 summary = state.hKeyframesSummary,
                 checked = state.hKeyframesEnable,
-                iconRes = R.drawable.baseline_h_24,
+                iconRes = R.drawable.ic_h_text,
                 onCheckedChange = onHKeyframesEnableChange,
             )
         }
-        Spacer(Modifier.size(HanimeDefaults.settingsItemPadding))
+        Spacer(Modifier.size(HanimeDefaults.Spacing.small))
 
         HKeyframeAnimatedSection(
             visible = state.hKeyframesEnable,
@@ -104,7 +104,7 @@ private fun HKeyframeSettingsContent(
         ) {
             SettingNavigationItem(
                 title = stringResource(R.string.h_keyframe_manage),
-                iconRes = R.drawable.baseline_format_list_bulleted_24,
+                iconRes = R.drawable.ic_format_list_bulleted,
                 onClick = onOpenHKeyframeManage,
             )
         }
@@ -117,26 +117,26 @@ private fun HKeyframeSettingsContent(
                 title = stringResource(R.string.shared_h_keyframes_enable),
                 summary = stringResource(R.string.shared_h_keyframes_enable_tip),
                 checked = state.sharedHKeyframesEnable,
-                iconRes = R.drawable.baseline_share_24,
+                iconRes = R.drawable.ic_share,
                 onCheckedChange = onSharedHKeyframesEnableChange,
             )
             SettingsAnimatedVisibility(visible = state.sharedHKeyframesEnable) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(
-                        HanimeDefaults.settingsSegmentedItemPadding,
+                        HanimeDefaults.Spacing.extraSmall,
                     ),
                 ) {
                     SettingSwitchItem(
                         title = stringResource(R.string.shared_h_keyframes_use_first),
                         summary = stringResource(R.string.shared_h_keyframes_use_first_tip),
                         checked = state.sharedHKeyframesUseFirst,
-                        iconRes = R.drawable.baseline_share_first_24,
+                        iconRes = R.drawable.ic_share_first,
                         onCheckedChange = onSharedHKeyframesUseFirstChange,
                     )
                     SettingNavigationItem(
                         title = stringResource(R.string.shared_h_keyframe_manage),
                         summary = stringResource(R.string.shared_h_keyframe_manage_tip),
-                        iconRes = R.drawable.baseline_online_manage_24,
+                        iconRes = R.drawable.ic_online_manage,
                         onClick = onOpenSharedHKeyframeManage,
                     )
                 }
@@ -150,7 +150,7 @@ private fun HKeyframeSettingsContent(
             SettingSwitchItem(
                 title = stringResource(R.string.show_prompt_when_countdown),
                 checked = state.showCommentWhenCountdown,
-                iconRes = R.drawable.baseline_count_down_24,
+                iconRes = R.drawable.ic_count_down,
                 onCheckedChange = onShowCommentWhenCountdownChange,
             )
             SettingSliderItem(
@@ -158,7 +158,7 @@ private fun HKeyframeSettingsContent(
                 summary = state.whenCountdownRemindSummary,
                 value = state.whenCountdownRemind,
                 valueRange = 5..30,
-                iconRes = R.drawable.ic_baseline_alert_24,
+                iconRes = R.drawable.ic_alert,
                 onValueChange = onWhenCountdownRemindChange,
             )
         }
@@ -179,7 +179,7 @@ private fun HKeyframeAnimatedSection(
         ) {
             SettingsSectionTitle(titleRes = titleRes)
             SettingsSegmentedGroup(content = content)
-            Spacer(Modifier.size(HanimeDefaults.settingsItemPadding))
+            Spacer(Modifier.size(HanimeDefaults.Spacing.small))
         }
     }
 }

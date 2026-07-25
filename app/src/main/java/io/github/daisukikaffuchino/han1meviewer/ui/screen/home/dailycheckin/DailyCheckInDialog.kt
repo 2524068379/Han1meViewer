@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,18 +15,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticButton as Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -117,7 +116,7 @@ fun CheckInDialog(
                         )
                     }
                     IconButton(onClick = onDismiss) {
-                        Icon(painter = painterResource(R.drawable.close_24px), "close")
+                        Icon(painter = painterResource(R.drawable.ic_close), "close")
                     }
                 }
 
@@ -346,7 +345,7 @@ fun ExistingRecordItem(
                     modifier = Modifier.size(28.dp)
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_delete_24),
+                        painter = painterResource(R.drawable.ic_delete),
                         contentDescription = stringResource(R.string.delete),
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)

@@ -35,14 +35,13 @@ import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ripple
@@ -82,6 +81,7 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.animatedShape
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.fadeScale
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 private data class DisplayLicense(
     val name: String,
@@ -240,7 +240,7 @@ fun OpenSourceLicensesScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(HanimeDefaults.settingsItemPadding),
+                    verticalArrangement = Arrangement.spacedBy(HanimeDefaults.Spacing.small),
                 ) {
                     item { Spacer(Modifier.size(4.dp)) }
                     items(
@@ -333,7 +333,7 @@ private fun LicenseLibraryItem(
 ) {
     val view = LocalView.current
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = animatedShape(HanimeDefaults.largerShapes(), interactionSource)
+    val shape = animatedShape(HanimeDefaults.cardShapes(), interactionSource)
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -342,20 +342,20 @@ private fun LicenseLibraryItem(
                 interactionSource = interactionSource,
                 indication = ripple(color = MaterialTheme.colorScheme.primary),
                 onClick = {
-                    view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                    VibrationUtil.performHapticFeedback(view, HapticFeedbackConstants.CLOCK_TICK)
                     onClick()
                 },
             ),
         shape = shape,
-        color = HanimeDefaults.Colors.Container,
+        color = HanimeDefaults.Colors.card,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(
-                    horizontal = HanimeDefaults.settingsItemHorizontalPadding,
-                    vertical = HanimeDefaults.settingsItemVerticalPadding,
+                    horizontal = HanimeDefaults.Spacing.itemHorizontal,
+                    vertical = HanimeDefaults.Spacing.itemVertical,
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -402,7 +402,7 @@ private fun LicenseEmptyTip(
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .padding(HanimeDefaults.screenHorizontalPadding)
+            .padding(HanimeDefaults.Spacing.contentHorizontal)
             .size(size)
             .clip(MaterialShapes.Cookie7Sided.toShape())
             .background(containerColor),
@@ -410,9 +410,9 @@ private fun LicenseEmptyTip(
         Icon(
             painter = painterResource(
                 if (searchMode) {
-                    R.drawable.ic_license_search_not_found
+                    R.drawable.ic_search_not_found
                 } else {
-                    R.drawable.ic_license_list_no_item
+                    R.drawable.ic_list_no_item
                 },
             ),
             contentDescription = null,
@@ -443,7 +443,7 @@ private fun LicenseContentDialog(
         confirmButton = {
             FilledTonalButton(
                 onClick = {
-                    view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                    VibrationUtil.performHapticFeedback(view, HapticFeedbackConstants.CLOCK_TICK)
                     onDismiss()
                 },
                 shapes = ButtonDefaults.shapes(),

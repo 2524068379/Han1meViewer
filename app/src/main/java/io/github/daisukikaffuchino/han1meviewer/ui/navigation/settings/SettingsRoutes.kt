@@ -19,10 +19,10 @@ object NetworkDownloadSettingsRoute
 object AppearanceSettingsRoute
 
 @Serializable
-object PrivacySettingsRoute
+object InterfaceInteractionSettingsRoute
 
 @Serializable
-object DataSettingsRoute
+object DataPrivacySettingsRoute
 
 @Serializable
 object AboutSettingsRoute
@@ -82,17 +82,17 @@ enum class SettingsDestinationSpec(
         screenClassName = "HomeSettingsScreen.Appearance",
         routeClass = AppearanceSettingsRoute::class,
     ),
-    Privacy(
-        routeKey = "privacy",
-        titleRes = R.string.privacy,
-        screenClassName = "HomeSettingsScreen.Privacy",
-        routeClass = PrivacySettingsRoute::class,
+    InterfaceInteraction(
+        routeKey = "interface_interaction",
+        titleRes = R.string.settings_interface_interaction,
+        screenClassName = "HomeSettingsScreen.InterfaceInteraction",
+        routeClass = InterfaceInteractionSettingsRoute::class,
     ),
-    Data(
-        routeKey = "data",
-        titleRes = R.string.settings_data,
-        screenClassName = "HomeSettingsScreen.Data",
-        routeClass = DataSettingsRoute::class,
+    DataPrivacy(
+        routeKey = "data_privacy",
+        titleRes = R.string.settings_data_privacy,
+        screenClassName = "HomeSettingsScreen.DataPrivacy",
+        routeClass = DataPrivacySettingsRoute::class,
     ),
     About(
         routeKey = "about",
@@ -155,8 +155,8 @@ enum class SettingsDestinationSpec(
             VideoPlayback -> VideoPlaybackSettingsRoute
             NetworkDownload -> NetworkDownloadSettingsRoute
             Appearance -> AppearanceSettingsRoute
-            Privacy -> PrivacySettingsRoute
-            Data -> DataSettingsRoute
+            InterfaceInteraction -> InterfaceInteractionSettingsRoute
+            DataPrivacy -> DataPrivacySettingsRoute
             About -> AboutSettingsRoute
             OpenSourceLicenses -> OpenSourceLicensesRoute
             Player -> PlayerSettingsRoute

@@ -102,13 +102,13 @@ fun PlayerSettingsScreen(
             SettingNavigationItem(
                 title = stringResource(R.string.switch_player_kernel),
                 valueText = state.kernelDisplay,
-                iconRes = R.drawable.ic_settings_slow_motion,
+                iconRes = R.drawable.ic_player_setting,
                 onClick = { activeDialog = PlayerChoiceDialog.Kernel },
             )
             SettingNavigationItem(
                 title = stringResource(R.string.mpv_advanced_settings),
                 summary = state.mpvSettingsSummary,
-                iconRes = R.drawable.baseline_player_24,
+                iconRes = R.drawable.ic_player_setting,
                 onClick = onOpenMpvSettings,
                 enabled = state.mpvSettingsEnabled,
                 valueText = null,
@@ -116,19 +116,23 @@ fun PlayerSettingsScreen(
             SettingSwitchItem(
                 title = stringResource(R.string.show_bottom_progress),
                 checked = state.showBottomProgress,
-                iconRes = R.drawable.baseline_seek_24,
+                iconRes = R.drawable.ic_seek_bar,
                 onCheckedChange = onShowBottomProgressChange,
             )
             SettingNavigationItem(
                 title = stringResource(R.string.default_playback_speed),
                 valueText = state.playerSpeedLabel,
-                iconRes = R.drawable.baseline_speed2_24,
+                iconRes = R.drawable.ic_speed,
                 onClick = { activeDialog = PlayerChoiceDialog.Speed },
             )
             SettingNavigationItem(
                 title = stringResource(R.string.long_press_speed_multiplier),
+                summary = stringResource(
+                    R.string.long_press_speed_summary,
+                    state.longPressSpeedTimesLabel,
+                ),
                 valueText = state.longPressSpeedTimesLabel,
-                iconRes = R.drawable.baseline_touch_24,
+                iconRes = R.drawable.ic_touch_long,
                 onClick = { activeDialog = PlayerChoiceDialog.LongPressSpeed },
             )
             SettingSliderItem(
@@ -136,7 +140,7 @@ fun PlayerSettingsScreen(
                 summary = state.slideSensitivitySummary,
                 value = state.slideSensitivity,
                 valueRange = 1..9,
-                iconRes = R.drawable.baseline_speed_24,
+                iconRes = R.drawable.ic_speed_flash,
                 onValueChange = onSlideSensitivityChange,
             )
         }

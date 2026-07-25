@@ -5,8 +5,11 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,9 +34,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilledIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
@@ -59,6 +62,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -74,6 +78,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.OnlineWatchHistorySo
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
+import io.github.daisukikaffuchino.han1meviewer.ui.component.CardContainerSurface
 import io.github.daisukikaffuchino.han1meviewer.ui.component.LoadMoreFooter
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.VideoCardItem
@@ -86,6 +91,9 @@ import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeHomePageVideos
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberVideoGridColumns
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.SpacingNormal
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
+import io.github.daisukikaffuchino.utils.VibrationUtil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -148,6 +156,7 @@ fun WatchHistoryTabScreen(
     HanimeScaffold(
         title = stringResource(R.string.watch_history),
         onBack = onBack,
+        contentHorizontalPadding = 0.dp,
         floatingActionButton = {
             WatchHistoryClearFab(
                 visible = pagerState.currentPage == 0 &&
@@ -261,6 +270,7 @@ private fun WatchHistoryClearFab(
     visible: Boolean,
     onClick: () -> Unit,
 ) {
+    val view = LocalView.current
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn() + slideInVertically { it / 2 },
@@ -273,11 +283,14 @@ private fun WatchHistoryClearFab(
                 text = { Text(stringResource(R.string.watch_history_clear_all)) },
                 icon = {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_delete_24),
+                        painter = painterResource(R.drawable.ic_delete),
                         contentDescription = null,
                     )
                 },
-                onClick = onClick,
+                onClick = {
+                    VibrationUtil.performHapticFeedback(view)
+                    onClick()
+                },
             )
         }
     }
@@ -518,8 +531,12 @@ private fun OnlineHistorySortChip(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
+    val view = LocalView.current
     AssistChip(
-        onClick = onClick,
+        onClick = {
+            VibrationUtil.performHapticFeedback(view)
+            onClick()
+        },
         label = { Text(text) },
         colors = AssistChipDefaults.assistChipColors(
             containerColor = if (selected) {
@@ -536,12 +553,14 @@ private fun OnlineHistorySortChip(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun WatchHistoryCard(
     history: WatchHistoryEntity,
     onClick: () -> Unit,
     onDeleteClick: () -> Unit,
 ) {
+    val view = LocalView.current
     val fixTimestamp = { ts: Long -> if (ts < 9999999999L) ts * 1000 else ts }
     val dateFormatter = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
     val watchDate =
@@ -549,17 +568,30 @@ private fun WatchHistoryCard(
     val releaseDate =
         remember(history.releaseDate) { dateFormatter.format(Date(fixTimestamp(history.releaseDate))) }
     val progressMinutes = remember(history.progress) { history.progress / 60_000 }
-
-    ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
+    val interactionSource = remember { MutableInteractionSource() }
+    val indication = LocalIndication.current
+    val pressed by interactionSource.collectIsPressedAsState()
+    val cardShape = shapeByInteraction(
+        shapes = HanimeDefaults.cardShapes(),
+        pressed = pressed,
+        animationSpec = HanimeDefaults.shapesDefaultAnimationSpec,
+    )
+    CardContainerSurface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = cardShape,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                .combinedClickable(
+                    interactionSource = interactionSource,
+                    indication = indication,
+                    onClick = {
+                        VibrationUtil.performHapticFeedback(view)
+                        onClick()
+                    },
+                    onLongClick = {},
+                )
                 .padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -606,11 +638,11 @@ private fun WatchHistoryCard(
                     overflow = TextOverflow.Ellipsis,
                 )
                 WatchHistoryMeta(
-                    iconRes = R.drawable.ic_baseline_access_time_24,
+                    iconRes = R.drawable.ic_access_time,
                     label = stringResource(R.string.watch_history_watched_at, watchDate),
                 )
                 WatchHistoryMeta(
-                    iconRes = R.drawable.ic_baseline_play_circle_outline_24,
+                    iconRes = R.drawable.ic_play_circle,
                     label = stringResource(R.string.watch_history_released_at, releaseDate),
                 )
                 Row(
@@ -620,7 +652,10 @@ private fun WatchHistoryCard(
                     horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
                 ) {
                     AssistChip(
-                        onClick = onClick,
+                        onClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            onClick()
+                        },
                         label = {
                             Text(
                                 stringResource(R.string.watch_history_resume_watch),
@@ -629,7 +664,7 @@ private fun WatchHistoryCard(
                         },
                         leadingIcon = {
                             Icon(
-                                painter = painterResource(R.drawable.ic_baseline_history_24),
+                                painter = painterResource(R.drawable.ic_history),
                                 contentDescription = null,
                                 modifier = Modifier.size(14.dp),
                             )

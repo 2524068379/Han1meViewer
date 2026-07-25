@@ -127,7 +127,6 @@ fun SubscriptionScreen(
                     isRefreshing = isRefreshing,
                     onRefresh = { handleEvent(SubscriptionEvent.OnRefresh) }
                 )
-                .background(MaterialTheme.colorScheme.background)
         ) {
             when (state) {
                 is WebsiteState.Loading -> {

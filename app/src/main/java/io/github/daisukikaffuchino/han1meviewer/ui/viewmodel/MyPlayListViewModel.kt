@@ -31,7 +31,7 @@ data class PlaylistSheetScrollState(
     val firstVisibleItemScrollOffset: Int = 0,
 )
 
-class MyPlayListViewModelV2 : ViewModel() {
+class MyPlayListViewModel : ViewModel() {
 
     private val _myPlaylistsFlow = MutableStateFlow<WebsiteState<Playlists>>(WebsiteState.Loading)
     val myPlaylistsFlow: StateFlow<WebsiteState<Playlists>> = _myPlaylistsFlow.asStateFlow()

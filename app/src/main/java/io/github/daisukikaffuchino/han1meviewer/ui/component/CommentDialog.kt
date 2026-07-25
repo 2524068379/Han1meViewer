@@ -14,13 +14,13 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -108,7 +108,7 @@ internal fun CommentReplyBar(
                     modifier = Modifier.size(48.dp),
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_send_24),
+                        painter = painterResource(R.drawable.ic_send),
                         contentDescription = stringResource(R.string.submit),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(24.dp),
@@ -157,9 +157,9 @@ internal fun CommentReportDialog(
                             Icon(
                                 painter = painterResource(
                                     if (selectedReasonIndex == index) {
-                                        R.drawable.ic_baseline_check_circle_24
+                                        R.drawable.ic_check_circle
                                     } else {
-                                        R.drawable.baseline_remove_circle_24
+                                        R.drawable.ic_remove_circle
                                     }
                                 ),
                                 contentDescription = null,

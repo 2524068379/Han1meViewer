@@ -2,7 +2,6 @@
 
 package io.github.daisukikaffuchino.han1meviewer.ui.component
 
-import android.view.HapticFeedbackConstants
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -21,7 +20,6 @@ import androidx.compose.material3.ButtonShapes
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -30,8 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -52,44 +48,38 @@ private fun SettingSurface(
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
-    val view = LocalView.current
     val interactionSource = remember { MutableInteractionSource() }
     val containerColor = animateColorAsState(
         targetValue = if (selected) {
             MaterialTheme.colorScheme.secondaryContainer
         } else {
-            HanimeDefaults.Colors.Container
+            HanimeDefaults.Colors.card
         },
         animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
         label = "setting-container-color",
     ).value
     val shape = animatedShape(shapes, interactionSource)
 
-    if (onClick == null) {
-        Surface(
-            modifier = modifier.fillMaxWidth(),
-            shape = shape,
-            color = containerColor,
-            content = content,
-        )
+    val surfaceModifier = if (onClick == null) {
+        modifier.fillMaxWidth()
     } else {
-        Surface(
-            modifier = modifier
-                .fillMaxWidth()
-                .clip(shape)
-                .immediateClickable(
-                    enabled = enabled,
-                    interactionSource = interactionSource,
-                    onClick = {
-                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                        onClick()
-                    },
-                ),
-            shape = shape,
-            color = containerColor,
-            content = content,
-        )
+        modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .immediateClickable(
+                enabled = enabled,
+                interactionSource = interactionSource,
+                onClick = {
+                    onClick()
+                },
+            )
     }
+    CardContainerSurface(
+        modifier = surfaceModifier,
+        shape = shape,
+        color = containerColor,
+        content = content,
+    )
 }
 
 @Composable
@@ -107,8 +97,8 @@ private fun SettingRow(
             .fillMaxWidth()
             .animateContentSize()
             .padding(
-                horizontal = HanimeDefaults.settingsItemHorizontalPadding,
-                vertical = HanimeDefaults.settingsItemVerticalPadding,
+                horizontal = HanimeDefaults.Spacing.itemHorizontal,
+                vertical = HanimeDefaults.Spacing.itemVertical,
             )
     } else {
         Modifier.fillMaxWidth().animateContentSize()
@@ -123,7 +113,7 @@ private fun SettingRow(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = contentAlpha),
                 modifier = Modifier
-                    .padding(end = HanimeDefaults.settingsItemHorizontalPadding)
+                    .padding(end = HanimeDefaults.Spacing.itemHorizontal)
                     .size(24.dp),
             )
         }
@@ -178,7 +168,7 @@ fun SettingSwitchItem(
                         modifier = Modifier.size(SwitchDefaults.IconSize),
                     )
                 },
-                modifier = Modifier.padding(start = HanimeDefaults.settingsItemHorizontalPadding / 2),
+                modifier = Modifier.padding(start = HanimeDefaults.Spacing.itemHorizontal / 2),
             )
         }
     }
@@ -256,8 +246,8 @@ fun SettingSliderItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    horizontal = HanimeDefaults.settingsItemHorizontalPadding,
-                    vertical = HanimeDefaults.settingsItemVerticalPadding,
+                    horizontal = HanimeDefaults.Spacing.itemHorizontal,
+                    vertical = HanimeDefaults.Spacing.itemVertical,
                 ),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {

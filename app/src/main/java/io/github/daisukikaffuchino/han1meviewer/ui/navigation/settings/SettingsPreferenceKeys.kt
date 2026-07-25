@@ -17,6 +17,7 @@ object SettingsPreferenceKeys {
     const val COLLAPSE_DOWNLOADED_GROUP = "collapse_downloaded_group"
     const val DISABLE_PREDICTIVE_BACK = "disable_predictive_back"
     const val TABLET_MODE = "tablet_mode"
+    const val HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled"
     const val SEARCH_GRID_COLUMNS_COMPACT = "search_grid_columns_compact"
     const val SEARCH_GRID_COLUMNS_MEDIUM = "search_grid_columns_medium"
     const val SEARCH_GRID_COLUMNS_EXPANDED = "search_grid_columns_expanded"

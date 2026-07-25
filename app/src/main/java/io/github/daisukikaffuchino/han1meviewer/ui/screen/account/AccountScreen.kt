@@ -26,13 +26,13 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticButton as Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -40,12 +40,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -56,8 +55,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -78,6 +77,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberRandomLoadingHint
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.UserAccountViewModel
 import io.github.daisukikaffuchino.utils.SonnerToast
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -195,6 +195,7 @@ private fun AccountContent(
     onLogout: () -> Unit,
     onOpenPasswordReset: () -> Unit,
 ) {
+    val view = LocalView.current
     val scrollState = rememberScrollState()
 
     var name by rememberSaveable(account.username) { mutableStateOf(account.username) }
@@ -218,7 +219,7 @@ private fun AccountContent(
             .fillMaxSize()
             .verticalScroll(scrollState)
             .padding(contentPadding)
-            .padding(horizontal = 16.dp, vertical = 20.dp),
+            .padding(vertical = 20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         Card(
@@ -248,7 +249,10 @@ private fun AccountContent(
                     )
 
                     SmallFloatingActionButton(
-                        onClick = onPickAvatar,
+                        onClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            onPickAvatar()
+                        },
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .offset(x = 4.dp, y = 4.dp),
@@ -260,7 +264,7 @@ private fun AccountContent(
                             LoadingIndicator(modifier = Modifier.size(16.dp))
                         } else {
                             Icon(
-                                painter = painterResource(R.drawable.ic_baseline_edit_24),
+                                painter = painterResource(R.drawable.ic_edit),
                                 contentDescription = stringResource(R.string.change_avatar),
                                 modifier = Modifier.size(18.dp)
                             )
@@ -473,7 +477,7 @@ private fun AccountContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         OutlinedButton(
             onClick = onLogout,

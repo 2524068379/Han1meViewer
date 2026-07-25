@@ -48,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.painterResource
@@ -68,8 +69,10 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyConten
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.ErrorContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeCommentList
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.util.parseTimeStrToMinutes
 import io.github.daisukikaffuchino.han1meviewer.util.safeSortedBy
+import io.github.daisukikaffuchino.utils.VibrationUtil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -95,6 +98,7 @@ fun CommentScreen(
     onViewMoreReplies: (VideoComments.VideoComment) -> Unit,
     onSortChange: (CommentSortType) -> Unit,
     onComposeComment: (String) -> Unit,
+    listContentPadding: PaddingValues = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
     initialFirstVisibleItemIndex: Int = 0,
     initialFirstVisibleItemScrollOffset: Int = 0,
     onCommentScrollChange: (Int, Int) -> Unit = { _, _ -> },
@@ -102,6 +106,7 @@ fun CommentScreen(
     val comments by commentsFlow.collectAsStateWithLifecycle()
     val state by commentStateFlow.collectAsStateWithLifecycle()
     val sortType by currentSortType.collectAsStateWithLifecycle()
+    val view = LocalView.current
     val containerSize = LocalWindowInfo.current.containerSize
     val maxScreenWidth = containerSize.width.dp
 
@@ -205,6 +210,7 @@ fun CommentScreen(
 
     Scaffold(
         modifier = modifier.widthIn(max = maxScreenWidth),
+        containerColor = HanimeDefaults.Colors.pageSurface,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             if (isAlreadyLogin) {
@@ -220,11 +226,14 @@ fun CommentScreen(
                             text = { Text(stringResource(R.string.comment)) },
                             icon = {
                                 Icon(
-                                    painter = painterResource(R.drawable.ic_baseline_reply_24),
+                                    painter = painterResource(R.drawable.ic_reply),
                                     contentDescription = null,
                                 )
                             },
-                            onClick = { showCommentBar = true },
+                            onClick = {
+                                VibrationUtil.performHapticFeedback(view)
+                                showCommentBar = true
+                            },
                         )
                     }
                 }
@@ -283,7 +292,7 @@ fun CommentScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .nestedScroll(nestedScrollInterop),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+                            contentPadding = listContentPadding,
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             if (sortedComments.size >= 3) {

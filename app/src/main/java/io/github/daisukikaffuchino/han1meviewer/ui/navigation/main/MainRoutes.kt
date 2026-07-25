@@ -5,7 +5,7 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.AboutSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.AppearanceSettingsRoute
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DataSettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DataPrivacySettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframeSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframesRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HomeSettingsRoute
@@ -14,7 +14,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.NetworkSe
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.NetworkDownloadSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.OpenSourceLicensesRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.PlayerSettingsRoute
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.PrivacySettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.InterfaceInteractionSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SharedHKeyframesRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.VideoPlaybackSettingsRoute
 import kotlinx.serialization.Serializable
@@ -156,14 +156,14 @@ enum class MainDestinationSpec(
         routeClass = AppearanceSettingsRoute::class,
         drawerEnabled = false,
     ),
-    SettingsPrivacy(
+    SettingsInterfaceInteraction(
         drawerDestination = MainDrawerDestination.Settings,
-        routeClass = PrivacySettingsRoute::class,
+        routeClass = InterfaceInteractionSettingsRoute::class,
         drawerEnabled = false,
     ),
-    SettingsData(
+    SettingsDataPrivacy(
         drawerDestination = MainDrawerDestination.Settings,
-        routeClass = DataSettingsRoute::class,
+        routeClass = DataPrivacySettingsRoute::class,
         drawerEnabled = false,
     ),
     SettingsAbout(

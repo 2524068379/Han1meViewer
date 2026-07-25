@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.material3.TopAppBarDefaults.pinnedScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -178,7 +178,7 @@ fun DailyCheckInScreen(
                 onClick = { showReport = true }
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.event_note_24px),
+                    painter = painterResource(R.drawable.ic_event_note),
                     contentDescription = null,
                     modifier = Modifier.size(20.dp)
                 )

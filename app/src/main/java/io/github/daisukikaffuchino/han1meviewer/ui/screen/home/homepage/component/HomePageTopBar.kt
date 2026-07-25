@@ -12,16 +12,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,10 +29,10 @@ import androidx.compose.ui.unit.dp
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeTopAppBar
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 /**
  * 渲染首页顶部栏，包含抽屉入口、搜索入口和新番列表入口。
- *
  * @param onOpenDrawer 点击抽屉按钮时调用。
  * @param onSearchClick 点击搜索框时调用。
  * @param onNavigateToPreview 点击新番按钮时调用。
@@ -45,6 +45,7 @@ fun HomePageTopBar(
     onNavigateToPreview: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val view = LocalView.current
     HanimeTopAppBar(
         modifier = modifier,
         title = {
@@ -54,7 +55,10 @@ fun HomePageTopBar(
                     .height(48.dp)
                     .clip(RoundedCornerShape(28.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .clickable(onClick = onSearchClick)
+                    .clickable {
+                        VibrationUtil.performHapticFeedback(view)
+                        onSearchClick()
+                    }
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart,
             ) {
@@ -77,7 +81,7 @@ fun HomePageTopBar(
         navigationIcon = {
             IconButton(onClick = onOpenDrawer) {
                 Icon(
-                    painter = painterResource(R.drawable.menu_24px),
+                    painter = painterResource(R.drawable.ic_menu),
                     contentDescription = stringResource(R.string.open_menu),
                 )
             }
@@ -85,7 +89,7 @@ fun HomePageTopBar(
         actions = {
             IconButton(onClick = onNavigateToPreview) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_baseline_newspaper_24),
+                    painter = painterResource(R.drawable.ic_newspaper),
                     contentDescription = stringResource(R.string.hanime_list),
                 )
             }

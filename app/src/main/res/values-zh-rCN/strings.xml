@@ -91,6 +91,8 @@
     <string name="playlist_title">标题</string>
     <string name="playlist_description">介绍</string>
     <string name="add_to_playlist">加入清单</string>
+    <string name="no_custom_playlist_hint">尚未创建自定义清单。你可以前往侧边栏的“播放清单”添加自定义清单。</string>
+    <string name="select_at_least_one_playlist">请至少选择一个清单</string>
     <string name="player_settings">播放器设置</string>
     <string name="tablet_mode">平板模式</string>
     <string name="tablet_mode_summary">开启后影片页面将以平板布局显示，提供更大观看区域</string>
@@ -317,7 +319,10 @@
     <string name="custom">自定义</string>
     <string name="show_bottom_progress">显示底部进度条</string>
     <string name="default_playback_speed">默认播放速度</string>
-    <string name="long_press_speed_multiplier">长按快进速度是当前速度的</string>
+    <string name="long_press_speed_multiplier">长按快进速度</string>
+    <string name="long_press_speed_summary">当前速度的 %1$s</string>
+    <string name="haptic_feedback">触感反馈</string>
+    <string name="haptic_feedback_summary">为某些操作提供震动反馈</string>
     <string name="slide_sensitivity">滑动调整进度的灵敏度</string>
     <string name="apply_deep_links">应用深层链接</string>
     <string name="apply_deep_links_summary">应用后，打开相关网页后能快速跳转至本 App</string>
@@ -627,11 +632,15 @@
     <string name="settings_network_download">网络和下载</string>
     <string name="settings_network_download_summary">连接、域名、下载存储与限制</string>
     <string name="settings_appearance">主题与外观</string>
-    <string name="settings_appearance_summary">颜色、深色模式、布局与语言</string>
+    <string name="settings_appearance_summary">颜色、深色模式与语言</string>
+    <string name="settings_interface_interaction">界面交互</string>
+    <string name="settings_interface_interaction_summary">触感反馈、布局与内容显示</string>
     <string name="settings_layout_content">布局与内容</string>
     <string name="settings_privacy_summary">应用锁、桌面伪装与内容显示</string>
     <string name="settings_data">数据</string>
     <string name="settings_data_summary">备份、恢复与缓存数据</string>
+    <string name="settings_data_privacy">数据和隐私</string>
+    <string name="settings_data_privacy_summary">隐私保护、备份、恢复与缓存数据</string>
     <string name="settings_about_summary">版本、开源许可与项目链接</string>
     <string name="accent_color">强调色</string>
     <string name="display">显示</string>

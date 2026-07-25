@@ -17,10 +17,10 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,6 +42,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.dataOrNull
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeTopAppBar
+import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimePageSurface
 import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageEmpty
 import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageError
 import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageLoading
@@ -69,11 +70,8 @@ fun GetchuPreviewScreen(
     }
     LaunchedEffect(dateCode) { viewModel.getPreview(dateCode) }
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
+    HanimePageSurface {
+        Column(Modifier.fillMaxSize()) {
         HanimeTopAppBar(
             title = {
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -140,6 +138,7 @@ fun GetchuPreviewScreen(
                     imageLoader = imageLoader
                 )
             }
+        }
         }
     }
 }

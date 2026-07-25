@@ -1,14 +1,15 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.component.appbar
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -16,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.verticalBounce
@@ -28,6 +30,7 @@ fun HanimeScaffold(
     title: String,
     onBack: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    contentHorizontalPadding: Dp = HanimeDefaults.Spacing.contentHorizontal,
     subtitle: (@Composable () -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null,
@@ -46,6 +49,7 @@ fun HanimeScaffold(
             )
         },
         modifier = modifier,
+        contentHorizontalPadding = contentHorizontalPadding,
         floatingActionButton = floatingActionButton,
         snackbarHost = snackbarHost,
         content = content,
@@ -58,6 +62,7 @@ fun HanimeScaffold(
     title: @Composable () -> Unit,
     onBack: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    contentHorizontalPadding: Dp = HanimeDefaults.Spacing.contentHorizontal,
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null,
     floatingActionButton: @Composable () -> Unit = {},
@@ -74,6 +79,7 @@ fun HanimeScaffold(
             )
         },
         modifier = modifier,
+        contentHorizontalPadding = contentHorizontalPadding,
         floatingActionButton = floatingActionButton,
         snackbarHost = snackbarHost,
         content = content,
@@ -84,6 +90,7 @@ fun HanimeScaffold(
 fun HanimeScaffold(
     topBar: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    contentHorizontalPadding: Dp = HanimeDefaults.Spacing.contentHorizontal,
     floatingActionButton: @Composable () -> Unit = {},
     snackbarHost: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
@@ -93,16 +100,21 @@ fun HanimeScaffold(
         topBar = topBar,
         floatingActionButton = floatingActionButton,
         snackbarHost = snackbarHost,
-        containerColor = HanimeDefaults.Colors.Background,
+        containerColor = HanimeDefaults.Colors.pageSurface,
     ) { innerPadding ->
-        Surface(
+        Box(
             modifier = Modifier
                 .verticalBounce()
                 .fillMaxSize(),
-            color = HanimeDefaults.Colors.Background,
-            shape = HanimeDefaults.screenContainerShape,
         ) {
-            content(innerPadding)
+            HanimePageSurface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = contentHorizontalPadding),
+            ) {
+                content(PaddingValues())
+            }
         }
     }
 }
@@ -124,13 +136,13 @@ private fun HanimeScaffoldPreview() {
             actions = {
                 FilledIconButton(onClick = { }, enabled = true) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_play_arrow_24),
+                        painter = painterResource(R.drawable.ic_play_arrow),
                         contentDescription = stringResource(R.string.start_all),
                     )
                 }
                 FilledIconButton(onClick = { }, enabled = false) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_pause_24),
+                        painter = painterResource(R.drawable.ic_pause),
                         contentDescription = stringResource(R.string.pause_all),
                     )
                 }

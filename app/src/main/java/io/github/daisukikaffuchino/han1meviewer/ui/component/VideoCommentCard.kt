@@ -1,9 +1,10 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.component
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,17 +14,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,7 +38,7 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoComments
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
-import io.github.daisukikaffuchino.han1meviewer.ui.theme.animatedShape
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
 import io.github.daisukikaffuchino.han1meviewer.util.DisplayTextLocalizer
 
 /**
@@ -68,14 +66,28 @@ fun VideoCommentCard(
     onReport: () -> Unit,
     onViewMoreReplies: (() -> Unit)? = null,
 ) {
-    Surface(
+    val interactionSource = remember { MutableInteractionSource() }
+    val indication = LocalIndication.current
+    val pressed by interactionSource.collectIsPressedAsState()
+    val cardShape = shapeByInteraction(
+        shapes = HanimeDefaults.cardShapes(),
+        pressed = pressed,
+        animationSpec = HanimeDefaults.shapesDefaultAnimationSpec,
+    )
+
+    CardContainerSurface(
         modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.largeIncreased,
-        onClick = {},
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = cardShape,
     ) {
         Column(
-            modifier = Modifier.padding(12.dp)
+            modifier = Modifier
+                .combinedClickable(
+                    interactionSource = interactionSource,
+                    indication = indication,
+                    onClick = {},
+                    onLongClick = {},
+                )
+                .padding(12.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -111,7 +123,7 @@ fun VideoCommentCard(
 
                 IconButton(onClick = onReport, modifier = Modifier.size(36.dp)) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_report_24),
+                        painter = painterResource(R.drawable.ic_report),
                         contentDescription = stringResource(R.string.report_reason_hint),
                         tint = MaterialTheme.colorScheme.primary
                     )
@@ -128,13 +140,16 @@ fun VideoCommentCard(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                TextButton(onClick = onThumbUp, colors = ButtonDefaults.textButtonColors()) {
+                TextButton(
+                    onClick = onThumbUp,
+                    colors = ButtonDefaults.textButtonColors(),
+                ) {
                     Icon(
                         painter = painterResource(
                             if (comment.post.likeCommentStatus) {
-                                R.drawable.ic_baseline_thumb_up_alt_24
+                                R.drawable.ic_thumb_up_alt
                             } else {
-                                R.drawable.ic_baseline_thumb_up_off_alt_24
+                                R.drawable.ic_thumb_up_off_alt
                             }
                         ),
                         contentDescription = null,
@@ -142,22 +157,27 @@ fun VideoCommentCard(
                     Text(comment.realLikesCount?.toString().orEmpty())
                 }
 
-                TextButton(onClick = onThumbDown, colors = ButtonDefaults.textButtonColors()) {
+                TextButton(
+                    onClick = onThumbDown,
+                    colors = ButtonDefaults.textButtonColors(),
+                ) {
                     Icon(
                         painter = painterResource(
                             if (comment.post.unlikeCommentStatus) {
-                                R.drawable.ic_baseline_thumb_down_alt_24
+                                R.drawable.ic_thumb_down_alt
                             } else {
-                                R.drawable.ic_baseline_thumb_down_off_alt_24
+                                R.drawable.ic_thumb_down_off_alt
                             }
                         ),
                         contentDescription = null,
                     )
                 }
 
-                TextButton(onClick = onReply) {
+                TextButton(
+                    onClick = onReply,
+                ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_reply_24),
+                        painter = painterResource(R.drawable.ic_reply),
                         contentDescription = null,
                     )
                     Text(stringResource(R.string.reply))
@@ -165,7 +185,9 @@ fun VideoCommentCard(
             }
 
             if (comment.hasMoreReplies && onViewMoreReplies != null) {
-                TextButton(onClick = onViewMoreReplies) {
+                TextButton(
+                    onClick = onViewMoreReplies,
+                ) {
                     Text(stringResource(R.string.view_more_replies, comment.replyCount ?: 0))
                 }
             }

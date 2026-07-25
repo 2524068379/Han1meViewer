@@ -1,6 +1,5 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.myplaylist
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,7 +9,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults.pinnedScrollBehavior
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -28,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -37,13 +36,14 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PullRefreshOverlay
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
-import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MyPlayListViewModelV2
+import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MyPlayListViewModel
 import io.github.daisukikaffuchino.utils.SonnerToast
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 /**
  * 播放列表页面 Screen 层。
  *
- * 持有 [MyPlayListViewModelV2]，管理缓存、下拉刷新、底部弹窗等状态编排。
+ * 持有 [MyPlayListViewModel]，管理缓存、下拉刷新、底部弹窗等状态编排。
  * 渲染委托给 [PlaylistContent] 和 [PlaylistBottomSheet]。
  *
  * @param viewModel 播放列表 ViewModel
@@ -54,7 +54,7 @@ import io.github.daisukikaffuchino.utils.SonnerToast
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PlaylistScreen(
-    viewModel: MyPlayListViewModelV2,
+    viewModel: MyPlayListViewModel,
     navigateBack: () -> Unit,
     onClickItem: (String) -> Unit,
     onLongClickItem: (String, String) -> Unit,
@@ -65,6 +65,7 @@ fun PlaylistScreen(
     var isRefreshing by remember { mutableStateOf(false) }
     val refreshState = rememberPullToRefreshState()
     val context = LocalContext.current
+    val view = LocalView.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var temporarilyHideSheetForNavigation by rememberSaveable { mutableStateOf(false) }
     var showCreatePlaylistDialog by rememberSaveable { mutableStateOf(false) }
@@ -128,7 +129,12 @@ fun PlaylistScreen(
         onBack = navigateBack,
         scrollBehavior = scrollBehavior,
         floatingActionButton = {
-            FloatingActionButton(onClick = { showCreatePlaylistDialog = true }) {
+            FloatingActionButton(
+                onClick = {
+                    VibrationUtil.performHapticFeedback(view)
+                    showCreatePlaylistDialog = true
+                },
+            ) {
                 Icon(
                     Icons.Default.Add,
                     contentDescription = stringResource(R.string.create_new_playlist)
@@ -154,7 +160,6 @@ fun PlaylistScreen(
                     state = refreshState,
                     isRefreshing = isRefreshing,
                     onRefresh = { handleEvent(PlaylistEvent.OnRefresh) })
-                .background(MaterialTheme.colorScheme.background)
         ) {
             when (state) {
                 is WebsiteState.Loading -> {

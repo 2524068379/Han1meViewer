@@ -14,7 +14,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +35,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -46,6 +48,7 @@ fun LoginScreen(
     webViewFactory: () -> WebView,
 ) {
     val refreshingState = rememberPullToRefreshState()
+    val view = LocalView.current
     HanimeScaffold(
         title = stringResource(R.string.login),
         onBack = onBack,
@@ -54,12 +57,15 @@ fun LoginScreen(
                 text = { Text(stringResource(R.string.scan_for_cookies)) },
                 icon = {
                     Icon(
-                        painter = painterResource(R.drawable.baseline_export_24),
+                        painter = painterResource(R.drawable.ic_export),
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
                     )
                 },
-                onClick = onOpenQrScanner,
+                onClick = {
+                    VibrationUtil.performHapticFeedback(view)
+                    onOpenQrScanner()
+                },
             )
         },
     ) { paddingValues ->

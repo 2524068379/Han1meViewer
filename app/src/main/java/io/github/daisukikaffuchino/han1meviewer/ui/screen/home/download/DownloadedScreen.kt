@@ -19,12 +19,13 @@ import androidx.compose.material.icons.automirrored.filled.DriveFileMove
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ButtonDefaults
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -118,7 +120,12 @@ fun DownloadedScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = listState,
-            contentPadding = PaddingValues(bottom = if (uiState.multiSelectMode) 72.dp else 8.dp),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                top = 16.dp,
+                end = 16.dp,
+                bottom = if (uiState.multiSelectMode) 72.dp else 8.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             items(uiState.downloadedNodes, key = {
@@ -250,15 +257,16 @@ private fun BatchActionBar(
     Surface(
         modifier = modifier
             .fillMaxWidth()
+            .padding(horizontal = 4.dp)
             .navigationBarsPadding(),
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-        shadowElevation = 12.dp,
+        shadowElevation = 8.dp,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 8.dp, end = 8.dp, top = 10.dp, bottom = 12.dp),
+                .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -268,7 +276,7 @@ private fun BatchActionBar(
             ) {
                 IconButton(onClick = onExitMultiSelect) {
                     Icon(
-                        imageVector = Icons.Default.Close,
+                        painter = painterResource(R.drawable.ic_close),
                         contentDescription = stringResource(R.string.close),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -285,53 +293,50 @@ private fun BatchActionBar(
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = onToggleSelectAll) {
-                    Text(
-                        text = if (isAllSelected) {
+                IconButton(
+                    onClick = onToggleSelectAll
+                ) {
+                    Icon(
+                        painter = if (isAllSelected) {
+                            painterResource(R.drawable.ic_remove_selection)
+                        } else {
+                            painterResource(R.drawable.ic_select_all)
+                        },
+                        contentDescription = if (isAllSelected) {
                             stringResource(R.string.deselect_all)
                         } else {
                             stringResource(R.string.select_all)
-                        },
-                        style = MaterialTheme.typography.labelLarge
+                        }
                     )
                 }
 
-                TextButton(
+                IconButton(
                     onClick = onMoveSelected,
-                    enabled = hasSelection,
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.primary
-                    )
+                    enabled = hasSelection
                 ) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.DriveFileMove,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(R.string.move_group),
-                        style = MaterialTheme.typography.labelLarge
+                        painter = painterResource(R.drawable.ic_move_group),
+                        contentDescription = stringResource(R.string.move_group),
+                        tint = if (hasSelection) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        }
                     )
                 }
-                TextButton(
+
+                FilledIconButton(
                     onClick = onDeleteSelected,
-                    enabled = hasSelection,
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                    )
+                    enabled = hasSelection
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(R.string.delete),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = if (hasSelection) FontWeight.SemiBold else FontWeight.Normal
+                        painter = painterResource(R.drawable.ic_delete),
+                        contentDescription = stringResource(R.string.delete),
+                        tint = if (hasSelection) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        }
                     )
                 }
             }

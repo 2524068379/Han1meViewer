@@ -17,7 +17,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,7 +27,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
@@ -728,7 +728,7 @@ private fun AdvancedSearchActionSection(
             modifier = Modifier.size(60.dp),
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_baseline_search_24),
+                painter = painterResource(R.drawable.ic_search),
                 contentDescription = stringResource(R.string.search),
             )
         }

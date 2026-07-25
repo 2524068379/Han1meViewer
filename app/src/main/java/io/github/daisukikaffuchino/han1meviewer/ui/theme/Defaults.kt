@@ -12,43 +12,53 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 object HanimeDefaults {
-    val screenHorizontalPadding = 16.dp
-    val screenVerticalPadding = 8.dp
-    val settingsItemHorizontalPadding = 24.dp
-    val settingsItemVerticalPadding = 16.dp
-    val settingsItemPadding = 4.dp
-    val settingsSegmentedItemPadding = 2.dp
+    object Spacing {
+        val extraSmall = 2.dp
+        val small = 4.dp
+        val medium = 8.dp
+        val large = 12.dp
+        val extraLarge = 16.dp
+        val itemHorizontal = 24.dp
+        val itemVertical = 16.dp
+        val contentHorizontal = extraLarge
+        val contentVertical = medium
+    }
 
-    val screenContainerShape: Shape
-        @Composable get() = MaterialTheme.shapes.largeIncreased
+    object Corners {
+        val medium: CornerBasedShape
+            @Composable get() = MaterialTheme.shapes.medium
+
+        val large: CornerBasedShape
+            @Composable get() = MaterialTheme.shapes.largeIncreased
+    }
 
     object Colors {
-        val Container: Color
+        val pageSurface: Color
+            @Composable get() = MaterialTheme.colorScheme.surfaceContainer
+
+        val card: Color
             @Composable get() = MaterialTheme.colorScheme.surfaceBright
 
-        val Background: Color
-            @Composable get() = MaterialTheme.colorScheme.surfaceContainer
+        val homeVideoCard: Color
+            @Composable get() = MaterialTheme.colorScheme.surfaceContainerLow
 
     }
 
-    val defaultShape: CornerBasedShape
+    val buttonShape: CornerBasedShape
         @Composable get() = MaterialTheme.shapes.extraSmall
-
-    val largeCornerShape: CornerBasedShape
-        @Composable get() = MaterialTheme.shapes.largeIncreased
 
     val pressedShape: CornerBasedShape
         @Composable get() = MaterialTheme.shapes.small
 
     @Composable
     fun shapes() = ButtonDefaults.shapes(
-        shape = defaultShape,
+        shape = buttonShape,
         pressedShape = pressedShape,
     )
 
     @Composable
-    fun largerShapes() = ButtonDefaults.shapes(
-        shape = largeCornerShape,
+    fun cardShapes() = ButtonDefaults.shapes(
+        shape = Corners.large,
         pressedShape = pressedShape,
     )
 

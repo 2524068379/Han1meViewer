@@ -99,7 +99,7 @@ ViewModel 是页面状态和业务动作的入口。
 - `ui/viewmodel/VideoViewModel.kt`
 - `ui/viewmodel/CommentViewModel.kt`
 - `ui/viewmodel/DownloadViewModel.kt`
-- `ui/viewmodel/MyPlayListViewModelV2.kt`
+- `ui/viewmodel/MyPlayListViewModel.kt`
 - `ui/viewmodel/OnlineWatchHistoryViewModel.kt`
 - `ui/viewmodel/CreatorCenterViewModel.kt`
 - `ui/viewmodel/UserAccountViewModel.kt`

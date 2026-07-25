@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,6 +24,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.SubscriptionItem
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeArtists
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.RetryableImage
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 
 /**
@@ -43,12 +45,19 @@ fun ArtistItem(
     onLongClickArtist: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val view = LocalView.current
     Column(
         modifier = modifier
             .width(72.dp)
             .combinedClickable(
-                onClick = { onClickArtist(artist.artistName) },
-                onLongClick = { onLongClickArtist(artist.artistName) },
+                onClick = {
+                    VibrationUtil.performHapticFeedback(view)
+                    onClickArtist(artist.artistName)
+                },
+                onLongClick = {
+                    VibrationUtil.performHapticFeedback(view)
+                    onLongClickArtist(artist.artistName)
+                },
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

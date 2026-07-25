@@ -22,7 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -199,6 +199,10 @@ fun HomeSettingsRouteScreen(
         },
         onUseDynamicColorChange = { enabled ->
             saveBoolean(HOME_USE_DYNAMIC_COLOR, enabled)
+            refreshKey++
+        },
+        onHapticFeedbackChange = { enabled ->
+            Preferences.hapticFeedbackEnabled = enabled
             refreshKey++
         },
         onThemeAccentColorChange = { id ->
@@ -526,6 +530,7 @@ private fun buildHomeSettingsUiState(
         disableComments = Preferences.preferenceSp.getBoolean(HOME_DISABLE_COMMENTS, false),
         collapseDownloadedGroup = Preferences.collapseDownloadedGroup,
         useDynamicColor = Preferences.useDynamicColor,
+        hapticFeedbackEnabled = Preferences.hapticFeedbackEnabled,
         useLockScreen = Preferences.preferenceSp.getBoolean(HOME_USE_LOCK_SCREEN, false),
         fakeLauncherIconName = currentItem.name,
         cacheSummary = cacheSummary,

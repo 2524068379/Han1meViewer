@@ -2,8 +2,11 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,22 +20,24 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,9 +48,13 @@ import coil3.compose.AsyncImage
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeDownloadEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.state.DownloadState
+import io.github.daisukikaffuchino.han1meviewer.ui.component.CardContainerSurface
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeHomePageVideos
-import io.github.daisukikaffuchino.utils.formatFileSizeV2
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
+import io.github.daisukikaffuchino.utils.formatFileSize
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 /**
  * 下载中任务卡片。
@@ -65,15 +74,32 @@ fun DownloadingItemCard(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    ElevatedCard(
+    val view = LocalView.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val indication = LocalIndication.current
+    val pressed by interactionSource.collectIsPressedAsState()
+    val cardShape = shapeByInteraction(
+        shapes = HanimeDefaults.cardShapes(),
+        pressed = pressed,
+        animationSpec = HanimeDefaults.shapesDefaultAnimationSpec,
+    )
+    CardContainerSurface(
         modifier = modifier
-            .fillMaxWidth()
-            .combinedClickable(onClick = {}, onLongClick = onDelete),
-        shape = RoundedCornerShape(24.dp),
+            .fillMaxWidth(),
+        shape = cardShape,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .combinedClickable(
+                    interactionSource = interactionSource,
+                    indication = indication,
+                    onClick = {},
+                    onLongClick = {
+                        VibrationUtil.performHapticFeedback(view)
+                        onDelete()
+                    },
+                )
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -147,9 +173,10 @@ fun DownloadingItemCard(
                     Text(
                         text = stringResource(
                             R.string.download_progress_size,
-                            item.downloadedLength.formatFileSizeV2(),
-                            item.length.formatFileSizeV2(),
+                            item.downloadedLength.formatFileSize(),
+                            item.length.formatFileSize(),
                         ),
+                        maxLines = 1,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -178,7 +205,7 @@ fun DownloadingItemCard(
                                 modifier = Modifier.size(36.dp)
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.ic_baseline_pause_24),
+                                    painter = painterResource(R.drawable.ic_pause),
                                     contentDescription = stringResource(R.string.pause_all),
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -218,14 +245,22 @@ fun DownloadingItemCard(
                 }
             }
 
-            val animatedProgress by animateFloatAsState(
-                targetValue = item.progress / 100f,
-                animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
-            )
-            LinearWavyProgressIndicator(
-                progress = { animatedProgress },
-                modifier = Modifier.fillMaxWidth(),
-            )
+            if (item.state == DownloadState.Downloading) {
+                val animatedProgress by animateFloatAsState(
+                    targetValue = item.progress / 100f,
+                    animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+                    label = "download-progress",
+                )
+                LinearWavyProgressIndicator(
+                    progress = { animatedProgress },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            } else {
+                LinearProgressIndicator(
+                    progress = { item.progress / 100f },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
     }
 }

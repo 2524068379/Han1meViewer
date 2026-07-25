@@ -92,10 +92,10 @@ fun downloadStateText(state: DownloadState, progress: Int): String = when (state
  * @return 图标 drawable 资源 ID
  */
 fun downloadStateIcon(state: DownloadState): Int = when (state) {
-    DownloadState.Queued -> R.drawable.ic_baseline_play_arrow_24
-    DownloadState.Downloading -> R.drawable.ic_baseline_pause_24
-    DownloadState.Paused -> R.drawable.ic_baseline_play_arrow_24
-    DownloadState.Failed -> R.drawable.baseline_error_outline_24
-    DownloadState.Finished -> R.drawable.ic_baseline_check_circle_24
-    DownloadState.Unknown -> R.drawable.ic_baseline_download_24
+    DownloadState.Queued -> R.drawable.ic_play_arrow
+    DownloadState.Downloading -> R.drawable.ic_pause
+    DownloadState.Paused -> R.drawable.ic_play_arrow
+    DownloadState.Failed -> R.drawable.ic_error_outline
+    DownloadState.Finished -> R.drawable.ic_check_circle
+    DownloadState.Unknown -> R.drawable.ic_download
 }

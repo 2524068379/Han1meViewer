@@ -307,6 +307,12 @@ object Preferences {
     val tabletMode: Boolean
         get() = preferenceSp.getBoolean(SettingsPreferenceKeys.TABLET_MODE, false)
 
+    var hapticFeedbackEnabled: Boolean
+        get() = preferenceSp.getBoolean(SettingsPreferenceKeys.HAPTIC_FEEDBACK_ENABLED, false)
+        set(value) = preferenceSp.edit {
+            putBoolean(SettingsPreferenceKeys.HAPTIC_FEEDBACK_ENABLED, value)
+        }
+
     /**
      * MPV播放器设置
      */

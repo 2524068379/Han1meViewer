@@ -16,7 +16,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,6 +38,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyConten
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 private enum class HKeyframeDialog {
     EditEntity,
@@ -195,9 +197,10 @@ private fun HKeyframeEntityCard(
     onEditKeyframe: (HKeyframeEntity.Keyframe) -> Unit,
     onDeleteKeyframe: (HKeyframeEntity.Keyframe) -> Unit,
 ) {
+    val view = LocalView.current
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = HanimeDefaults.screenContainerShape,
+        shape = HanimeDefaults.Corners.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),
@@ -227,7 +230,10 @@ private fun HKeyframeEntityCard(
 
             Text(
                 text = stringResource(R.string.h_keyframe_title_prefix) + entity.videoCode,
-                modifier = Modifier.clickable(onClick = onOpenVideo),
+                modifier = Modifier.clickable {
+                    VibrationUtil.performHapticFeedback(view)
+                    onOpenVideo()
+                },
                 color = MaterialTheme.colorScheme.primary,
             )
 

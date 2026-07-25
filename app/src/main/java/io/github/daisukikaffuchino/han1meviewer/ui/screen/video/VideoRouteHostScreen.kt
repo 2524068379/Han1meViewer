@@ -29,7 +29,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -230,9 +230,9 @@ fun VideoRouteHostScreen(
         if (!activity.isInPictureInPictureMode) return
         val isPlaying = (Jzvd.CURRENT_JZVD?.mediaInterface as? ExoMediaKernel)?.isPlaying == true
         val icon = if (isPlaying) {
-            Icon.createWithResource(activity, R.drawable.ic_baseline_pause_24)
+            Icon.createWithResource(activity, R.drawable.ic_pause)
         } else {
-            Icon.createWithResource(activity, R.drawable.ic_baseline_play_arrow_24)
+            Icon.createWithResource(activity, R.drawable.ic_play_arrow)
         }
         val title = if (isPlaying) "Pause Video" else "Play Video"
         val intent = PendingIntent.getBroadcast(
@@ -282,7 +282,7 @@ fun VideoRouteHostScreen(
                     PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
                 )
                 val icon =
-                    Icon.createWithResource(activity, R.drawable.ic_baseline_pause_24)
+                    Icon.createWithResource(activity, R.drawable.ic_pause)
                 val action = RemoteAction(
                     icon,
                     activity.getString(R.string.play_pause),

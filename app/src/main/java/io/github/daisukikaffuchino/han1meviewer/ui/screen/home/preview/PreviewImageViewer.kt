@@ -18,7 +18,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -151,7 +151,7 @@ fun PreviewImageViewerDialog(
                         ),
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_arrow_back_24),
+                        painter = painterResource(R.drawable.ic_arrow_back),
                         contentDescription = stringResource(R.string.back),
                         tint = MaterialTheme.colorScheme.onSurface,
                     )

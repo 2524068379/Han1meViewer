@@ -32,6 +32,7 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,6 +54,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.MoveGrou
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.toDisplayGroups
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.toFlatNodeList
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.toNodeList
+import io.github.daisukikaffuchino.utils.VibrationUtil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -205,6 +207,7 @@ fun DownloadScreen(
     HanimeScaffold(
         title = stringResource(R.string.download),
         onBack = onBack,
+        contentHorizontalPadding = 0.dp,
         floatingActionButton = {
             DownloadFabMenu(
                 currentPage = uiState.currentPage,
@@ -310,6 +313,7 @@ private fun DownloadFabMenu(
     onImportDownloaded: () -> Unit,
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
+    val view = LocalView.current
     val visible = !multiSelectMode && (currentPage != 0 || hasDownloadingItems)
 
     LaunchedEffect(currentPage, multiSelectMode, hasDownloadingItems) {
@@ -321,16 +325,19 @@ private fun DownloadFabMenu(
         enter = fadeIn() + slideInVertically { it / 2 },
         exit = fadeOut() + slideOutVertically { it / 2 },
     ) {
-        Box(
-            modifier = Modifier.padding(8.dp)
-        ) {
+
             FloatingActionButtonMenu(
                 expanded = expanded,
                 button = {
-                    FloatingActionButton(onClick = { expanded = !expanded }) {
+                    FloatingActionButton(
+                        onClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            expanded = !expanded
+                        },
+                    ) {
                         Icon(
                             painter = painterResource(
-                                if (expanded) R.drawable.close_24px else R.drawable.menu_24px,
+                                if (expanded) R.drawable.ic_close else R.drawable.ic_menu,
                             ),
                             contentDescription = stringResource(if (expanded) R.string.close else R.string.download),
                         )
@@ -342,11 +349,12 @@ private fun DownloadFabMenu(
                         text = { Text(stringResource(R.string.start_all)) },
                         icon = {
                             Icon(
-                                painter = painterResource(R.drawable.ic_baseline_play_arrow_24),
+                                painter = painterResource(R.drawable.ic_play_arrow),
                                 contentDescription = null,
                             )
                         },
                         onClick = {
+                            VibrationUtil.performHapticFeedback(view)
                             onResumeAll()
                             expanded = false
                         },
@@ -355,11 +363,12 @@ private fun DownloadFabMenu(
                         text = { Text(stringResource(R.string.pause_all)) },
                         icon = {
                             Icon(
-                                painter = painterResource(R.drawable.ic_baseline_pause_24),
+                                painter = painterResource(R.drawable.ic_pause),
                                 contentDescription = null,
                             )
                         },
                         onClick = {
+                            VibrationUtil.performHapticFeedback(view)
                             onPauseAll()
                             expanded = false
                         },
@@ -369,11 +378,12 @@ private fun DownloadFabMenu(
                         text = { Text(stringResource(R.string.edit)) },
                         icon = {
                             Icon(
-                                painter = painterResource(R.drawable.baseline_format_list_bulleted_24),
+                                painter = painterResource(R.drawable.ic_format_list_bulleted),
                                 contentDescription = null,
                             )
                         },
                         onClick = {
+                            VibrationUtil.performHapticFeedback(view)
                             onToggleMultiSelect()
                             expanded = false
                         },
@@ -382,11 +392,12 @@ private fun DownloadFabMenu(
                         text = { Text(stringResource(R.string.create_new_group)) },
                         icon = {
                             Icon(
-                                painter = painterResource(R.drawable.baseline_add_24),
+                                painter = painterResource(R.drawable.ic_add),
                                 contentDescription = null,
                             )
                         },
                         onClick = {
+                            VibrationUtil.performHapticFeedback(view)
                             onCreateGroup()
                             expanded = false
                         },
@@ -395,18 +406,19 @@ private fun DownloadFabMenu(
                         text = { Text(stringResource(R.string.read_download_dir_title)) },
                         icon = {
                             Icon(
-                                painter = painterResource(R.drawable.ic_baseline_download_24),
+                                painter = painterResource(R.drawable.ic_download),
                                 contentDescription = null,
                             )
                         },
                         onClick = {
+                            VibrationUtil.performHapticFeedback(view)
                             onImportDownloaded()
                             expanded = false
                         },
                     )
                 }
             }
-        }
+
     }
 }
 

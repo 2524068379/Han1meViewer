@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -49,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 private val robotoFont = FontFamily(
     Font(R.font.roboto)
@@ -116,6 +118,7 @@ fun MainDrawerHeader(
     onAvatarLongClick: () -> Unit,
     onSwitchSiteClick: () -> Unit,
 ) {
+val view = LocalView.current
 val cardShape = RoundedCornerShape(28.dp)
 val cardInteractionSource = remember { MutableInteractionSource() }
 val isCardPressed = cardInteractionSource.collectIsPressedAsState().value
@@ -144,7 +147,10 @@ Column(
             .combinedClickable(
                 interactionSource = cardInteractionSource,
                 indication = ripple(),
-                onClick = onAvatarClick,
+                onClick = {
+                    VibrationUtil.performHapticFeedback(view)
+                    onAvatarClick()
+                },
             ),
         shape = cardShape,
         colors = CardDefaults.elevatedCardColors(
@@ -166,8 +172,14 @@ Column(
                     .size(56.dp)
                     .clip(CircleShape)
                     .combinedClickable(
-                        onClick = onAvatarClick,
-                        onLongClick = onAvatarLongClick
+                        onClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            onAvatarClick()
+                        },
+                        onLongClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            onAvatarLongClick()
+                        },
                     ),
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(id = R.drawable.bg_default_header),
@@ -207,7 +219,10 @@ Column(
                     .align(Alignment.CenterVertically)
                     .padding(top = 6.dp)
                     .clickable(
-                        onClick = onSwitchSiteClick,
+                        onClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            onSwitchSiteClick()
+                        },
                         indication = ripple(bounded = false),
                         interactionSource = remember { MutableInteractionSource() }
                     ),
@@ -220,7 +235,7 @@ Column(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_switch_24),
+                        painter = painterResource(id = R.drawable.ic_switch),
                         contentDescription = stringResource(R.string.switch_site)
                     )
                 }

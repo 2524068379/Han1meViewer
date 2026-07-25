@@ -152,7 +152,8 @@ fun ChildCommentScreen(
 
     Scaffold(
         modifier = Modifier.widthIn(max = maxScreenWidth)
-            .background(color = HanimeDefaults.Colors.Background),
+            .background(color = HanimeDefaults.Colors.pageSurface),
+        containerColor = HanimeDefaults.Colors.pageSurface,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             AnimatedVisibility(

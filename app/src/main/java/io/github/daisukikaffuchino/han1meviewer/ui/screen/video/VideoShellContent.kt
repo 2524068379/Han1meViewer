@@ -33,9 +33,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
+import io.github.daisukikaffuchino.utils.VibrationUtil
 
 @Composable
 fun VideoShellContent(
@@ -131,9 +133,13 @@ private fun RelatedCollapseIndicator(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val view = LocalView.current
     Row(
         modifier = modifier
-            .clickable(onClick = onClick)
+            .clickable {
+                VibrationUtil.performHapticFeedback(view)
+                onClick()
+            }
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
