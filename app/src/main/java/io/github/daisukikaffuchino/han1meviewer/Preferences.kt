@@ -7,8 +7,8 @@ import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HProxySelector
 import io.github.daisukikaffuchino.han1meviewer.logic.network.interceptor.SpeedLimitInterceptor
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsPreferenceKeys
-import io.github.daisukikaffuchino.han1meviewer.ui.view.video.HJzvdStd
-import io.github.daisukikaffuchino.han1meviewer.ui.view.video.HMediaKernel
+import io.github.daisukikaffuchino.han1meviewer.ui.player.PlayerDefaults
+import io.github.daisukikaffuchino.han1meviewer.ui.player.PlayerKernel
 import io.github.daisukikaffuchino.han1meviewer.util.CookieString
 import io.github.daisukikaffuchino.han1meviewer.util.defaultSharedPreferences
 import io.github.daisukikaffuchino.han1meviewer.util.SafFileManager
@@ -76,8 +76,8 @@ object Preferences {
     val switchPlayerKernel: String
         get() = preferenceSp.getString(
             SettingsPreferenceKeys.SWITCH_PLAYER_KERNEL,
-            HMediaKernel.Type.ExoPlayer.name
-        ) ?: HMediaKernel.Type.ExoPlayer.name
+            PlayerKernel.ExoPlayer.name
+        ) ?: PlayerKernel.ExoPlayer.name
 
     val showBottomProgress: Boolean
         get() = preferenceSp.getBoolean(
@@ -88,20 +88,20 @@ object Preferences {
     val playerSpeed: Float
         get() = preferenceSp.getString(
             SettingsPreferenceKeys.PLAYER_SPEED,
-            HJzvdStd.DEF_SPEED.toString()
-        )?.toFloat() ?: HJzvdStd.DEF_SPEED
+            PlayerDefaults.DEFAULT_SPEED.toString()
+        )?.toFloat() ?: PlayerDefaults.DEFAULT_SPEED
 
     val slideSensitivity: Int
         get() = preferenceSp.getInt(
             SettingsPreferenceKeys.SLIDE_SENSITIVITY,
-            HJzvdStd.DEF_PROGRESS_SLIDE_SENSITIVITY
+            PlayerDefaults.DEFAULT_PROGRESS_SLIDE_SENSITIVITY
         )
 
     val longPressSpeedTime: Float
         get() = preferenceSp.getString(
             SettingsPreferenceKeys.LONG_PRESS_SPEED_TIMES,
-            HJzvdStd.DEF_LONG_PRESS_SPEED_TIMES.toString()
-        )?.toFloat() ?: HJzvdStd.DEF_LONG_PRESS_SPEED_TIMES
+            PlayerDefaults.DEFAULT_LONG_PRESS_SPEED_MULTIPLIER.toString()
+        )?.toFloat() ?: PlayerDefaults.DEFAULT_LONG_PRESS_SPEED_MULTIPLIER
 
     val videoLanguage: String
         get() = preferenceSp.getString(SettingsPreferenceKeys.VIDEO_LANGUAGE, "zhs") ?: "zht"
@@ -228,7 +228,7 @@ object Preferences {
     val whenCountdownRemind: Int
         get() = preferenceSp.getInt(
             SettingsPreferenceKeys.WHEN_COUNTDOWN_REMIND,
-            HJzvdStd.DEF_COUNTDOWN_SEC
+            PlayerDefaults.DEFAULT_COUNTDOWN_SECONDS
         ) * 1_000 // 越不了界，最大就30_000ms而已
 
     val showCommentWhenCountdown: Boolean

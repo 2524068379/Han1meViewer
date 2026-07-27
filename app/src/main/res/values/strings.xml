@@ -535,6 +535,7 @@ Recommendations are as follows:\n
     <string name="create_group_success">Created successfully! %s</string>
     <string name="disable_mobile_data_warning">Disable Mobile Data Warning</string>
     <string name="disable_mobile_data_warning_summary">When enabled, no warning will be shown when playing with mobile data</string>
+    <string name="mobile_data_playback_warning">You are using a metered network. Continue playing the video?</string>
     <string name="mpv_socks5_warning">Note: MPV playback engine does not support SOCKS proxy, playback may fail</string>
     <string name="warning">Warning</string>
     <string name="collapse_downloaded_groups">Collapse Downloaded Groups by Default</string>
@@ -675,4 +676,17 @@ Recommendations are as follows:\n
     <string name="no_license_items">No items to display</string>
     <string name="no_licenses_found">No items found</string>
     <string name="global_search">Global Search</string>
+    <string name="player_anime4k_label" translatable="false">Anime4K</string>
+    <string name="player_h_keyframe">H Keyframe</string>
+    <string name="player_auto_quality">Auto</string>
+    <string name="player_time_format">%1$s / %2$s</string>
+    <string name="player_speed_format">%1$sx</string>
+    <string name="player_keyframe_index">#%1$d</string>
+    <string name="player_keyframe_option">#%1$d %2$s</string>
+    <string name="player_progress_percent">%1$d%%</string>
+    <string name="player_gesture_brightness">Brightness</string>
+    <string name="player_gesture_volume">Volume</string>
+    <string name="player_gesture_progress">Progress</string>
+    <string name="player_play_from_beginning">Play from beginning</string>
+    <string name="player_untitled_video">Untitled</string>
 </resources>

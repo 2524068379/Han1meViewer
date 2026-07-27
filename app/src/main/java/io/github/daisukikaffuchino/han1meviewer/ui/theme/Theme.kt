@@ -39,6 +39,7 @@ import com.kyant.m3color.scheme.SchemeTonalSpot
 import com.kyant.m3color.scheme.SchemeVibrant
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsPreferenceKeys
+import androidx.core.graphics.drawable.toDrawable
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -73,6 +74,7 @@ fun HanimeTheme(
     if (!view.isInEditMode) {
         SideEffect {
             view.context.findActivity()?.window?.let { window ->
+                window.setBackgroundDrawable(colorScheme.surfaceContainer.toArgb().toDrawable())
                 WindowCompat.getInsetsController(window, view).apply {
                     isAppearanceLightStatusBars = !resolvedDarkTheme
                     isAppearanceLightNavigationBars = !resolvedDarkTheme

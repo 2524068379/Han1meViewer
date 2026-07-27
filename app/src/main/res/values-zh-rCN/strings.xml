@@ -541,6 +541,7 @@
     <string name="create_group_success">创建成功！%s</string>
     <string name="disable_mobile_data_warning">关闭流量提醒</string>
     <string name="disable_mobile_data_warning_summary">开启后使用移动流量播放时将不再提醒</string>
+    <string name="mobile_data_playback_warning">当前正在使用移动网络，继续播放可能产生流量费用。是否继续？</string>
     <string name="mpv_socks5_warning">注意：MPV播放内核不支持Socks代理，可能会播放失败</string>
     <string name="warning">警告</string>
     <string name="collapse_downloaded_groups">默认折叠已下载分组</string>
@@ -660,4 +661,17 @@
     <string name="no_license_items">没有可显示的项目</string>
     <string name="no_licenses_found">未搜索到项目</string>
     <string name="global_search">全站搜索</string>
+    <string name="player_anime4k_label" translatable="false">Anime4K</string>
+    <string name="player_h_keyframe">H关键帧</string>
+    <string name="player_auto_quality">自动</string>
+    <string name="player_time_format">%1$s / %2$s</string>
+    <string name="player_speed_format">%1$sx</string>
+    <string name="player_keyframe_index">#%1$d</string>
+    <string name="player_keyframe_option">#%1$d %2$s</string>
+    <string name="player_progress_percent">%1$d%%</string>
+    <string name="player_gesture_brightness">亮度</string>
+    <string name="player_gesture_volume">音量</string>
+    <string name="player_gesture_progress">进度</string>
+    <string name="player_play_from_beginning">从头开始播放</string>
+    <string name="player_untitled_video">未命名视频</string>
 </resources>

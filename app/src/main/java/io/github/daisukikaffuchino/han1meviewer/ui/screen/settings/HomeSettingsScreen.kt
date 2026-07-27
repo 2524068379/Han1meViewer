@@ -321,7 +321,7 @@ fun HomeSettingsScreen(
                             title = stringResource(R.string.haptic_feedback),
                             summary = stringResource(R.string.haptic_feedback_summary),
                             checked = state.hapticFeedbackEnabled,
-                            iconRes = R.drawable.ic_touch_long,
+                            iconRes = R.drawable.ic_mobile_vibrate,
                             onCheckedChange = onHapticFeedbackChange,
                         )
                     }

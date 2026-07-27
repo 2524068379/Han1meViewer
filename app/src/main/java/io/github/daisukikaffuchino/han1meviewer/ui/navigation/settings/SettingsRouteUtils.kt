@@ -19,7 +19,7 @@ import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_HOSTNAME
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.han1meviewer.ui.view.video.HJzvdStd
+import io.github.daisukikaffuchino.han1meviewer.ui.player.PlayerDefaults
 import io.github.daisukikaffuchino.utils.formatBytesPerSecond
 import io.github.daisukikaffuchino.utils.formatFileSize
 import io.github.daisukikaffuchino.utils.SonnerToast
@@ -70,7 +70,9 @@ internal fun toPrettyCountdownRemindString(
 ): String {
     return buildString {
         append(context.getString(R.string.will_remind_before_d_seconds, value))
-        if (value == HJzvdStd.DEF_COUNTDOWN_SEC) append(" (${context.getString(R.string.default_)})")
+        if (value == PlayerDefaults.DEFAULT_COUNTDOWN_SECONDS) {
+            append(" (${context.getString(R.string.default_)})")
+        }
     }
 }
 

@@ -22,11 +22,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DarkMode
-import androidx.compose.material.icons.outlined.LightMode
-import androidx.compose.material.icons.outlined.Lightbulb
-import androidx.compose.material.icons.outlined.SettingsBrightness
 import androidx.compose.material3.ButtonShapes
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -47,8 +42,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -95,19 +90,19 @@ fun DarkModePicker(
         DarkModeOption(
             value = "follow_system",
             title = stringResource(R.string.follow_system),
-            icon = Icons.Outlined.Lightbulb,
+            iconRes = R.drawable.ic_lightbulb,
             dark = systemDark,
         ),
         DarkModeOption(
             value = "always_off",
             title = stringResource(R.string.always_off),
-            icon = Icons.Outlined.LightMode,
+            iconRes = R.drawable.ic_light_mode,
             dark = false,
         ),
         DarkModeOption(
             value = "always_on",
             title = stringResource(R.string.always_on),
-            icon = Icons.Outlined.DarkMode,
+            iconRes = R.drawable.ic_dark_mode,
             dark = true,
         ),
     )
@@ -287,7 +282,7 @@ private fun DarkModeItem(
                 ),
         ) {
             Icon(
-                imageVector = option.icon,
+                painter = painterResource(option.iconRes),
                 contentDescription = null,
                 tint = foreground,
                 modifier = Modifier.align(Alignment.Center),
@@ -370,11 +365,14 @@ private fun PickerOption(
 private data class DarkModeOption(
     val value: String,
     val title: String,
-    val icon: ImageVector,
+    val iconRes: Int,
     val dark: Boolean,
 )
 
-private fun ContentDrawScope.drawFadedEdge(edgeWidth: androidx.compose.ui.unit.Dp, leftEdge: Boolean) {
+private fun ContentDrawScope.drawFadedEdge(
+    edgeWidth: androidx.compose.ui.unit.Dp,
+    leftEdge: Boolean
+) {
     val edgeWidthPx = edgeWidth.toPx()
     drawRect(
         topLeft = Offset(if (leftEdge) 0f else size.width - edgeWidthPx, 0f),

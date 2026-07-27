@@ -6,12 +6,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -21,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -30,43 +27,44 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.navigateSafely
-import io.github.daisukikaffuchino.han1meviewer.ui.screen.account.AvatarCropScreen
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadSettingsRoute
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadSettingsRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.AboutSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.AppearanceSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DataPrivacySettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadSettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadSettingsRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframeSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframeSettingsRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframesRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframesRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HomeSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HomeSettingsRouteScreen
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.InterfaceInteractionSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.MpvPlayerSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.MpvPlayerSettingsRouteScreen
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.NetworkDownloadSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.NetworkSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.NetworkSettingsRouteScreen
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.NetworkDownloadSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.OpenSourceLicensesRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.PlayerSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.PlayerSettingsRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsScaffold
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.InterfaceInteractionSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SharedHKeyframesRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SharedHKeyframesRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.VideoPlaybackSettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.screen.account.AccountScreen
+import io.github.daisukikaffuchino.han1meviewer.ui.screen.account.AvatarCropScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.HomeSettingsPage
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.OpenSourceLicensesScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.SettingsMainScreen
-import io.github.daisukikaffuchino.han1meviewer.ui.screen.account.AccountScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.materialSharedAxisXIn
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.materialSharedAxisXOut
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.UserAccountViewModel
 import io.github.daisukikaffuchino.utils.VibrationUtil
 import kotlinx.serialization.json.Json
 
-private const val PredictiveBackOffsetFactor = 0.10f
+private const val PageTransitionOffsetFactor = 0.10f
 
 @Composable
 fun MainNavHost(
@@ -92,13 +90,17 @@ fun MainNavHost(
     NavHost(
         navController = navController,
         startDestination = HomeRoute,
-        enterTransition = { materialSharedAxisXIn(initialOffsetX = { it }) },
-        exitTransition = { materialSharedAxisXOut(targetOffsetX = { -it }) },
+        enterTransition = {
+            materialSharedAxisXIn(initialOffsetX = { (it * PageTransitionOffsetFactor).toInt() })
+        },
+        exitTransition = {
+            materialSharedAxisXOut(targetOffsetX = { -(it * PageTransitionOffsetFactor).toInt() })
+        },
         popEnterTransition = {
-            materialSharedAxisXIn(initialOffsetX = { -(it * PredictiveBackOffsetFactor).toInt() })
+            materialSharedAxisXIn(initialOffsetX = { -(it * PageTransitionOffsetFactor).toInt() })
         },
         popExitTransition = {
-            materialSharedAxisXOut(targetOffsetX = { (it * PredictiveBackOffsetFactor).toInt() })
+            materialSharedAxisXOut(targetOffsetX = { (it * PageTransitionOffsetFactor).toInt() })
         },
     ) {
         composable<HomeRoute> {
@@ -285,7 +287,7 @@ fun MainNavHost(
                             onClick = { searchMode = true },
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.Search,
+                                painter = painterResource(R.drawable.ic_search),
                                 contentDescription = stringResource(R.string.search),
                             )
                         }
@@ -294,7 +296,6 @@ fun MainNavHost(
             ) {
                 OpenSourceLicensesScreen(
                     searchMode = searchMode,
-                    onSearchModeChange = { searchMode = it },
                 )
             }
         }
@@ -346,7 +347,7 @@ fun MainNavHost(
                         },
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Add,
+                            painter = painterResource(R.drawable.ic_add),
                             contentDescription = stringResource(R.string.h_keyframes_import_shared),
                         )
                     }

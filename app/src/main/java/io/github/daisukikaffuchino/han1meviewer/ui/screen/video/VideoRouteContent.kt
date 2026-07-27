@@ -94,6 +94,7 @@ fun VideoRouteContent(
                 )
             } else {
                 RenderVideoCommentContent(
+                    videoCode = videoCode,
                     viewModel = commentViewModel,
                     reportMessages = remember { kotlinx.coroutines.flow.MutableSharedFlow() },
                     getMessageText = { message ->

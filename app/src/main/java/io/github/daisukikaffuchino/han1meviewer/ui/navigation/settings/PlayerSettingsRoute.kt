@@ -11,10 +11,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.content.edit
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
+import io.github.daisukikaffuchino.han1meviewer.ui.player.PlayerDefaults
+import io.github.daisukikaffuchino.han1meviewer.ui.player.PlayerKernel
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.PlayerSettingsScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.PlayerSettingsUiState
-import io.github.daisukikaffuchino.han1meviewer.ui.view.video.HJzvdStd
-import io.github.daisukikaffuchino.han1meviewer.ui.view.video.HMediaKernel
 
 private const val PLAYER_SWITCH_PLAYER_KERNEL = "switch_player_kernel"
 private const val PLAYER_SHOW_BOTTOM_PROGRESS = "show_bottom_progress"
@@ -32,8 +32,8 @@ fun PlayerSettingsRouteScreen(
 
     PlayerSettingsScreen(
         state = uiState,
-        kernelOptions = HMediaKernel.Type.entries.map { it.name to it.name },
-        speedOptions = HJzvdStd.speedStringArray.zip(HJzvdStd.speedArray.map { it.toString() }),
+        kernelOptions = PlayerKernel.entries.map { it.name to it.name },
+        speedOptions = PlayerDefaults.speedLabels.zip(PlayerDefaults.speeds.map { it.toString() }),
         longPressSpeedOptions = listOf(
             stringResource(R.string.d_speed_times, 1f) to "1",
             stringResource(R.string.d_speed_times, 1.5f) to "1.5",
@@ -77,13 +77,14 @@ fun PlayerSettingsRouteScreen(
 
 private fun buildPlayerSettingsUiState(context: Context): PlayerSettingsUiState {
     val kernel = Preferences.switchPlayerKernel
-    val isMpvPlayer = kernel == HMediaKernel.Type.MpvPlayer.name
+    val isMpvPlayer = kernel == PlayerKernel.MpvPlayer.name
     val currentSpeed = Preferences.playerSpeed
     val currentLongPressSpeed = Preferences.longPressSpeedTime
-    val speedDisplay = HJzvdStd.speedStringArray.getOrElse(
-        HJzvdStd.speedArray.indexOfFirst { it == currentSpeed }.takeIf { it >= 0 }
-            ?: HJzvdStd.DEF_SPEED_INDEX
-    ) { HJzvdStd.speedStringArray[HJzvdStd.DEF_SPEED_INDEX] }
+    val speedLabels = PlayerDefaults.speedLabels
+    val speedDisplay = speedLabels.getOrElse(
+        PlayerDefaults.speeds.indexOfFirst { it == currentSpeed }.takeIf { it >= 0 }
+            ?: PlayerDefaults.DEFAULT_SPEED_INDEX
+    ) { speedLabels[PlayerDefaults.DEFAULT_SPEED_INDEX] }
     val longPressDisplay = context.getString(R.string.d_speed_times, currentLongPressSpeed)
     return PlayerSettingsUiState(
         kernel = kernel,

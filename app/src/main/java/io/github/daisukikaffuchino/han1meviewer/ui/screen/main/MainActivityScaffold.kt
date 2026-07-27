@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainDrawerDestination
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.utils.VibrationUtil
 import kotlinx.coroutines.launch
 
@@ -125,7 +126,11 @@ fun MainActivityScaffold(
             }
         },
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(HanimeDefaults.Colors.pageSurface),
+        ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()

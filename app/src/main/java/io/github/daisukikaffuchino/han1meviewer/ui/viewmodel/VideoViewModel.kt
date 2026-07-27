@@ -5,6 +5,8 @@ import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -25,7 +27,6 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
 import io.github.daisukikaffuchino.han1meviewer.util.TagLocalizer
 import io.github.daisukikaffuchino.utils.ApplicationViewModel
-import io.github.daisukikaffuchino.utils.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -58,7 +59,7 @@ class VideoViewModel(application: Application) : ApplicationViewModel(applicatio
         val commentBadgeCount: Int = 0,
         val isScrollDisabled: Boolean = false,
         val isInPipMode: Boolean = false,
-        val playerHeightDp: Int = 250.dp,
+        val playerHeightDp: Dp? = 250.dp,
     )
 
     private data class VideoIntroUiState(
@@ -147,7 +148,7 @@ class VideoViewModel(application: Application) : ApplicationViewModel(applicatio
         _videoHostUiStateFlow.update { it.copy(isInPipMode = isInPipMode) }
     }
 
-    fun setPlayerHeightDp(playerHeightDp: Int) {
+    fun setPlayerHeightDp(playerHeightDp: Dp?) {
         _videoHostUiStateFlow.update { it.copy(playerHeightDp = playerHeightDp) }
     }
 
@@ -425,6 +426,26 @@ class VideoViewModel(application: Application) : ApplicationViewModel(applicatio
                 _modifyHKeyframeFlow.emit(true to application.getString(R.string.add_success))
                 _forceRefresh.emit(Unit)
             }
+        }
+    }
+
+    fun modifyHKeyframe(
+        videoCode: String,
+        oldKeyframe: HKeyframeEntity.Keyframe,
+        newKeyframe: HKeyframeEntity.Keyframe,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            DatabaseRepo.HKeyframe.modifyKeyframe(videoCode, oldKeyframe, newKeyframe)
+            _modifyHKeyframeFlow.emit(true to application.getString(R.string.modify_success))
+            _forceRefresh.emit(Unit)
+        }
+    }
+
+    fun removeHKeyframe(videoCode: String, hKeyframe: HKeyframeEntity.Keyframe) {
+        viewModelScope.launch(Dispatchers.IO) {
+            DatabaseRepo.HKeyframe.removeKeyframe(videoCode, hKeyframe)
+            _modifyHKeyframeFlow.emit(true to application.getString(R.string.delete_success))
+            _forceRefresh.emit(Unit)
         }
     }
 }

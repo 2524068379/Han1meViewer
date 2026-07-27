@@ -527,6 +527,7 @@
     <string name="create_new_group">建立新分組</string>
     <string name="create_group_success">建立成功！%s</string>
     <string name="disable_mobile_data_warning">關閉流量提醒</string>
+    <string name="mobile_data_playback_warning">目前正在使用行動網路，繼續播放可能產生流量費用。是否繼續？</string>
     <string name="disable_mobile_data_warning_summary">開啟後，使用行動數據播放時將不再提醒</string>
     <string name="mpv_socks5_warning">注意：MPV 播放核心不支援 Socks 代理，可能會導致播放失敗</string>
     <string name="warning">警告</string>
@@ -646,4 +647,17 @@
     <string name="no_license_items">沒有可顯示的項目</string>
     <string name="no_licenses_found">找不到項目</string>
     <string name="global_search">全站搜尋</string>
+    <string name="player_anime4k_label" translatable="false">Anime4K</string>
+    <string name="player_h_keyframe">H關鍵影格</string>
+    <string name="player_auto_quality">自動</string>
+    <string name="player_time_format">%1$s / %2$s</string>
+    <string name="player_speed_format">%1$sx</string>
+    <string name="player_keyframe_index">#%1$d</string>
+    <string name="player_keyframe_option">#%1$d %2$s</string>
+    <string name="player_progress_percent">%1$d%%</string>
+    <string name="player_gesture_brightness">亮度</string>
+    <string name="player_gesture_volume">音量</string>
+    <string name="player_gesture_progress">進度</string>
+    <string name="player_play_from_beginning">從頭開始播放</string>
+    <string name="player_untitled_video">未命名影片</string>
 </resources>

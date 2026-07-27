@@ -69,7 +69,6 @@ fun RenderVideoIntroductionContent(
             state = videoState,
             fromDownload = viewModel.fromDownload,
             hideRelatedInIntro = viewModel.hideRelatedInIntro,
-            shareText = videoShareText,
             playlistInitialIndex = viewModel.getPlaylistFirstVisibleIndex(videoCode),
             introFirstVisibleItemIndex = introScrollState.firstVisibleItemIndex,
             introFirstVisibleItemScrollOffset = introScrollState.firstVisibleItemScrollOffset,
@@ -112,7 +111,6 @@ fun RenderVideoIntroductionContent(
             onOpenOriginalComic = video?.originalComic
                 ?.takeIf { it.isNotBlank() }
                 ?.let { comicLink -> { onOpenOriginalComic(comicLink) } },
-            onCopyText = onCopyText,
             onShowAllPlaylist = if (!viewModel.fromDownload && video?.playlist != null) {
                 {}
             } else {
@@ -132,13 +130,14 @@ fun RenderVideoIntroductionContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RenderVideoCommentContent(
+    videoCode: String,
     viewModel: CommentViewModel,
     reportMessages: MutableSharedFlow<CommentMessage>,
     getMessageText: (CommentViewModel.Message) -> String,
     pageHost: VideoPageHost? = null,
 ) {
-    val commentUiState = remember(viewModel.code) {
-        viewModel.getCommentUiState(viewModel.code)
+    val commentUiState = remember(videoCode) {
+        viewModel.getCommentUiState(videoCode)
     }
     var childCommentId by remember { mutableStateOf(commentUiState.childCommentId) }
     val childSheetState = rememberBottomSheetState(
@@ -152,8 +151,9 @@ fun RenderVideoCommentContent(
     val scope = rememberCoroutineScope()
 
     HanimeTheme {
-        LaunchedEffect(viewModel.code) {
-            viewModel.getComment(VIDEO_COMMENT_PREFIX, viewModel.code)
+        LaunchedEffect(videoCode) {
+            viewModel.code = videoCode
+            viewModel.getComment(VIDEO_COMMENT_PREFIX, videoCode)
         }
 
         LaunchedEffect(Unit) {
@@ -169,7 +169,7 @@ fun RenderVideoCommentContent(
             ModalBottomSheet(
                 onDismissRequest = {
                     childCommentId = null
-                    viewModel.setChildCommentId(viewModel.code, null)
+                    viewModel.setChildCommentId(videoCode, null)
                     viewModel.clearVideoReplyList()
                 },
                 sheetState = childSheetState,
@@ -208,7 +208,7 @@ fun RenderVideoCommentContent(
                         viewModel.reportComment(
                             reason.reasonKey ?: reason.value,
                             viewModel.currentUserId,
-                            "${Preferences.baseUrl}watch?v=${viewModel.code}",
+                            "${Preferences.baseUrl}watch?v=${videoCode}",
                             comment.reportableType,
                             comment.reportableId,
                         )
@@ -248,7 +248,7 @@ fun RenderVideoCommentContent(
             reportReasons = viewModel.reportReason,
             isPreviewCommentPrefetched = false,
             isAlreadyLogin = isAlreadyLogin,
-            onRefresh = { viewModel.getComment(VIDEO_COMMENT_PREFIX, viewModel.code) },
+            onRefresh = { viewModel.getComment(VIDEO_COMMENT_PREFIX, videoCode) },
             onReply = { comment, text ->
                 if (!isAlreadyLogin) return@CommentScreen
                 val replyTargetId = comment.replyTargetIdOrNull
@@ -264,7 +264,7 @@ fun RenderVideoCommentContent(
                 viewModel.reportComment(
                     reason.reasonKey ?: reason.value,
                     viewModel.currentUserId,
-                    "${Preferences.baseUrl}watch?v=${viewModel.code}",
+                    "${Preferences.baseUrl}watch?v=${videoCode}",
                     comment.reportableType,
                     comment.reportableId,
                 )
@@ -314,12 +314,12 @@ fun RenderVideoCommentContent(
                     return@CommentScreen
                 }
                 childCommentId = replyTargetId
-                viewModel.setChildCommentId(viewModel.code, replyTargetId)
+                viewModel.setChildCommentId(videoCode, replyTargetId)
             },
             onSortChange = { viewModel.setSortType(it) },
             onComposeComment = {
                 viewModel.currentUserId?.let { id ->
-                    viewModel.postComment(id, viewModel.code, VIDEO_COMMENT_PREFIX, it)
+                    viewModel.postComment(id, videoCode, VIDEO_COMMENT_PREFIX, it)
                 } ?: scope.launch {
                     reportMessages.emit(CommentMessage(getMessageText(CommentViewModel.Message(R.string.there_is_a_small_issue))))
                 }
@@ -327,7 +327,7 @@ fun RenderVideoCommentContent(
             initialFirstVisibleItemIndex = commentUiState.firstVisibleItemIndex,
             initialFirstVisibleItemScrollOffset = commentUiState.firstVisibleItemScrollOffset,
             onCommentScrollChange = { index, offset ->
-                viewModel.setCommentScrollState(viewModel.code, index, offset)
+                viewModel.setCommentScrollState(videoCode, index, offset)
             },
         )
     }
