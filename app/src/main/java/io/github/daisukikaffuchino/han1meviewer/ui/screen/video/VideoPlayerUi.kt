@@ -13,18 +13,22 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.border
 import androidx.compose.foundation.AndroidExternalSurface
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,52 +39,34 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.automirrored.outlined.ArrowForward
-import androidx.compose.material.icons.automirrored.outlined.VolumeUp
-import androidx.compose.material.icons.outlined.Brightness7
-import androidx.compose.material.icons.outlined.FastForward
-import androidx.compose.material.icons.outlined.Fullscreen
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.LockOpen
-import androidx.compose.material.icons.outlined.Pause
-import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material3.Card
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
-import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
-import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -96,26 +82,32 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import coil3.compose.AsyncImage
-import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
+import io.github.daisukikaffuchino.han1meviewer.R
+import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledTonalIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.player.PlaybackEngine
 import io.github.daisukikaffuchino.han1meviewer.ui.player.PlaybackQuality
 import io.github.daisukikaffuchino.han1meviewer.ui.player.PlayerDefaults
+import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Date
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.math.abs
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -174,16 +166,16 @@ fun VideoPlayerUi(
 ) {
     var showControlsState by remember { mutableStateOf(true) }
     var gestureType by remember { mutableStateOf<GestureIndicatorType?>(null) }
-    var gesturePercent by remember { mutableStateOf(0.5f) }
+    var gesturePercent by remember { mutableFloatStateOf(0.5f) }
     var dragStartedOnLeft by remember { mutableStateOf(true) }
     var progressDirection by remember { mutableStateOf<ProgressGestureDirection?>(null) }
     var isProgressGestureActive by remember { mutableStateOf(false) }
     var showLongPressSpeedHint by remember { mutableStateOf(false) }
-    var suppressTapUntilMs by remember { mutableStateOf(0L) }
+    var suppressTapUntilMs by remember { mutableLongStateOf(0L) }
     var activeSidePanel by remember { mutableStateOf<PlayerSidePanel?>(null) }
     var displayedSidePanel by remember { mutableStateOf<PlayerSidePanel?>(null) }
     var showUnlockButton by remember { mutableStateOf(false) }
-    var unlockButtonTimeoutToken by remember { mutableStateOf(0) }
+    var unlockButtonTimeoutToken by remember { mutableIntStateOf(0) }
     val context = LocalContext.current
     val view = LocalView.current
     var deviceTime by remember(context) {
@@ -435,7 +427,10 @@ fun VideoPlayerUi(
 
                                     else ->
                                         (gesturePercent - dragAmount.y /
-                                            (size.height * 0.8f).coerceAtLeast(1f)).coerceIn(0f, 1f)
+                                                (size.height * 0.8f).coerceAtLeast(1f)).coerceIn(
+                                            0f,
+                                            1f
+                                        )
                                 }
                                 gesturePercent = next
                                 when (type) {
@@ -606,7 +601,7 @@ fun VideoPlayerUi(
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                            painter = painterResource(R.drawable.ic_arrow_back_ios),
                             contentDescription = null,
                             tint = Color.White,
                             modifier = Modifier.size(20.dp)
@@ -623,10 +618,10 @@ fun VideoPlayerUi(
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Home,
+                            painter = painterResource(R.drawable.ic_home),
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                     }
 
@@ -694,10 +689,12 @@ fun VideoPlayerUi(
                 color = Color.Black.copy(alpha = 0.46f),
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.FastForward,
+                    painter = painterResource(R.drawable.ic_fast_forward),
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.padding(8.dp).size(20.dp),
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(20.dp),
                 )
             }
         }
@@ -708,9 +705,9 @@ fun VideoPlayerUi(
         AnimatedVisibility(
             visible =
                 !isLocked &&
-                    activeSidePanel == null &&
-                    gestureType == null &&
-                    (!isPlaying || effectiveShowControls),
+                        activeSidePanel == null &&
+                        gestureType == null &&
+                        (!isPlaying || effectiveShowControls),
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
@@ -721,27 +718,27 @@ fun VideoPlayerUi(
                 if (showLoading && !isProgressGestureActive) {
                     ContainedLoadingIndicator()
                 } else if (!isPlaying) {
-                    FilledIconButton(
+                    FilledTonalIconButton(
                         onClick = onPlayClick,
-                        modifier = Modifier.size(72.dp),
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.92f)
-                        )
+                        modifier = Modifier.size(72.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.PlayArrow,
+                            painter = painterResource(R.drawable.ic_play_arrow),
                             contentDescription = null,
                             modifier = Modifier.size(42.dp)
                         )
                     }
                 } else {
                     // Playing: small pause button when controls are visible
-                    IconButton(onClick = onPlayClick) {
+                    IconButton(
+                        onClick = onPlayClick,
+                        modifier = Modifier.size(72.dp)
+                    ) {
                         Icon(
-                            imageVector = Icons.Outlined.Pause,
+                            painter = painterResource(R.drawable.ic_pause),
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(42.dp)
                         )
                     }
                 }
@@ -767,10 +764,10 @@ fun VideoPlayerUi(
                 )
             ) {
                 Icon(
-                    imageVector = if (isLocked)
-                        Icons.Outlined.Lock
+                    painter = if (isLocked)
+                        painterResource(R.drawable.ic_lock)
                     else
-                        Icons.Outlined.LockOpen,
+                        painterResource(R.drawable.ic_unlock),
                     contentDescription = null,
                     tint = Color.White
                 )
@@ -879,10 +876,13 @@ fun VideoPlayerUi(
                             modifier = Modifier.size(26.dp)
                         ) {
                             Icon(
-                                imageVector = if (isPlaying) Icons.Outlined.Pause else Icons.Outlined.PlayArrow,
+                                painter = if (isPlaying)
+                                    painterResource(R.drawable.ic_pause)
+                                else
+                                    painterResource(R.drawable.ic_play_arrow),
                                 contentDescription = null,
                                 tint = Color.White,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         }
 
@@ -925,10 +925,10 @@ fun VideoPlayerUi(
                             modifier = Modifier.size(26.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.Fullscreen,
+                                painter = painterResource(R.drawable.ic_fullscreen),
                                 contentDescription = null,
                                 tint = Color.White,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                     }
@@ -943,7 +943,7 @@ fun VideoPlayerUi(
             visible = showResumeButton && activeSidePanel == null,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 92.dp),
+                .padding(bottom = 72.dp),
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
@@ -988,7 +988,7 @@ fun VideoPlayerUi(
                         onClick = onRetry
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Refresh,
+                            painter = painterResource(R.drawable.ic_refresh),
                             contentDescription = null
                         )
 
@@ -1508,8 +1508,8 @@ private fun GestureIndicatorOverlay(
     visible: Boolean,
     type: GestureIndicatorType,
     percent: Float,
-    progressDirection: ProgressGestureDirection? = null,
     modifier: Modifier = Modifier,
+    progressDirection: ProgressGestureDirection? = null,
     text: String? = null,
 ) {
     val displayText = text ?: stringResource(
@@ -1610,12 +1610,12 @@ private fun GestureIndicatorOverlay(
                 ) {
 
                     Icon(
-                        imageVector = when (type) {
-                            GestureIndicatorType.Brightness -> Icons.Outlined.Brightness7
-                            GestureIndicatorType.Volume -> Icons.AutoMirrored.Outlined.VolumeUp
+                        painter = when (type) {
+                            GestureIndicatorType.Brightness -> painterResource(R.drawable.ic_light_mode)
+                            GestureIndicatorType.Volume -> painterResource(R.drawable.ic_volume_up)
                             GestureIndicatorType.Progress -> when (progressDirection) {
-                                ProgressGestureDirection.Backward -> Icons.AutoMirrored.Outlined.ArrowBack
-                                else -> Icons.AutoMirrored.Outlined.ArrowForward
+                                ProgressGestureDirection.Backward -> painterResource(R.drawable.ic_fast_rewind)
+                                else -> painterResource(R.drawable.ic_fast_forward)
                             }
                         },
                         contentDescription = null,

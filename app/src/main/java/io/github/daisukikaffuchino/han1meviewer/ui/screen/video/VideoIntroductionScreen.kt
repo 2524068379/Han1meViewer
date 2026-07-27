@@ -3,9 +3,12 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.video
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -91,8 +94,10 @@ import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeVideoIntroduction
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberCardResponsiveWidth
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberRandomLoadingHint
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.SpacingNormal
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.VideoNormalCardMinWidth
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.VideoSimplifiedCardMinWidth
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
 import io.github.daisukikaffuchino.han1meviewer.util.DisplayTextLocalizer
 import io.github.daisukikaffuchino.utils.SonnerToast
 import io.github.daisukikaffuchino.utils.VibrationUtil
@@ -815,8 +820,16 @@ private fun ArtistSection(
     onToggleSubscribe: () -> Unit,
 ) {
     val view = LocalView.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    val cardShape = shapeByInteraction(
+        shapes = HanimeDefaults.cardShapes(),
+        pressed = pressed,
+        animationSpec = HanimeDefaults.shapesDefaultAnimationSpec,
+    )
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = cardShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),
@@ -825,6 +838,8 @@ private fun ArtistSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .combinedClickable(
+                    interactionSource = interactionSource,
+                    indication = LocalIndication.current,
                     onClick = {
                         VibrationUtil.performHapticFeedback(view)
                         onOpenArtist()
@@ -1277,6 +1292,7 @@ private fun PlaylistSection(
                     videoItem = item,
                     isHorizontalCard = item.itemType == HanimeInfo.NORMAL,
                     isPlaying = item.isPlaying,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                     onClickVideosItem = { onOpenVideo(item) },
                     onLongClickVideosItem = { _, _ -> },
                 )
@@ -1314,6 +1330,7 @@ internal fun RelatedVideosSection(
                         modifier = Modifier.width(itemWidth),
                         videoItem = item,
                         isHorizontalCard = item.itemType == HanimeInfo.NORMAL,
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                         onClickVideosItem = { onOpenVideo(item) },
                         onLongClickVideosItem = { _, _ -> },
                     )

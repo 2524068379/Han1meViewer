@@ -77,6 +77,7 @@ fun VideoCardItem(
     isHomePage: Boolean = false,
     isWatched: Boolean = false,
     isPlaying: Boolean = false,
+    containerColor: Color? = null,
     onClickVideosItem: (String) -> Unit,
     onLongClickVideosItem: (String, String) -> Unit,
 ) {
@@ -101,7 +102,11 @@ fun VideoCardItem(
             .fillMaxWidth()
             .animateContentSize(),
         shape = cardShape,
-        color = if (isHomePage) HanimeDefaults.Colors.homeVideoCard else HanimeDefaults.Colors.card,
+        color = containerColor ?: if (isHomePage) {
+            HanimeDefaults.Colors.homeVideoCard
+        } else {
+            HanimeDefaults.Colors.card
+        },
     ) {
         Box {
             Column(

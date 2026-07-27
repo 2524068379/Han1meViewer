@@ -75,6 +75,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 
+@Suppress("DEPRECATION")
 @OptIn(ExperimentalTime::class)
 @Composable
 fun VideoRouteHostScreen(
@@ -181,7 +182,16 @@ fun VideoRouteHostScreen(
             controller.systemBarsBehavior =
                 androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         } else {
+            activity.window.statusBarColor = Color.BLACK
             controller.show(WindowInsetsCompat.Type.systemBars())
+            controller.isAppearanceLightStatusBars = false
+            controller.isAppearanceLightNavigationBars = false
+            activity.window.decorView.post {
+                WindowCompat.getInsetsController(activity.window, activity.window.decorView).apply {
+                    isAppearanceLightStatusBars = false
+                    isAppearanceLightNavigationBars = false
+                }
+            }
         }
     }
 

@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.ui.player.PlaybackEngine
+import io.github.daisukikaffuchino.han1meviewer.ui.player.PlaybackQuality
 import io.github.daisukikaffuchino.utils.VibrationUtil
 import kotlin.math.roundToInt
 
@@ -80,7 +81,7 @@ fun VideoShellContent(
     onProgressChange: (Float) -> Unit,
     onRetry: () -> Unit,
     onResumeClick: () -> Unit,
-    qualities: List<io.github.daisukikaffuchino.han1meviewer.ui.player.PlaybackQuality>,
+    qualities: List<PlaybackQuality>,
     selectedQuality: String?,
     onQualitySelected: (Int) -> Unit,
     playbackSpeed: Float,
