@@ -139,7 +139,7 @@ fun PlayerSettingsScreen(
                 title = stringResource(R.string.slide_sensitivity),
                 summary = state.slideSensitivitySummary,
                 value = state.slideSensitivity,
-                valueRange = 1..9,
+                valueRange = 1..7,
                 iconRes = R.drawable.ic_speed_flash,
                 onValueChange = onSlideSensitivityChange,
             )

@@ -281,6 +281,8 @@
     <string name="low">低</string>
     <string name="very_low">很低</string>
     <string name="extremely_low">极低</string>
+    <string name="slightly_high">稍高</string>
+    <string name="extremely_high">极高</string>
     <string name="shared_h_keyframe_detected_msg">注意：如果你也有和对方相同代号的关键H帧，那么你自己的将会被覆盖\n
 \n
 标题：%1$s\n

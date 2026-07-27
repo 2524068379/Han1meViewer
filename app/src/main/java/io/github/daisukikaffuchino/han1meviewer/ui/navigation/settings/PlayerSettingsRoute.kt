@@ -68,7 +68,10 @@ fun PlayerSettingsRouteScreen(
             refreshKey++
         },
         onSlideSensitivityChange = {
-            Preferences.preferenceSp.edit { putInt(PLAYER_SLIDE_SENSITIVITY, it) }
+            Preferences.preferenceSp.edit {
+                putInt(PLAYER_SLIDE_SENSITIVITY, it)
+                putBoolean(SettingsPreferenceKeys.SLIDE_SENSITIVITY_V2_MIGRATED, true)
+            }
             refreshKey++
         },
         onOpenMpvSettings = onNavigateToMpvSettings,

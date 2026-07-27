@@ -12,8 +12,10 @@ import android.graphics.Rect
 import android.graphics.drawable.Icon
 import android.net.ConnectivityManager
 import android.os.Build
+import android.provider.Settings
 import android.util.Base64
 import android.util.Rational
+import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -127,6 +129,7 @@ fun VideoRouteHostScreen(
     var isFullscreen by remember { mutableStateOf(false) }
     var isPlayerLocked by remember { mutableStateOf(false) }
     var volume by remember { mutableStateOf(1f) }
+    var brightness by remember { mutableStateOf(currentScreenBrightness(activity)) }
     var previousScreenBrightness by remember { mutableStateOf<Float?>(null) }
     var speedBeforeLongPress by remember { mutableStateOf<Float?>(null) }
     var showResumeButton by remember { mutableStateOf(false) }
@@ -193,6 +196,7 @@ fun VideoRouteHostScreen(
             }
             previousScreenBrightness = null
         }
+        brightness = currentScreenBrightness(activity)
     }
 
     fun enterFullscreen() {
@@ -318,9 +322,11 @@ fun VideoRouteHostScreen(
     }
 
     DisposableEffect(activity, playbackController, pageHost) {
+        activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         activity.registerCurrentVideoHost(pageHost)
         activity.onBackPressedDispatcher.addCallback(lifecycleOwner, backCallback)
         onDispose {
+            activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             activity.registerCurrentVideoHost(null)
             playbackController.release()
             exitFullscreen()
@@ -533,6 +539,8 @@ fun VideoRouteHostScreen(
             playbackState.engine.bufferedPositionMs,
             playbackState.engine.durationMs,
         ),
+        currentVolume = volume,
+        currentBrightness = brightness,
         isPlaying = playbackState.engine.isPlaying,
         isLocked = isPlayerLocked,
         showPoster = !playbackState.engine.hasRenderedFirstFrame,
@@ -633,6 +641,7 @@ fun VideoRouteHostScreen(
             playbackController.setVolume(value)
         },
         onBrightnessChange = { value ->
+            brightness = value
             if (previousScreenBrightness == null) {
                 previousScreenBrightness = activity.window.attributes.screenBrightness
             }
@@ -798,6 +807,17 @@ fun VideoRouteHostScreen(
 private fun playbackProgress(positionMs: Long, durationMs: Long): Float =
     if (durationMs <= 0L) 0f else (positionMs.toFloat() / durationMs).coerceIn(0f, 1f)
 
+private fun currentScreenBrightness(activity: MainActivity): Float {
+    val overrideBrightness = activity.window.attributes.screenBrightness
+    if (overrideBrightness in 0f..1f) return overrideBrightness
+    return runCatching {
+        Settings.System.getInt(
+            activity.contentResolver,
+            Settings.System.SCREEN_BRIGHTNESS,
+        ) / 255f
+    }.getOrDefault(0.5f).coerceIn(0.01f, 1f)
+}
+
 private fun formatPlaybackTime(positionMs: Long): String {
     val totalSeconds = (positionMs / 1000L).coerceAtLeast(0L)
     val hours = totalSeconds / 3600L
@@ -825,11 +845,7 @@ private fun isActiveNetworkMetered(context: Context): Boolean {
     return connectivityManager?.isActiveNetworkMetered == true
 }
 
-private fun realProgressSensitivity(value: Int): Float = when (value) {
-    in 1..5 -> value.toFloat()
-    6 -> 7f
-    7 -> 10f
-    8 -> 20f
-    9 -> 40f
-    else -> 5f
+private fun realProgressSensitivity(value: Int): Float {
+    val clampedValue = value.coerceIn(1, 7)
+    return 4f - (clampedValue - 1) * (3.5f / 6f)
 }

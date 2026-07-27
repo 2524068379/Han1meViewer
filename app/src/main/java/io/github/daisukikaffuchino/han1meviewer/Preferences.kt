@@ -92,10 +92,33 @@ object Preferences {
         )?.toFloat() ?: PlayerDefaults.DEFAULT_SPEED
 
     val slideSensitivity: Int
-        get() = preferenceSp.getInt(
-            SettingsPreferenceKeys.SLIDE_SENSITIVITY,
-            PlayerDefaults.DEFAULT_PROGRESS_SLIDE_SENSITIVITY
-        )
+        get() {
+            val preferences = preferenceSp
+            if (!preferences.contains(SettingsPreferenceKeys.SLIDE_SENSITIVITY)) {
+                return PlayerDefaults.DEFAULT_PROGRESS_SLIDE_SENSITIVITY
+            }
+            val storedValue = preferences.getInt(
+                SettingsPreferenceKeys.SLIDE_SENSITIVITY,
+                PlayerDefaults.DEFAULT_PROGRESS_SLIDE_SENSITIVITY,
+            )
+            if (preferences.getBoolean(SettingsPreferenceKeys.SLIDE_SENSITIVITY_V2_MIGRATED, false)) {
+                return storedValue.coerceIn(1, 7)
+            }
+            val migratedValue = when (storedValue) {
+                1, 2 -> 6
+                3, 4 -> 5
+                5 -> 4
+                6 -> 3
+                7 -> 2
+                8, 9 -> 1
+                else -> PlayerDefaults.DEFAULT_PROGRESS_SLIDE_SENSITIVITY
+            }
+            preferences.edit {
+                putInt(SettingsPreferenceKeys.SLIDE_SENSITIVITY, migratedValue)
+                putBoolean(SettingsPreferenceKeys.SLIDE_SENSITIVITY_V2_MIGRATED, true)
+            }
+            return migratedValue
+        }
 
     val longPressSpeedTime: Float
         get() = preferenceSp.getString(

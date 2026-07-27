@@ -49,16 +49,16 @@ internal fun generateClearCacheSummary(context: Context, size: Long): CharSequen
 
 internal fun toPrettySensitivityString(
     context: Context,
-    @IntRange(from = 1, to = 9) value: Int
+    @IntRange(from = 1, to = 7) value: Int
 ): String {
     val pretty = when (value) {
-        1, 2 -> context.getString(R.string.high)
-        3, 4 -> context.getString(R.string.moderately_high)
-        5 -> context.getString(R.string.moderate)
-        6 -> context.getString(R.string.slightly_low)
-        7 -> context.getString(R.string.low)
-        8 -> context.getString(R.string.very_low)
-        9 -> context.getString(R.string.extremely_low)
+        1 -> context.getString(R.string.extremely_low)
+        2 -> context.getString(R.string.low)
+        3 -> context.getString(R.string.slightly_low)
+        4 -> context.getString(R.string.moderate)
+        5 -> context.getString(R.string.slightly_high)
+        6 -> context.getString(R.string.high)
+        7 -> context.getString(R.string.extremely_high)
         else -> error("Invalid sensitivity value: $value")
     }
     return context.getString(R.string.current_slide_sensitivity, pretty)

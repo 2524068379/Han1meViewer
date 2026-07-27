@@ -17,7 +17,7 @@ enum class PlayerKernel {
 object PlayerDefaults {
     const val DEFAULT_SPEED = 1f
     const val DEFAULT_SPEED_INDEX = 2
-    const val DEFAULT_PROGRESS_SLIDE_SENSITIVITY = 5
+    const val DEFAULT_PROGRESS_SLIDE_SENSITIVITY = 4
     const val DEFAULT_LONG_PRESS_SPEED_MULTIPLIER = 2.5f
     const val DEFAULT_COUNTDOWN_SECONDS = 10
 

@@ -3,7 +3,9 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.video
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.os.Build
+import android.os.SystemClock
 import android.text.format.DateFormat
+import android.view.HapticFeedbackConstants
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.compose.animation.AnimatedVisibility
@@ -44,6 +46,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.outlined.Brightness7
 import androidx.compose.material.icons.outlined.FastForward
@@ -80,6 +83,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -91,6 +95,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.KeyboardType
@@ -123,6 +128,8 @@ fun VideoPlayerUi(
     totalTime: String,
     progress: Float,
     bufferedProgress: Float,
+    currentVolume: Float,
+    currentBrightness: Float,
     showControls: Boolean = true,
     isFullscreen: Boolean = false,
     isPlaying: Boolean = false,
@@ -169,11 +176,16 @@ fun VideoPlayerUi(
     var gestureType by remember { mutableStateOf<GestureIndicatorType?>(null) }
     var gesturePercent by remember { mutableStateOf(0.5f) }
     var dragStartedOnLeft by remember { mutableStateOf(true) }
+    var progressDirection by remember { mutableStateOf<ProgressGestureDirection?>(null) }
+    var isProgressGestureActive by remember { mutableStateOf(false) }
+    var showLongPressSpeedHint by remember { mutableStateOf(false) }
+    var suppressTapUntilMs by remember { mutableStateOf(0L) }
     var activeSidePanel by remember { mutableStateOf<PlayerSidePanel?>(null) }
     var displayedSidePanel by remember { mutableStateOf<PlayerSidePanel?>(null) }
     var showUnlockButton by remember { mutableStateOf(false) }
     var unlockButtonTimeoutToken by remember { mutableStateOf(0) }
     val context = LocalContext.current
+    val view = LocalView.current
     var deviceTime by remember(context) {
         mutableStateOf(DateFormat.getTimeFormat(context).format(Date()))
     }
@@ -201,6 +213,20 @@ fun VideoPlayerUi(
         selectedQuality ?: qualities.lastOrNull()?.label
         ?: stringResource(R.string.player_auto_quality)
     val qualitySelectedIndex = qualities.indexOfFirst { it.label == resolvedQualityLabel }
+    val latestProgress by rememberUpdatedState(progress)
+    val latestVolume by rememberUpdatedState(currentVolume)
+    val latestBrightness by rememberUpdatedState(currentBrightness)
+    val latestProgressSensitivity by rememberUpdatedState(progressGestureSensitivity)
+    val latestOnProgressGesture by rememberUpdatedState(onProgressGesture)
+    val latestOnVolumeChange by rememberUpdatedState(onVolumeChange)
+    val latestOnBrightnessChange by rememberUpdatedState(onBrightnessChange)
+    val latestIsPlaying by rememberUpdatedState(isPlaying)
+    val latestOnLongPressStart by rememberUpdatedState(onLongPressStart)
+    val latestOnLongPressEnd by rememberUpdatedState(onLongPressEnd)
+
+    LaunchedEffect(isPlaying) {
+        if (!isPlaying) showLongPressSpeedHint = false
+    }
 
     LaunchedEffect(activeSidePanel) {
         if (activeSidePanel != null) {
@@ -241,15 +267,34 @@ fun VideoPlayerUi(
                                 var activated = false
                                 val activationJob = launch {
                                     delay(longPressTimeout.milliseconds)
-                                    activated = true
-                                    onLongPressStart()
+                                    if (latestIsPlaying) {
+                                        activated = true
+                                        showLongPressSpeedHint = true
+                                        showControlsState = false
+                                        suppressTapUntilMs = Long.MAX_VALUE
+                                        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                        latestOnLongPressStart()
+                                    }
                                 }
                                 tryAwaitRelease()
                                 activationJob.cancel()
-                                if (activated) onLongPressEnd()
+                                if (activated) {
+                                    showLongPressSpeedHint = false
+                                    showControlsState = false
+                                    if (suppressTapUntilMs == Long.MAX_VALUE) {
+                                        suppressTapUntilMs = SystemClock.uptimeMillis() + 500L
+                                    }
+                                    latestOnLongPressEnd()
+                                }
                             }
                         },
-                        onTap = { showControlsState = !showControlsState },
+                        onTap = {
+                            if (SystemClock.uptimeMillis() <= suppressTapUntilMs) {
+                                suppressTapUntilMs = 0L
+                            } else {
+                                showControlsState = !showControlsState
+                            }
+                        },
                         onDoubleTap = { onPlayClick() },
                     )
                 }
@@ -335,14 +380,27 @@ fun VideoPlayerUi(
                 .fillMaxSize()
                 .pointerInput(isLocked) {
                     if (!isLocked) {
+                        var gestureStartProgress = 0f
+                        var gestureStartVolume = 0f
+                        var gestureStartBrightness = 0f
                         detectDragGestures(
                             onDragStart = { offset ->
                                 dragStartedOnLeft = offset.x < size.width / 2f
                                 gestureType = null
-                                gesturePercent = progress
+                                progressDirection = null
+                                isProgressGestureActive = false
+                                gestureStartProgress = latestProgress
+                                gestureStartVolume = latestVolume
+                                gestureStartBrightness = latestBrightness
                             },
-                            onDragEnd = { gestureType = null },
-                            onDragCancel = { gestureType = null },
+                            onDragEnd = {
+                                gestureType = null
+                                isProgressGestureActive = false
+                            },
+                            onDragCancel = {
+                                gestureType = null
+                                isProgressGestureActive = false
+                            },
                             onDrag = { _, dragAmount ->
                                 val type =
                                     gestureType ?: if (abs(dragAmount.x) > abs(dragAmount.y)) {
@@ -352,23 +410,38 @@ fun VideoPlayerUi(
                                     } else {
                                         GestureIndicatorType.Volume
                                     }
+                                if (gestureType == null) {
+                                    gesturePercent = when (type) {
+                                        GestureIndicatorType.Progress -> gestureStartProgress
+                                        GestureIndicatorType.Brightness -> gestureStartBrightness
+                                        GestureIndicatorType.Volume -> gestureStartVolume
+                                    }
+                                    isProgressGestureActive = type == GestureIndicatorType.Progress
+                                }
                                 gestureType = type
                                 val next = when (type) {
-                                    GestureIndicatorType.Progress ->
+                                    GestureIndicatorType.Progress -> {
+                                        progressDirection = if (dragAmount.x < 0f) {
+                                            ProgressGestureDirection.Backward
+                                        } else {
+                                            ProgressGestureDirection.Forward
+                                        }
                                         (gesturePercent + dragAmount.x /
-                                                (size.width * progressGestureSensitivity.coerceAtLeast(
+                                                (size.width * latestProgressSensitivity.coerceAtLeast(
                                                     1f
                                                 )))
                                             .coerceIn(0f, 1f)
+                                    }
 
                                     else ->
-                                        (gesturePercent - dragAmount.y / 320f).coerceIn(0f, 1f)
+                                        (gesturePercent - dragAmount.y /
+                                            (size.height * 0.8f).coerceAtLeast(1f)).coerceIn(0f, 1f)
                                 }
                                 gesturePercent = next
                                 when (type) {
-                                    GestureIndicatorType.Brightness -> onBrightnessChange(next)
-                                    GestureIndicatorType.Volume -> onVolumeChange(next)
-                                    GestureIndicatorType.Progress -> onProgressGesture(next)
+                                    GestureIndicatorType.Brightness -> latestOnBrightnessChange(next)
+                                    GestureIndicatorType.Volume -> latestOnVolumeChange(next)
+                                    GestureIndicatorType.Progress -> latestOnProgressGesture(next)
                                 }
                             },
                         )
@@ -381,6 +454,7 @@ fun VideoPlayerUi(
                 visible = true,
                 type = type,
                 percent = gesturePercent,
+                progressDirection = progressDirection,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -607,11 +681,36 @@ fun VideoPlayerUi(
             }
         }
 
+        AnimatedVisibility(
+            visible = showLongPressSpeedHint,
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(start = 24.dp),
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = Color.Black.copy(alpha = 0.46f),
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.FastForward,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.padding(8.dp).size(20.dp),
+                )
+            }
+        }
+
         /**
          * 中间播放按钮
          */
         AnimatedVisibility(
-            visible = !isLocked && activeSidePanel == null && (!isPlaying || effectiveShowControls),
+            visible =
+                !isLocked &&
+                    activeSidePanel == null &&
+                    gestureType == null &&
+                    (!isPlaying || effectiveShowControls),
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
@@ -619,7 +718,7 @@ fun VideoPlayerUi(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                if (showLoading) {
+                if (showLoading && !isProgressGestureActive) {
                     ContainedLoadingIndicator()
                 } else if (!isPlaying) {
                     FilledIconButton(
@@ -1399,11 +1498,17 @@ enum class GestureIndicatorType {
     Progress,
 }
 
+private enum class ProgressGestureDirection {
+    Backward,
+    Forward,
+}
+
 @Composable
-fun GestureIndicatorOverlay(
+private fun GestureIndicatorOverlay(
     visible: Boolean,
     type: GestureIndicatorType,
     percent: Float,
+    progressDirection: ProgressGestureDirection? = null,
     modifier: Modifier = Modifier,
     text: String? = null,
 ) {
@@ -1508,7 +1613,10 @@ fun GestureIndicatorOverlay(
                         imageVector = when (type) {
                             GestureIndicatorType.Brightness -> Icons.Outlined.Brightness7
                             GestureIndicatorType.Volume -> Icons.AutoMirrored.Outlined.VolumeUp
-                            GestureIndicatorType.Progress -> Icons.Outlined.FastForward
+                            GestureIndicatorType.Progress -> when (progressDirection) {
+                                ProgressGestureDirection.Backward -> Icons.AutoMirrored.Outlined.ArrowBack
+                                else -> Icons.AutoMirrored.Outlined.ArrowForward
+                            }
                         },
                         contentDescription = null,
                         tint = Color.White,
@@ -1644,6 +1752,8 @@ private fun VideoPlayerUiPreviewContent(
         totalTime = VideoPlayerUiPreviewData.totalTime,
         progress = VideoPlayerUiPreviewData.progress,
         bufferedProgress = VideoPlayerUiPreviewData.bufferedProgress,
+        currentVolume = 0.7f,
+        currentBrightness = 0.65f,
         isFullscreen = isFullscreen,
         isPlaying = isPlaying,
         showLoading = showLoading,

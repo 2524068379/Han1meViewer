@@ -279,6 +279,8 @@
     <string name="low">低</string>
     <string name="very_low">很低</string>
     <string name="extremely_low">極低</string>
+    <string name="slightly_high">稍高</string>
+    <string name="extremely_high">極高</string>
     <string name="shared_h_keyframe_detected_msg">注意：如果你也有與對方相同代號的關鍵 H 幀，你自己的資料將會被覆蓋\n\n標題：%1$s\n代號：%2$s\n共有 %3$d 個時間點</string>
     <string name="domain_change_tips">修改網域需要重新啟動程式，否則不會生效！\n不同網域不共用 Cookie，因此更換網域後需要重新登入。\n所以除了 hanime1.me 以外的網域可能在某些時段重新導向回 hanime1.me，這可能導致 Cookie 失效\n\n建議如下：\n· 無 VPN 使用者，使用 hanime1.me 並開啟內建 Hosts\n· 日本使用者，使用 hanime1.com\n· 其他地區使用者，使用 hanime1.me 並關閉內建 Hosts</string>
     <string name="website_blocked_msg">看到這裡表示他們的網站已經加固，只能聽天由命看看能否恢復了…</string>

@@ -280,6 +280,8 @@ Some mirrors may not support login, may not share cookies, may fail verification
     <string name="low">Low</string>
     <string name="very_low">Very Low</string>
     <string name="extremely_low">Extremely Low</string>
+    <string name="slightly_high">Slightly High</string>
+    <string name="extremely_high">Extremely High</string>
     <string name="shared_h_keyframe_detected_msg">Note: If you also have H Keyframes with the same code as the other party, yours will be overwritten\n\nTitle: %1$s\nCode: %2$s\n%3$d moment(s) available</string>
     <string name="domain_change_tips">Changing the domain name requires restarting the program, otherwise it will not take effect!\n
 Different domains do not share the same cookies, so after changing the domain name, you need to log in again.\n

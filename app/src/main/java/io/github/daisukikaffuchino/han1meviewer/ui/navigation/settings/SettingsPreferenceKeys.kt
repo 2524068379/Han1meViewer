@@ -33,6 +33,7 @@ object SettingsPreferenceKeys {
     const val SWITCH_PLAYER_KERNEL = "switch_player_kernel"
     const val PLAYER_SPEED = "player_speed"
     const val SLIDE_SENSITIVITY = "slide_sensitivity"
+    const val SLIDE_SENSITIVITY_V2_MIGRATED = "slide_sensitivity_v2_migrated"
     const val LONG_PRESS_SPEED_TIMES = "long_press_speed_times"
     const val DOMAIN_NAME = "domain_name"
     const val SELECTED_BASE_URL = "selectedBaseUrl"
