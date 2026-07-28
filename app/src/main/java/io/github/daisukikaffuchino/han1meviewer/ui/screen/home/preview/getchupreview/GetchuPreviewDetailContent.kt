@@ -14,10 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.PlayCircleOutline
 import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticButton as Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedCard
@@ -157,7 +153,7 @@ internal fun GetchuPreviewDetailContent(
                                     onClick = { onNavigateToVideoUrl(detail.videoUrls.first()) },
                                     contentPadding = PaddingValues(vertical = 12.dp)
                                 ) {
-                                    Icon(Icons.Default.PlayArrow, contentDescription = null)
+                                    Icon(painterResource(R.drawable.ic_play_arrow), contentDescription = null)
                                     Spacer(Modifier.width(4.dp))
                                     Text(stringResource(R.string.play_trailer))
                                 }
@@ -168,7 +164,7 @@ internal fun GetchuPreviewDetailContent(
                                 onClick = { uriHandler.openUri(detail.productUrl) },
                                 contentPadding = PaddingValues(vertical = 12.dp)
                             ) {
-                                Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null)
+                                Icon(painterResource(R.drawable.ic_ext_link), contentDescription = null)
                                 Spacer(Modifier.width(4.dp))
                                 Text(stringResource(R.string.jump_to_webpage))
                             }
@@ -184,7 +180,7 @@ internal fun GetchuPreviewDetailContent(
                                             containerColor = MaterialTheme.colorScheme.surfaceVariant
                                         )
                                     ) {
-                                        Icon(Icons.Default.PlayCircleOutline, contentDescription = null)
+                                        Icon(painterResource(R.drawable.ic_play_circle), contentDescription = null)
                                         Spacer(Modifier.width(8.dp))
                                         Text("${stringResource(R.string.play_trailer)} ${index + 2}")
                                     }

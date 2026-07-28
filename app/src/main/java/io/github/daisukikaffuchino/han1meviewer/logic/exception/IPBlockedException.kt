@@ -7,4 +7,4 @@ package io.github.daisukikaffuchino.han1meviewer.logic.exception
  * @author Yenaly Liew
  * @time 2023/08/07 007 12:40
  */
-class IPBlockedException(reason: String) : CloudFlareBlockedException(reason)
+class IPBlockedException(reason: String) : CloudflareBlockedException(reason)

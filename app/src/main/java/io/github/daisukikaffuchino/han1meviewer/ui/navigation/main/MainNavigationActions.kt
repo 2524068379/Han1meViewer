@@ -27,21 +27,21 @@ fun TopLevelBackStack<HanimeScreen>.navigateDrawerDestination(
 }
 
 fun TopLevelBackStack<HanimeScreen>.handleMainIntent(intent: Intent) {
-    if (intent.action == Intent.ACTION_VIEW) {
-        val uri = intent.data ?: return
+    intent.data?.let { uri ->
         when (uri.scheme) {
             "http", "https" -> {
                 val videoCode = uri.getQueryParameter("v")
                 if (videoCode != null) {
                     add(VideoRoute(videoCode))
+                    return
                 }
             }
 
             "file", "content" -> {
                 add(VideoRoute("-1", uri.toString()))
+                return
             }
         }
-        return
     }
 
     if (intent.getBooleanExtra(EXTRA_OPEN_DAILY_CHECK_IN, false)) {

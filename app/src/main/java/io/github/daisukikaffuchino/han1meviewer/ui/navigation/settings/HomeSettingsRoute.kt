@@ -205,6 +205,10 @@ fun HomeSettingsRouteScreen(
             Preferences.hapticFeedbackEnabled = enabled
             refreshKey++
         },
+        onFunLoadingHintsChange = { enabled ->
+            saveBoolean(SettingsPreferenceKeys.FUN_LOADING_HINTS, enabled)
+            refreshKey++
+        },
         onThemeAccentColorChange = { id ->
             saveInt(HOME_THEME_ACCENT_COLOR, id)
             refreshKey++
@@ -531,6 +535,7 @@ private fun buildHomeSettingsUiState(
         collapseDownloadedGroup = Preferences.collapseDownloadedGroup,
         useDynamicColor = Preferences.useDynamicColor,
         hapticFeedbackEnabled = Preferences.hapticFeedbackEnabled,
+        funLoadingHints = Preferences.funLoadingHints,
         useLockScreen = Preferences.preferenceSp.getBoolean(HOME_USE_LOCK_SCREEN, false),
         fakeLauncherIconName = currentItem.name,
         cacheSummary = cacheSummary,

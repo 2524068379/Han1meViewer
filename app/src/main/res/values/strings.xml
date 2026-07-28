@@ -291,7 +291,6 @@ Recommendations are as follows:\n
 · Non-VPN users, use hanime1.me and enable built-in Hosts\n
 · Japanese users, use hanime1.com\n
 · Users from other regions, use hanime1.me and disable built-in Hosts</string>
-    <string name="website_blocked_msg">Seeing this message means their website has been reinforced. Whether it can be restored depends on fate…</string>
     <string name="not_logged_in_currently">Currently not logged in</string>
     <string name="login_state_expired">Your login session has expired. You have been logged out automatically. Please sign in again.</string>
     <string name="parse_error_msg">Maybe this URL is parsed differently…</string>
@@ -320,6 +319,8 @@ Recommendations are as follows:\n
     <string name="long_press_speed_summary">Uses %1$s the current playback speed</string>
     <string name="haptic_feedback">Haptic Feedback</string>
     <string name="haptic_feedback_summary">Provide vibration feedback for certain actions</string>
+    <string name="fun_loading_hints">More playful loading messages</string>
+    <string name="fun_loading_hints_summary">You are as cute as ever today~</string>
     <string name="slide_sensitivity">Slide Sensitivity for Progress Adjustment</string>
     <string name="apply_deep_links">Apply Deep Links</string>
     <string name="apply_deep_links_summary">After application, quickly jump to this app when opening relevant web pages</string>
@@ -335,8 +336,6 @@ Recommendations are as follows:\n
     <string name="sure_to_redownload">Are you sure you want to redownload?</string>
     <string name="privacy">Privacy</string>
     <string name="refresh_page_or_login_expired">Try refreshing the page\nor your login may have expired</string>
-    <string name="website_blocked_msg_2">The website is blocked, changing to another domain name might work!</string>
-    <string name="website_blocked_msg_3">You can notify the developer, but don\'t rush them, the website being blocked is not their fault~</string>
     <string name="action_not_support">This device does not support this action</string>
     <string name="download_settings">Download Settings</string>
     <string name="download_count_limit">Download Count Limit</string>
@@ -692,4 +691,20 @@ Recommendations are as follows:\n
     <string name="player_gesture_progress">Progress</string>
     <string name="player_play_from_beginning">Play from beginning</string>
     <string name="player_untitled_video">Untitled</string>
+    <string name="perception">Sensing</string>
+    <string-array name="loading_hints">
+        <item>Hmph! I-it\'s not like I kept you waiting! The router just sneezed…</item>
+        <item>Idiot! Staring at it won\'t make it go faster! …Okay, just give me three more seconds!</item>
+        <item>(Hurriedly hides the chip bag) O-oh, you caught me! Lemme just swallow this bite and I\'m on it!</item>
+        <item>Whoa! The data cables seem to have eloped and tangled together! Untangling them now!</item>
+        <item>Packing happiness into a ZIP file for you… Estimated extraction time: Right now!</item>
+        <item>The progress bar is sneaking bites of tiramisu—current status: bottom cookie crumbs are gone!</item>
+        <item>Progress bar of dark powers, reveal thy true speed before me— (strikethrough) …Actually, let\'s stick with this speed!</item>
+        <item>Hunting for interdimensional signals… Beep beep— Signal strength at max, but a cat bit the wire. Hold on!</item>
+        <item>I know you\'re in a hurry, but chill~! Blink your eyes and turn your neck left three times… Yep, just like that!</item>
+        <item>Activating spell card: Pot of Greed! …Oops, I drew even more loading time. Sorry~!</item>
+        <item>Your loading request has been priority-queue-jumped by the hero squad! Current rank: #0 (VIP lane)!</item>
+        <item>Rubbing my hands in excitement till they\'re smoking…</item>
+        <item>◝(⑅•ᴗ•⑅)◜..°♡ Transmitting a bundle of cuteness your way—please sign for it~</item>
+    </string-array>
 </resources>

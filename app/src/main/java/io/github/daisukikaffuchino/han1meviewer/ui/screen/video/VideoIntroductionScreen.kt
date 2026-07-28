@@ -80,7 +80,6 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.CheckInRecordEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo
 import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
-import io.github.daisukikaffuchino.han1meviewer.ui.component.BottomSheetHandler
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ExpandableRichText
 import io.github.daisukikaffuchino.han1meviewer.ui.component.TagChipGroup
 import io.github.daisukikaffuchino.han1meviewer.ui.component.VideoCardItem
@@ -672,7 +671,7 @@ private fun PlaylistBottomSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        dragHandle = { BottomSheetHandler() },
+        containerColor = HanimeDefaults.Colors.pageSurface,
     ) {
         Column(
             modifier = Modifier

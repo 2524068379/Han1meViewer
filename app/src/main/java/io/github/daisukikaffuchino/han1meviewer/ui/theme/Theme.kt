@@ -138,7 +138,7 @@ internal fun expressiveColorScheme(
 ): ColorScheme {
     val scheme = remember(keyColor, isDark, style, contrastLevel) {
         val hct = Hct.fromInt(keyColor.toArgb())
-        val specVersion = ColorSpec.SpecVersion.SPEC_2021
+        val specVersion = ColorSpec.SpecVersion.SPEC_2026
         val platform = DynamicScheme.Platform.PHONE
         when (style) {
             AppPaletteStyle.TonalSpot -> SchemeTonalSpot(hct, isDark, contrastLevel, specVersion, platform)

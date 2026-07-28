@@ -6,8 +6,6 @@ import okhttp3.Response
 class SpeedLimitInterceptor(var maxSpeed: Long) : Interceptor {
 
     companion object {
-        const val NO_LIMIT = 0L
-
         const val NO_LIMIT_INDEX = 0
 
         @JvmField

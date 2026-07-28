@@ -122,7 +122,6 @@ dependencies {
     implementation(libs.androidx.documentfile)
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.startup.runtime)
-    implementation(libs.androidx.material.icons.extended)
 
     implementation(libs.bundles.android.base)
     implementation(libs.bundles.android.jetpack)

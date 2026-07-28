@@ -63,6 +63,7 @@ fun HomeSettingsScreen(
     onDarkModeChange: (String) -> Unit,
     onUseDynamicColorChange: (Boolean) -> Unit,
     onHapticFeedbackChange: (Boolean) -> Unit,
+    onFunLoadingHintsChange: (Boolean) -> Unit,
     onThemeAccentColorChange: (Int) -> Unit,
     onAppPaletteStyleChange: (Int) -> Unit,
     onAllowPipModeChange: (Boolean) -> Unit,
@@ -316,7 +317,7 @@ fun HomeSettingsScreen(
 
             HomeSettingsPage.InterfaceInteraction -> {
                 item {
-                    SettingsSegmentedGroup {
+                    SettingsSection(stringResource(R.string.perception)) {
                         SettingSwitchItem(
                             title = stringResource(R.string.haptic_feedback),
                             summary = stringResource(R.string.haptic_feedback_summary),
@@ -363,6 +364,13 @@ fun HomeSettingsScreen(
                             checked = state.checkInEnabled,
                             iconRes = R.drawable.ic_thumb_up_off_alt,
                             onCheckedChange = onCheckInEnabledChange,
+                        )
+                        SettingSwitchItem(
+                            title = stringResource(R.string.fun_loading_hints),
+                            summary = stringResource(R.string.fun_loading_hints_summary),
+                            checked = state.funLoadingHints,
+                            iconRes = R.drawable.ic_pet_supplies,
+                            onCheckedChange = onFunLoadingHintsChange,
                         )
                         SettingsAnimatedVisibility(visible = state.tabletMode) {
                             SettingNavigationItem(
@@ -524,6 +532,7 @@ private fun HomeSettingsScreenPreview() {
             onDarkModeChange = {},
             onUseDynamicColorChange = {},
             onHapticFeedbackChange = {},
+            onFunLoadingHintsChange = {},
             onThemeAccentColorChange = {},
             onAppPaletteStyleChange = {},
             onAllowPipModeChange = {},
@@ -574,6 +583,7 @@ private fun previewHomeSettingsState() = HomeSettingsUiState(
     collapseDownloadedGroup = false,
     useDynamicColor = false,
     hapticFeedbackEnabled = false,
+    funLoadingHints = true,
     useLockScreen = false,
     fakeLauncherIconName = "Han1meViewer",
     cacheSummary = "12 MB",

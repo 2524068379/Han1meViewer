@@ -26,11 +26,11 @@ import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
-import io.github.daisukikaffuchino.han1meviewer.ui.component.BottomSheetHandler
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.video.ChildCommentScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.video.CommentMessage
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.video.CommentScreen
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.CommentViewModel
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.PreviewCommentPrefetcher
 import io.github.daisukikaffuchino.utils.application
@@ -135,12 +135,11 @@ fun PreviewCommentRouteScreen(
                 viewModel.clearVideoReplyList()
             },
             sheetState = childSheetState,
-            dragHandle = null
+            containerColor = HanimeDefaults.Colors.pageSurface,
         ) {
             LaunchedEffect(currentCommentId) {
                 viewModel.getCommentReply(currentCommentId)
             }
-            BottomSheetHandler()
             val mappedReportFlow = remember(viewModel.reportMessage) {
                 viewModel.reportMessage.map { message ->
                     val text = if (message.args.isNotEmpty()) {

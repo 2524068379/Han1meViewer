@@ -296,7 +296,6 @@
 · 无 VPN 用户，使用 hanime1.me 并开启内置 Hosts\n
 · 日本用户，使用 hanime1.com\n
 · 其他地区用户，使用 hanime1.me 并关闭内置 Hosts</string>
-    <string name="website_blocked_msg">看到这里说明他们网站被加固了，能不能恢复只能听天命了…</string>
     <string name="not_logged_in_currently">当前未登录</string>
     <string name="login_state_expired">登录状态已失效，已自动登出，请重新登录</string>
     <string name="parse_error_msg">可能这个网址解析起来不太一样…</string>
@@ -325,6 +324,8 @@
     <string name="long_press_speed_summary">当前速度的 %1$s</string>
     <string name="haptic_feedback">触感反馈</string>
     <string name="haptic_feedback_summary">为某些操作提供震动反馈</string>
+    <string name="fun_loading_hints">更有趣的加载文案</string>
+    <string name="fun_loading_hints_summary">今天也很可爱哦~</string>
     <string name="slide_sensitivity">滑动调整进度的灵敏度</string>
     <string name="apply_deep_links">应用深层链接</string>
     <string name="apply_deep_links_summary">应用后，打开相关网页后能快速跳转至本 App</string>
@@ -340,8 +341,6 @@
     <string name="sure_to_redownload">确定要重新下载吗？</string>
     <string name="privacy">隐私</string>
     <string name="refresh_page_or_login_expired">刷新一下页面试试\n也可能登入已过期</string>
-    <string name="website_blocked_msg_2">网站被加固，修改为另外一个域名可能有奇效！</string>
-    <string name="website_blocked_msg_3">可以提醒一下开发者，但不要催，网站被加固跟他没有任何关系哦～</string>
     <string name="action_not_support">此设备不支持该操作</string>
     <string name="download_settings">下载设置</string>
     <string name="download_count_limit">同时下载数量限制</string>
@@ -676,4 +675,20 @@
     <string name="player_gesture_progress">进度</string>
     <string name="player_play_from_beginning">从头开始播放</string>
     <string name="player_untitled_video">未命名视频</string>
+    <string name="perception">感知</string>
+    <string-array name="loading_hints">
+        <item>哼！才、才没有让你久等呢！是路由器刚才打了个喷嚏啦……</item>
+        <item>笨蛋！盯着看它也不会变快啦！……好啦，再给我三秒就好！</item>
+        <item>（慌慌张张藏起薯片袋）被…被发现了呢！等我咽下这口就来！</item>
+        <item>呜哇！前面的数据线好像偷偷私奔缠在一起了！正在拆散它们！</item>
+        <item>正在把快乐打包成压缩包发送给你……预计解压时间：马上！</item>
+        <item>进度条正在偷吃提拉米苏，目前进度：底层饼干碎已吃完！</item>
+        <item>隐藏着黑暗力量的进度条啊，在我面前用你真正的速度（划掉）……还是用现在的速度吧！</item>
+        <item>正在捕捉异世界电波……哔哔——信号强度满格，但猫猫把线咬断了，稍等！</item>
+        <item>知道你急，但先别急嘛~ 趁现在眨眨眼，把脖子向左扭三圈……对，就是这样！</item>
+        <item>发动魔法卡：强欲之壶！……糟糕，抽到了更多的加载时间，对不起嘛！</item>
+        <item>您的加载请求已被勇者小队插队处理，当前排名：第0位（贵宾通道）！</item>
+        <item>搓手手期待到手指都冒烟啦……</item>
+        <item>◝(⑅•ᴗ•⑅)◜..°♡ 正在把这份可爱传送给你，请签收~</item>
+    </string-array>
 </resources>

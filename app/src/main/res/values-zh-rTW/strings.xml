@@ -283,7 +283,6 @@
     <string name="extremely_high">極高</string>
     <string name="shared_h_keyframe_detected_msg">注意：如果你也有與對方相同代號的關鍵 H 幀，你自己的資料將會被覆蓋\n\n標題：%1$s\n代號：%2$s\n共有 %3$d 個時間點</string>
     <string name="domain_change_tips">修改網域需要重新啟動程式，否則不會生效！\n不同網域不共用 Cookie，因此更換網域後需要重新登入。\n所以除了 hanime1.me 以外的網域可能在某些時段重新導向回 hanime1.me，這可能導致 Cookie 失效\n\n建議如下：\n· 無 VPN 使用者，使用 hanime1.me 並開啟內建 Hosts\n· 日本使用者，使用 hanime1.com\n· 其他地區使用者，使用 hanime1.me 並關閉內建 Hosts</string>
-    <string name="website_blocked_msg">看到這裡表示他們的網站已經加固，只能聽天由命看看能否恢復了…</string>
     <string name="not_logged_in_currently">目前未登入</string>
     <string name="login_state_expired">登入狀態已失效，已自動登出，請重新登入</string>
     <string name="parse_error_msg">這個網址可能有不同的解析方式…</string>
@@ -312,6 +311,8 @@
     <string name="long_press_speed_summary">目前速度的 %1$s</string>
     <string name="haptic_feedback">觸感回饋</string>
     <string name="haptic_feedback_summary">為部分操作提供震動回饋</string>
+    <string name="fun_loading_hints">更有趣的載入文案</string>
+    <string name="fun_loading_hints_summary">今天也很可愛哦~</string>
     <string name="slide_sensitivity">滑動調整進度的靈敏度</string>
     <string name="apply_deep_links">套用深層連結</string>
     <string name="apply_deep_links_summary">套用後，開啟相關網頁時可快速跳轉至此 App</string>
@@ -327,8 +328,6 @@
     <string name="sure_to_redownload">確定要重新下載嗎？</string>
     <string name="privacy">隱私</string>
     <string name="refresh_page_or_login_expired">重新整理頁面試試\n也可能登入已過期</string>
-    <string name="website_blocked_msg_2">網站已加固，修改成其他網域可能會有奇效！</string>
-    <string name="website_blocked_msg_3">可以提醒開發者，但不要催促，網站加固與他沒有任何關係哦～</string>
     <string name="action_not_support">此裝置不支援此操作</string>
     <string name="download_settings">下載設定</string>
     <string name="download_count_limit">同時下載數量限制</string>
@@ -662,4 +661,20 @@
     <string name="player_gesture_progress">進度</string>
     <string name="player_play_from_beginning">從頭開始播放</string>
     <string name="player_untitled_video">未命名影片</string>
+    <string name="perception">感知</string>
+    <string-array name="loading_hints">
+        <item>哼！才、才沒有讓你等很久啦！是路由器剛打了個噴嚏啦……</item>
+        <item>笨蛋！一直盯著它看也不會變快啦！……好啦，再給我三秒就好！</item>
+        <item>（慌慌張張藏起洋芋片袋）被…被發現了呢！等我吞下這口就來！</item>
+        <item>嗚哇！前面的數據線好像偷偷私奔纏在一起了！正在拆散它們！</item>
+        <item>正在把快樂打包成壓縮檔傳送給你……預估解壓時間：馬上！</item>
+        <item>進度條正在偷吃提拉米蘇，目前進度：底層餅乾碎已吃完！</item>
+        <item>隱藏著黑暗力量的進度條啊，在我面前用你真正的速度（劃掉）……還是用現在的速度吧！</item>
+        <item>正在捕捉異世界電波……嗶嗶——訊號強度滿格，但貓貓把線咬斷了，稍等！</item>
+        <item>知道你急，但先別急嘛~ 趁現在眨眨眼，把脖子向左扭三圈……對，就是這樣！</item>
+        <item>發動魔法卡：強欲之壺！……糟糕，抽到了更多的載入時間，對不起嘛！</item>
+        <item>您的載入請求已被勇者小隊插隊處理，目前排名：第0位（VIP通道）！</item>
+        <item>搓手手期待到手指都冒煙啦……</item>
+        <item>◝(⑅•ᴗ•⑅)◜..°♡ 正在把這份可愛傳送給你，請簽收~</item>
+    </string-array>
 </resources>

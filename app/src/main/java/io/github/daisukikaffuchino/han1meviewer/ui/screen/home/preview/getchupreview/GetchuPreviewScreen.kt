@@ -8,10 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -85,7 +82,7 @@ fun GetchuPreviewScreen(
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
+                                painter = painterResource(R.drawable.ic_arrow_drop_down),
                                 contentDescription = null,
                                 modifier = Modifier.size(24.dp),
                             )
@@ -111,10 +108,10 @@ fun GetchuPreviewScreen(
             onBack = onBack,
             actions = {
                 IconButton(onClick = { dateCode = shiftGetchuMonthCode(dateCode, -1) }) {
-                    Icon(Icons.AutoMirrored.Default.KeyboardArrowLeft, null)
+                    Icon(painterResource(R.drawable.ic_chevron_left), null)
                 }
                 IconButton(onClick = { dateCode = shiftGetchuMonthCode(dateCode, 1) }) {
-                    Icon(Icons.AutoMirrored.Default.KeyboardArrowRight, null)
+                    Icon(painterResource(R.drawable.ic_chevron_right), null)
                 }
             },
         )

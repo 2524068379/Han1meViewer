@@ -22,7 +22,6 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.bridge.VideoPageHost
-import io.github.daisukikaffuchino.han1meviewer.ui.component.BottomSheetHandler
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeTheme
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.CommentViewModel
@@ -174,13 +173,11 @@ fun RenderVideoCommentContent(
                     viewModel.clearVideoReplyList()
                 },
                 sheetState = childSheetState,
-                dragHandle = null,
                 containerColor = HanimeDefaults.Colors.pageSurface,
             ) {
                 LaunchedEffect(currentCommentId) {
                     viewModel.getCommentReply(currentCommentId)
                 }
-                BottomSheetHandler()
                 val childReportFlow = remember(viewModel.reportMessage) {
                     viewModel.reportMessage.map { message ->
                         val text = if (message.args.isNotEmpty()) {

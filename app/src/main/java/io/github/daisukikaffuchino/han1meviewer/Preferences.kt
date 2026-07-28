@@ -336,6 +336,9 @@ object Preferences {
             putBoolean(SettingsPreferenceKeys.HAPTIC_FEEDBACK_ENABLED, value)
         }
 
+    val funLoadingHints: Boolean
+        get() = preferenceSp.getBoolean(SettingsPreferenceKeys.FUN_LOADING_HINTS, true)
+
     /**
      * MPV播放器设置
      */

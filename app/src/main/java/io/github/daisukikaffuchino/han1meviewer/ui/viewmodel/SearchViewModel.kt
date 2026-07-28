@@ -16,7 +16,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.SearchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
-import io.github.daisukikaffuchino.han1meviewer.util.loadAssetAs
+import io.github.daisukikaffuchino.utils.loadAssetAs
 import io.github.daisukikaffuchino.utils.ApplicationViewModel
 import io.github.daisukikaffuchino.utils.unsafeLazy
 import kotlinx.coroutines.Dispatchers

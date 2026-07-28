@@ -5,7 +5,7 @@ import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.Preferences.isAlreadyLogin
 import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.han1meviewer.logic.exception.CloudFlareBlockedException
+import io.github.daisukikaffuchino.han1meviewer.logic.exception.CloudflareBlockedException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.HanimeNotFoundException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.IPBlockedException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.ParseException
@@ -587,7 +587,7 @@ object NetworkRepo {
                         throw IPBlockedException(getString(R.string.cloudflare_ip_block_warning))
 
                     "Just a moment" in body ->
-                        throw CloudFlareBlockedException(getString(R.string.cloudflare_network_mismatch))
+                        throw CloudflareBlockedException(getString(R.string.cloudflare_network_mismatch))
 
                     else ->
                         throw HanimeNotFoundException(getString(R.string.video_might_not_exist)) // 主要出現在影片界面，當你v數不大時會報403

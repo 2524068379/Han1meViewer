@@ -28,7 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.HCacheManager
-import io.github.daisukikaffuchino.han1meviewer.logic.exception.CloudFlareBlockedException
+import io.github.daisukikaffuchino.han1meviewer.logic.exception.CloudflareBlockedException
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.component.UsageNoticeDialog
@@ -120,7 +120,7 @@ fun MainActivityContent(
         LaunchedEffect(homeState) {
             if (homeState is PageState.Error) {
                 val throwable = (homeState as PageState.Error).throwable
-                if (throwable is CloudFlareBlockedException) {
+                if (throwable is CloudflareBlockedException) {
                     LogUtil.e("error", "被屏蔽时的处理")
                 }
             }
