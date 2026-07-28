@@ -1,8 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.navigation.main
 
 import android.content.Intent
-import androidx.navigation.NavHostController
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.navigateSafely
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HomeSettingsRoute
 import kotlinx.serialization.json.Json
 
@@ -15,7 +13,7 @@ private val loginRequiredDrawerItems = setOf(
 
 const val EXTRA_OPEN_DAILY_CHECK_IN = "openDailyCheckIn"
 
-fun NavHostController.navigateDrawerDestination(
+fun MainNavigationState.navigateDrawerDestination(
     destination: MainDrawerDestination,
     isLoggedIn: Boolean,
     onRequireLogin: () -> Unit,
@@ -26,32 +24,32 @@ fun NavHostController.navigateDrawerDestination(
     }
 
     when (destination) {
-        MainDrawerDestination.Home -> navigateSafely(HomeRoute)
-        MainDrawerDestination.Settings -> navigateSafely(HomeSettingsRoute)
-        MainDrawerDestination.DailyCheckIn -> navigateSafely(DailyCheckInRoute)
-        MainDrawerDestination.WatchLater -> navigateSafely(MyWatchLaterRoute)
-        MainDrawerDestination.FavVideo -> navigateSafely(MyFavVideoRoute)
-        MainDrawerDestination.Playlist -> navigateSafely(MyPlaylistRoute)
-        MainDrawerDestination.Subscription -> navigateSafely(SubscriptionRoute)
-        MainDrawerDestination.WatchHistory -> navigateSafely(WatchHistoryRoute)
-        MainDrawerDestination.Download -> navigateSafely(DownloadRoute)
+        MainDrawerDestination.Home -> navigate(HomeRoute)
+        MainDrawerDestination.Settings -> navigate(HomeSettingsRoute)
+        MainDrawerDestination.DailyCheckIn -> navigate(DailyCheckInRoute)
+        MainDrawerDestination.WatchLater -> navigate(MyWatchLaterRoute)
+        MainDrawerDestination.FavVideo -> navigate(MyFavVideoRoute)
+        MainDrawerDestination.Playlist -> navigate(MyPlaylistRoute)
+        MainDrawerDestination.Subscription -> navigate(SubscriptionRoute)
+        MainDrawerDestination.WatchHistory -> navigate(WatchHistoryRoute)
+        MainDrawerDestination.Download -> navigate(DownloadRoute)
     }
     return true
 }
 
-fun NavHostController.handleMainIntent(intent: Intent) {
+fun MainNavigationState.handleMainIntent(intent: Intent) {
     if (intent.action == Intent.ACTION_VIEW) {
         val uri = intent.data ?: return
         when (uri.scheme) {
             "http", "https" -> {
                 val videoCode = uri.getQueryParameter("v")
                 if (videoCode != null) {
-                    navigateSafely(VideoRoute(videoCode))
+                    navigate(VideoRoute(videoCode))
                 }
             }
 
             "file", "content" -> {
-                navigateSafely(VideoRoute("-1", uri.toString()))
+                navigate(VideoRoute("-1", uri.toString()))
             }
         }
         return
@@ -59,15 +57,13 @@ fun NavHostController.handleMainIntent(intent: Intent) {
 
     if (intent.getBooleanExtra(EXTRA_OPEN_DAILY_CHECK_IN, false)) {
         intent.removeExtra(EXTRA_OPEN_DAILY_CHECK_IN)
-        navigateSafely(DailyCheckInRoute) {
-            launchSingleTop = true
-        }
+        navigate(DailyCheckInRoute, launchSingleTop = true)
         return
     }
 
     intent.getStringExtra("startSearchFromTag")?.let { tag ->
         intent.removeExtra("startSearchFromTag")
-        navigateSafely(SearchRoute(query = tag))
+        navigate(SearchRoute(query = tag))
         return
     }
 
@@ -75,13 +71,13 @@ fun NavHostController.handleMainIntent(intent: Intent) {
     val map = intent.getSerializableExtra("startSearchFromMap") as? HashMap<String, String>
     if (map != null) {
         intent.removeExtra("startSearchFromMap")
-        navigateSafely(SearchRoute(advancedSearchJson = Json.encodeToString(map)))
+        navigate(SearchRoute(advancedSearchJson = Json.encodeToString(map)))
         return
     }
 
     val videoCode = intent.getStringExtra("startVideoCode")
     if (!videoCode.isNullOrEmpty()) {
         intent.removeExtra("startVideoCode")
-        navigateSafely(VideoRoute(videoCode))
+        navigate(VideoRoute(videoCode))
     }
 }

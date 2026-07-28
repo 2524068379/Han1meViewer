@@ -20,15 +20,13 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.toRoute
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.navigateSafely
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.AboutSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.AppearanceSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DataPrivacySettingsRoute
@@ -58,8 +56,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.account.AvatarCropScre
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.HomeSettingsPage
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.OpenSourceLicensesScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.SettingsMainScreen
-import io.github.daisukikaffuchino.han1meviewer.ui.theme.materialSharedAxisXIn
-import io.github.daisukikaffuchino.han1meviewer.ui.theme.materialSharedAxisXOut
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.materialSharedAxisX
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.UserAccountViewModel
 import io.github.daisukikaffuchino.utils.VibrationUtil
 import kotlinx.serialization.json.Json
@@ -69,106 +66,115 @@ private const val PageTransitionOffsetFactor = 0.10f
 @Composable
 fun MainNavHost(
     activity: MainActivity,
-    navController: NavHostController,
+    navigationState: MainNavigationState,
     isDrawerOpen: Boolean,
     onOpenDrawer: () -> Unit,
     onDestinationChanged: (MainDestinationSpec) -> Unit,
 ) {
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    val destinationSpec = MainDestinationSpec.fromDestination(backStackEntry?.destination)
+    val destinationSpec = MainDestinationSpec.fromRoute(navigationState.currentRoute)
     var pendingAvatarCropResult by remember { mutableStateOf<String?>(null) }
 
-    val onBack: () -> Unit = { navController.popBackStack() }
-    val onNavigateToVideo: (String) -> Unit = { code -> navController.navigateSafely(VideoRoute(code)) }
+    val onBack: () -> Unit = { navigationState.popBackStack() }
+    val onNavigateToVideo: (String) -> Unit = { code -> navigationState.navigate(VideoRoute(code)) }
     val onNavigateToLocalVideo: (String, String?) -> Unit =
-        { code, uri -> navController.navigateSafely(VideoRoute(code, uri)) }
+        { code, uri -> navigationState.navigate(VideoRoute(code, uri)) }
 
     LaunchedEffect(destinationSpec) {
         destinationSpec?.let(onDestinationChanged)
     }
 
-    NavHost(
-        navController = navController,
-        startDestination = HomeRoute,
-        enterTransition = {
-            materialSharedAxisXIn(initialOffsetX = { (it * PageTransitionOffsetFactor).toInt() })
+    NavDisplay(
+        backStack = navigationState.backStack,
+        onBack = onBack,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator(),
+        ),
+        transitionSpec = {
+            materialSharedAxisX(
+                initialOffsetX = { (it * PageTransitionOffsetFactor).toInt() },
+                targetOffsetX = { -(it * PageTransitionOffsetFactor).toInt() },
+            )
         },
-        exitTransition = {
-            materialSharedAxisXOut(targetOffsetX = { -(it * PageTransitionOffsetFactor).toInt() })
+        popTransitionSpec = {
+            materialSharedAxisX(
+                initialOffsetX = { -(it * PageTransitionOffsetFactor).toInt() },
+                targetOffsetX = { (it * PageTransitionOffsetFactor).toInt() },
+            )
         },
-        popEnterTransition = {
-            materialSharedAxisXIn(initialOffsetX = { -(it * PageTransitionOffsetFactor).toInt() })
+        predictivePopTransitionSpec = { _ ->
+            materialSharedAxisX(
+                initialOffsetX = { -(it * PageTransitionOffsetFactor).toInt() },
+                targetOffsetX = { (it * PageTransitionOffsetFactor).toInt() },
+            )
         },
-        popExitTransition = {
-            materialSharedAxisXOut(targetOffsetX = { (it * PageTransitionOffsetFactor).toInt() })
-        },
-    ) {
-        composable<HomeRoute> {
+        entryProvider = entryProvider {
+        entry<HomeRoute> {
             HomeRouteScreen(
                 activity = activity,
                 isDrawerOpen = isDrawerOpen,
                 onOpenDrawer = onOpenDrawer,
-                onNavigateToPreview = { navController.navigateSafely(PreviewRoute) },
-                onNavigateToSearch = { query -> navController.navigateSafely(SearchRoute(query = query)) },
+                onNavigateToPreview = { navigationState.navigate(PreviewRoute) },
+                onNavigateToSearch = { query -> navigationState.navigate(SearchRoute(query = query)) },
                 onNavigateToSearchAdvanced = { params ->
-                    navController.navigateSafely(
+                    navigationState.navigate(
                         SearchRoute(advancedSearchJson = Json.encodeToString(params))
                     )
                 },
                 onNavigateToVideo = onNavigateToVideo,
             )
         }
-        composable<WatchHistoryRoute> {
+        entry<WatchHistoryRoute> {
             WatchHistoryRouteScreen(
                 onBack = onBack,
                 onNavigateToVideo = onNavigateToVideo,
             )
         }
-        composable<MyFavVideoRoute> {
+        entry<MyFavVideoRoute> {
             FavVideoRouteScreen(
                 onBack = onBack,
                 onNavigateToVideo = onNavigateToVideo,
             )
         }
-        composable<MyWatchLaterRoute> {
+        entry<MyWatchLaterRoute> {
             WatchLaterRouteScreen(
                 onBack = onBack,
                 onNavigateToVideo = onNavigateToVideo,
             )
         }
-        composable<MyPlaylistRoute> {
+        entry<MyPlaylistRoute> {
             MyPlaylistRouteScreen(
                 onBack = onBack,
                 onNavigateToVideo = onNavigateToVideo,
             )
         }
-        composable<SubscriptionRoute> {
+        entry<SubscriptionRoute> {
             SubscriptionRouteScreen(
                 onBack = onBack,
-                onNavigateToSearch = { query -> navController.navigateSafely(SearchRoute(query = query)) },
+                onNavigateToSearch = { query -> navigationState.navigate(SearchRoute(query = query)) },
                 onNavigateToVideo = onNavigateToVideo,
             )
         }
-        composable<DailyCheckInRoute> {
+        entry<DailyCheckInRoute> {
             DailyCheckInRouteScreen(
                 activity = activity,
                 onBack = onBack,
             )
         }
-        composable<DownloadRoute> {
+        entry<DownloadRoute> {
             DownloadRouteScreen(
                 onBack = onBack,
                 onNavigateToVideo = onNavigateToVideo,
                 onNavigateToLocalVideo = onNavigateToLocalVideo,
             )
         }
-        composable<AccountRoute> {
+        entry<AccountRoute> {
             val accountViewModel: UserAccountViewModel = viewModel()
             AccountScreen(
                 viewModel = accountViewModel,
                 onBack = onBack,
                 onOpenAvatarCrop = { sourceUri ->
-                    navController.navigateSafely(AvatarCropRoute(sourceUri))
+                    navigationState.navigate(AvatarCropRoute(sourceUri))
                 },
                 pendingAvatarCropResult = pendingAvatarCropResult,
                 onAvatarCropResultConsumed = { pendingAvatarCropResult = null },
@@ -176,8 +182,7 @@ fun MainNavHost(
                 onLogout = { activity.showLogoutConfirmDialog(closeCurrentPageOnConfirm = true) },
             )
         }
-        composable<AvatarCropRoute> {
-            val route = it.toRoute<AvatarCropRoute>()
+        entry<AvatarCropRoute> { route ->
             AvatarCropScreen(
                 sourceUri = route.sourceUri,
                 onBack = onBack,
@@ -187,84 +192,84 @@ fun MainNavHost(
                 },
             )
         }
-        composable<HomeSettingsRoute> {
+        entry<HomeSettingsRoute> {
             SettingsScaffold(
-                navController = navController,
+                navigationState = navigationState,
                 fallbackDestination = HomeRoute,
             ) {
                 SettingsMainScreen(
-                    onOpenVideoPlayback = { navController.navigateSafely(VideoPlaybackSettingsRoute) },
-                    onOpenPlayerSettings = { navController.navigateSafely(PlayerSettingsRoute) },
-                    onOpenNetworkDownload = { navController.navigateSafely(NetworkDownloadSettingsRoute) },
-                    onOpenAppearance = { navController.navigateSafely(AppearanceSettingsRoute) },
+                    onOpenVideoPlayback = { navigationState.navigate(VideoPlaybackSettingsRoute) },
+                    onOpenPlayerSettings = { navigationState.navigate(PlayerSettingsRoute) },
+                    onOpenNetworkDownload = { navigationState.navigate(NetworkDownloadSettingsRoute) },
+                    onOpenAppearance = { navigationState.navigate(AppearanceSettingsRoute) },
                     onOpenInterfaceInteraction = {
-                        navController.navigateSafely(InterfaceInteractionSettingsRoute)
+                        navigationState.navigate(InterfaceInteractionSettingsRoute)
                     },
-                    onOpenDataPrivacy = { navController.navigateSafely(DataPrivacySettingsRoute) },
-                    onOpenAbout = { navController.navigateSafely(AboutSettingsRoute) },
+                    onOpenDataPrivacy = { navigationState.navigate(DataPrivacySettingsRoute) },
+                    onOpenAbout = { navigationState.navigate(AboutSettingsRoute) },
                 )
             }
         }
-        composable<VideoPlaybackSettingsRoute> {
-            SettingsScaffold(navController, HomeSettingsRoute) {
+        entry<VideoPlaybackSettingsRoute> {
+            SettingsScaffold(navigationState, HomeSettingsRoute) {
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.VideoPlayback,
-                    onNavigateToHKeyframes = { navController.navigateSafely(HKeyframesRoute) },
-                    onNavigateToSharedHKeyframes = { navController.navigateSafely(SharedHKeyframesRoute) },
+                    onNavigateToHKeyframes = { navigationState.navigate(HKeyframesRoute) },
+                    onNavigateToSharedHKeyframes = { navigationState.navigate(SharedHKeyframesRoute) },
                 )
             }
         }
-        composable<NetworkDownloadSettingsRoute> {
-            SettingsScaffold(navController, HomeSettingsRoute) {
+        entry<NetworkDownloadSettingsRoute> {
+            SettingsScaffold(navigationState, HomeSettingsRoute) {
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.NetworkDownload,
                 )
             }
         }
-        composable<AppearanceSettingsRoute> {
-            SettingsScaffold(navController, HomeSettingsRoute) {
+        entry<AppearanceSettingsRoute> {
+            SettingsScaffold(navigationState, HomeSettingsRoute) {
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.Appearance,
                 )
             }
         }
-        composable<InterfaceInteractionSettingsRoute> {
-            SettingsScaffold(navController, HomeSettingsRoute) {
+        entry<InterfaceInteractionSettingsRoute> {
+            SettingsScaffold(navigationState, HomeSettingsRoute) {
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.InterfaceInteraction,
                 )
             }
         }
-        composable<DataPrivacySettingsRoute> {
-            SettingsScaffold(navController, HomeSettingsRoute) {
+        entry<DataPrivacySettingsRoute> {
+            SettingsScaffold(navigationState, HomeSettingsRoute) {
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.DataPrivacy,
                 )
             }
         }
-        composable<AboutSettingsRoute> {
-            SettingsScaffold(navController, HomeSettingsRoute) {
+        entry<AboutSettingsRoute> {
+            SettingsScaffold(navigationState, HomeSettingsRoute) {
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.About,
                     onNavigateToOpenSourceLicenses = {
-                        navController.navigateSafely(OpenSourceLicensesRoute)
+                        navigationState.navigate(OpenSourceLicensesRoute)
                     },
                 )
             }
         }
-        composable<OpenSourceLicensesRoute> {
+        entry<OpenSourceLicensesRoute> {
             var searchMode by remember { mutableStateOf(false) }
             BackHandler(enabled = searchMode) {
                 searchMode = false
             }
             SettingsScaffold(
-                navController = navController,
+                navigationState = navigationState,
                 fallbackDestination = AboutSettingsRoute,
                 onNavigateBack = {
                     if (searchMode) {
@@ -299,45 +304,45 @@ fun MainNavHost(
                 )
             }
         }
-        composable<PlayerSettingsRoute> {
+        entry<PlayerSettingsRoute> {
             SettingsScaffold(
-                navController = navController,
+                navigationState = navigationState,
                 fallbackDestination = HomeSettingsRoute,
             ) {
                 PlayerSettingsRouteScreen(
-                    onNavigateToMpvSettings = { navController.navigateSafely(MpvPlayerSettingsRoute) },
+                    onNavigateToMpvSettings = { navigationState.navigate(MpvPlayerSettingsRoute) },
                 )
             }
         }
-        composable<NetworkSettingsRoute> {
+        entry<NetworkSettingsRoute> {
             SettingsScaffold(
-                navController = navController,
+                navigationState = navigationState,
                 fallbackDestination = NetworkDownloadSettingsRoute,
             ) {
                 NetworkSettingsRouteScreen()
             }
         }
-        composable<DownloadSettingsRoute> {
+        entry<DownloadSettingsRoute> {
             SettingsScaffold(
-                navController = navController,
+                navigationState = navigationState,
                 fallbackDestination = NetworkDownloadSettingsRoute,
             ) {
                 DownloadSettingsRouteScreen()
             }
         }
-        composable<MpvPlayerSettingsRoute> {
+        entry<MpvPlayerSettingsRoute> {
             SettingsScaffold(
-                navController = navController,
+                navigationState = navigationState,
                 fallbackDestination = PlayerSettingsRoute,
             ) {
                 MpvPlayerSettingsRouteScreen()
             }
         }
-        composable<HKeyframesRoute> {
+        entry<HKeyframesRoute> {
             var showImportDialog by remember { mutableStateOf(false) }
             val view = LocalView.current
             SettingsScaffold(
-                navController = navController,
+                navigationState = navigationState,
                 fallbackDestination = VideoPlaybackSettingsRoute,
                 floatingActionButton = {
                     FloatingActionButton(
@@ -360,9 +365,9 @@ fun MainNavHost(
                 )
             }
         }
-        composable<SharedHKeyframesRoute> {
+        entry<SharedHKeyframesRoute> {
             SettingsScaffold(
-                navController = navController,
+                navigationState = navigationState,
                 fallbackDestination = VideoPlaybackSettingsRoute,
             ) {
                 SharedHKeyframesRouteScreen(
@@ -370,63 +375,64 @@ fun MainNavHost(
                 )
             }
         }
-        composable<HKeyframeSettingsRoute> {
+        entry<HKeyframeSettingsRoute> {
             SettingsScaffold(
-                navController = navController,
+                navigationState = navigationState,
                 fallbackDestination = VideoPlaybackSettingsRoute,
             ) {
                 HKeyframeSettingsRouteScreen(
-                    onNavigateToHKeyframes = { navController.navigateSafely(HKeyframesRoute) },
-                    onNavigateToSharedHKeyframes = { navController.navigateSafely(SharedHKeyframesRoute) },
+                    onNavigateToHKeyframes = { navigationState.navigate(HKeyframesRoute) },
+                    onNavigateToSharedHKeyframes = { navigationState.navigate(SharedHKeyframesRoute) },
                 )
             }
         }
-        composable<SearchRoute> {
+        entry<SearchRoute> { route ->
             SearchRouteScreen(
-                route = it.toRoute(),
+                route = route,
                 onBack = onBack,
                 onNavigateToVideo = onNavigateToVideo,
             )
         }
-        composable<PreviewRoute> {
+        entry<PreviewRoute> {
             PreviewRouteScreen(
                 activity = activity,
                 onBack = onBack,
                 onNavigateToGetchuPreview = {
-                    navController.navigateSafely(GetchuPreviewRoute)
+                    navigationState.navigate(GetchuPreviewRoute)
                 },
                 onNavigateToPreviewComment = { date, dateCode ->
-                    navController.navigateSafely(PreviewCommentRoute(date, dateCode))
+                    navigationState.navigate(PreviewCommentRoute(date, dateCode))
                 },
                 onNavigateToVideo = onNavigateToVideo,
             )
         }
-        composable<GetchuPreviewRoute> {
+        entry<GetchuPreviewRoute> {
             GetchuPreviewRouteScreen(
                 onBack = onBack,
-                onNavigateToDetail = { id -> navController.navigateSafely(GetchuPreviewDetailRoute(id)) },
+                onNavigateToDetail = { id -> navigationState.navigate(GetchuPreviewDetailRoute(id)) },
             )
         }
-        composable<GetchuPreviewDetailRoute> {
+        entry<GetchuPreviewDetailRoute> { route ->
             GetchuPreviewDetailRouteScreen(
-                route = it.toRoute(),
+                route = route,
                 onBack = onBack,
-                onNavigateToDetail = { id -> navController.navigateSafely(GetchuPreviewDetailRoute(id)) },
-                onNavigateToVideoUrl = { url -> navController.navigateSafely(VideoRoute("-1", url)) },
+                onNavigateToDetail = { id -> navigationState.navigate(GetchuPreviewDetailRoute(id)) },
+                onNavigateToVideoUrl = { url -> navigationState.navigate(VideoRoute("-1", url)) },
             )
         }
-        composable<PreviewCommentRoute> {
+        entry<PreviewCommentRoute> { route ->
             PreviewCommentRouteScreen(
                 activity = activity,
-                route = it.toRoute(),
+                route = route,
                 onBack = onBack,
             )
         }
-        composable<VideoRoute> {
+        entry<VideoRoute> { route ->
             VideoRouteScreen(
                 activity = activity,
-                route = it.toRoute(),
+                route = route,
             )
         }
-    }
+        },
+    )
 }

@@ -1,55 +1,54 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings
 
-import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation3.runtime.NavKey
 import io.github.daisukikaffuchino.han1meviewer.R
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 
 @Serializable
-object HomeSettingsRoute
+object HomeSettingsRoute : NavKey
 
 @Serializable
-object VideoPlaybackSettingsRoute
+object VideoPlaybackSettingsRoute : NavKey
 
 @Serializable
-object NetworkDownloadSettingsRoute
+object NetworkDownloadSettingsRoute : NavKey
 
 @Serializable
-object AppearanceSettingsRoute
+object AppearanceSettingsRoute : NavKey
 
 @Serializable
-object InterfaceInteractionSettingsRoute
+object InterfaceInteractionSettingsRoute : NavKey
 
 @Serializable
-object DataPrivacySettingsRoute
+object DataPrivacySettingsRoute : NavKey
 
 @Serializable
-object AboutSettingsRoute
+object AboutSettingsRoute : NavKey
 
 @Serializable
-object OpenSourceLicensesRoute
+object OpenSourceLicensesRoute : NavKey
 
 @Serializable
-object PlayerSettingsRoute
+object PlayerSettingsRoute : NavKey
 
 @Serializable
-object NetworkSettingsRoute
+object NetworkSettingsRoute : NavKey
 
 @Serializable
-object DownloadSettingsRoute
+object DownloadSettingsRoute : NavKey
 
 @Serializable
-object MpvPlayerSettingsRoute
+object MpvPlayerSettingsRoute : NavKey
 
 @Serializable
-object HKeyframesRoute
+object HKeyframesRoute : NavKey
 
 @Serializable
-object SharedHKeyframesRoute
+object SharedHKeyframesRoute : NavKey
 
 @Serializable
-object HKeyframeSettingsRoute
+object HKeyframeSettingsRoute : NavKey
 
 enum class SettingsDestinationSpec(
     val routeKey: String,
@@ -149,7 +148,7 @@ enum class SettingsDestinationSpec(
         routeClass = HKeyframeSettingsRoute::class,
     );
 
-    val route: Any
+    val route: NavKey
         get() = when (this) {
             Home -> HomeSettingsRoute
             VideoPlayback -> VideoPlaybackSettingsRoute
@@ -172,9 +171,7 @@ enum class SettingsDestinationSpec(
         fun fromRouteKey(routeKey: String?): SettingsDestinationSpec? =
             entries.firstOrNull { it.routeKey == routeKey }
 
-        fun fromDestination(destination: NavDestination?): SettingsDestinationSpec? {
-            if (destination == null) return null
-            return entries.firstOrNull { destination.hasRoute(it.routeClass) }
-        }
+        fun fromRoute(route: NavKey?): SettingsDestinationSpec? =
+            entries.firstOrNull { spec -> route != null && spec.routeClass.isInstance(route) }
     }
 }

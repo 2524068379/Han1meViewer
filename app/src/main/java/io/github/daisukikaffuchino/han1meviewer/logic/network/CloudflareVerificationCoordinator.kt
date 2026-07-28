@@ -3,7 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.logic.network
 import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
-import io.github.daisukikaffuchino.han1meviewer.ui.activity.CloudflareActivity
+import io.github.daisukikaffuchino.han1meviewer.ui.activity.AuthActivity
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -39,10 +39,8 @@ object CloudflareVerificationCoordinator {
         if (shouldLaunch) {
             try {
                 context.startActivity(
-                    Intent(context, CloudflareActivity::class.java).apply {
+                    AuthActivity.cloudflareIntent(context, url, host).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        putExtra(CloudflareActivity.EXTRA_URL, url)
-                        putExtra(CloudflareActivity.EXTRA_VERIFICATION_HOST, host)
                     },
                 )
             } catch (_: Exception) {

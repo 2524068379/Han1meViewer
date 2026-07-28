@@ -96,6 +96,8 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
     val executor = remember { Executors.newCachedThreadPool() }
     val uiState = remember(refreshKey, context) { buildNetworkSettingsUiState(context) }
     val networkTimeoutText = stringResource(R.string.network_timeout_text)
+    val customMirrorInvalidText = stringResource(R.string.custom_mirror_site_invalid)
+    val customMirrorTestingText = stringResource(R.string.custom_mirror_site_testing)
     fun stopDelayTest() {
         isDelayTesting = false
         delayHandler.removeCallbacksAndMessages(null)
@@ -236,12 +238,12 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
         onTestCustomMirrorSite = { url, appendPath ->
             val normalizedUrl = normalizeCustomMirrorSite(url)
             if (normalizedUrl == null) {
-                customMirrorTestResult = context.getString(R.string.custom_mirror_site_invalid)
+                customMirrorTestResult = customMirrorInvalidText
                 return@NetworkSettingsScreen
             }
             if (isCustomMirrorTesting) return@NetworkSettingsScreen
             isCustomMirrorTesting = true
-            customMirrorTestResult = context.getString(R.string.custom_mirror_site_testing)
+            customMirrorTestResult = customMirrorTestingText
             executor.execute {
                 val result = testCustomMirrorSite(context, normalizedUrl, appendPath)
                 Handler(Looper.getMainLooper()).post {

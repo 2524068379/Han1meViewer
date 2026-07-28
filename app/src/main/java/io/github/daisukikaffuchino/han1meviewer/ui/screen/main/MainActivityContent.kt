@@ -25,8 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.HCacheManager
@@ -37,6 +36,8 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.UsageNoticeDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainDestinationSpec
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainNavHost
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainNavigationState
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HomeRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.handleMainIntent
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.navigateDrawerDestination
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomePageViewModel
@@ -62,9 +63,10 @@ fun MainActivityContent(
     onDismissLogout: () -> Unit,
     onConfirmLogout: () -> Unit,
     onOpenClipboardVideo: (String) -> Unit,
-    onNavigateControllerReady: (NavHostController) -> Unit,
+    onNavigationStateReady: (MainNavigationState) -> Unit,
 ) {
-        val composeNavController = rememberNavController()
+        val backStack = rememberNavBackStack(HomeRoute)
+        val navigationState = remember(backStack) { MainNavigationState(backStack) }
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
         val clipboard = LocalClipboard.current
@@ -91,8 +93,8 @@ fun MainActivityContent(
         val headerIsLoading = isLoggedIn && homeState is PageState.Loading
         val selectedDrawerDestination = currentMainDestination.drawerDestination
 
-        LaunchedEffect(composeNavController) {
-            onNavigateControllerReady(composeNavController)
+        LaunchedEffect(navigationState) {
+            onNavigationStateReady(navigationState)
         }
         LaunchedEffect(Unit) {
             val clipboardText = clipboard.getClipEntry()
@@ -114,7 +116,7 @@ fun MainActivityContent(
         }
         LaunchedEffect(Unit) {
             pendingNavigationRequests.collect { intent ->
-                composeNavController.handleMainIntent(intent)
+                navigationState.handleMainIntent(intent)
             }
         }
         LaunchedEffect(viewModel) {
@@ -153,7 +155,7 @@ fun MainActivityContent(
             },
             onSwitchSiteClick = onSwitchSiteClick,
             onDrawerItemSelected = { destination ->
-                val handled = composeNavController.navigateDrawerDestination(
+                val handled = navigationState.navigateDrawerDestination(
                     destination = destination,
                     isLoggedIn = isLoggedIn,
                     onRequireLogin = { SonnerToast.warning(R.string.login_first) },
@@ -167,7 +169,7 @@ fun MainActivityContent(
             Box(modifier = Modifier.fillMaxSize()) {
                 MainNavHost(
                     activity = activity,
-                    navController = composeNavController,
+                    navigationState = navigationState,
                     isDrawerOpen = isDrawerOpen,
                     onOpenDrawer = {
                         if (currentMainDestination.drawerEnabled) {

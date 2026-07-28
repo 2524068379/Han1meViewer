@@ -23,7 +23,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
-import androidx.navigation.NavHostController
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.ANIME_URL
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
 import io.github.daisukikaffuchino.han1meviewer.BuildConfig
@@ -31,8 +30,8 @@ import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logout
 import io.github.daisukikaffuchino.han1meviewer.ui.bridge.VideoPageHost
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.navigateSafely
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.AccountRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainNavigationState
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.VideoRoute
 import io.github.daisukikaffuchino.han1meviewer.util.defaultSharedPreferences
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsPreferenceKeys
@@ -46,7 +45,7 @@ class MainActivity : BaseActivity() {
 
     val viewModel by viewModels<HomePageViewModel>()
 
-    lateinit var navController: NavHostController
+    lateinit var navigationState: MainNavigationState
     private var showAuthGuard by mutableStateOf(true)
     private val pendingNavigationRequests = MutableSharedFlow<Intent>(
         replay = 1,
@@ -61,7 +60,7 @@ class MainActivity : BaseActivity() {
     }
 
     // 登錄完了後讓activity刷新主頁
-    private val loginDataLauncher =
+    private val loginResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 viewModel.getHomePage()
@@ -87,18 +86,18 @@ class MainActivity : BaseActivity() {
                 viewModel = viewModel,
                 pendingNavigationRequests = pendingNavigationRequests,
                 showAuthGuard = showAuthGuard,
-                onOpenAccount = { navController.navigateSafely(AccountRoute) },
+                onOpenAccount = { navigationState.navigate(AccountRoute) },
                 showSiteSwitchConfirm = showSiteSwitchConfirm,
                 logoutDialogCloseCurrentPage = logoutDialogCloseCurrentPage,
                 onLogoutClick = { showLogoutConfirmDialog() },
-                onRequireLogin = { gotoLoginActivity() },
+                onRequireLogin = { openLogin() },
                 onSwitchSiteClick = { showSiteSwitchConfirm = true },
                 onDismissSiteSwitch = { showSiteSwitchConfirm = false },
                 onConfirmSiteSwitch = ::confirmSiteSwitch,
                 onDismissLogout = { logoutDialogCloseCurrentPage = null },
                 onConfirmLogout = ::confirmLogout,
                 onOpenClipboardVideo = ::showVideoDetailFragment,
-                onNavigateControllerReady = { controller -> navController = controller },
+                onNavigationStateReady = { state -> navigationState = state },
             )
         }
     }
@@ -210,7 +209,11 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return navController.navigateUp() || super.onSupportNavigateUp()
+        return if (::navigationState.isInitialized && navigationState.popBackStack()) {
+            true
+        } else {
+            super.onSupportNavigateUp()
+        }
     }
 
     private fun confirmSiteSwitch() {
@@ -234,9 +237,8 @@ class MainActivity : BaseActivity() {
         }, 500)
     }
 
-    fun gotoLoginActivity() {
-        val intent = Intent(this, LoginActivity::class.java)
-        loginDataLauncher.launch(intent)
+    fun openLogin() {
+        loginResultLauncher.launch(AuthActivity.loginIntent(this))
     }
 
     fun showLogoutConfirmDialog(closeCurrentPageOnConfirm: Boolean = false) {
@@ -247,7 +249,7 @@ class MainActivity : BaseActivity() {
         val closeCurrentPage = logoutDialogCloseCurrentPage ?: return
         logoutDialogCloseCurrentPage = null
         if (closeCurrentPage) {
-            navController.popBackStack()
+            if (::navigationState.isInitialized) navigationState.popBackStack()
         }
         logoutWithRefresh()
     }
@@ -258,7 +260,9 @@ class MainActivity : BaseActivity() {
     }
 
     fun showVideoDetailFragment(videoCode: String, fileUri: String? = null) {
-        navController.navigateSafely(VideoRoute(videoCode, fileUri))
+        if (::navigationState.isInitialized) {
+            navigationState.navigate(VideoRoute(videoCode, fileUri))
+        }
     }
 
     fun registerCurrentVideoHost(host: VideoPageHost?) {

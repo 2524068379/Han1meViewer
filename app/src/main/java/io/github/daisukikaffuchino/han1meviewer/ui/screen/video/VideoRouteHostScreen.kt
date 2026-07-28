@@ -562,7 +562,7 @@ fun VideoRouteHostScreen(
         onPlayClick = playbackController::togglePlayPause,
         onBackClick = { activity.onBackPressedDispatcher.onBackPressed() },
         onHomeClick = {
-            activity.navController.popBackStack(HomeRoute, inclusive = false)
+            activity.navigationState.popBackStack(HomeRoute, inclusive = false)
         },
         onFullscreenClick = {
             if (isFullscreen) exitFullscreen() else enterFullscreen()

@@ -1,7 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.navigation.main
 
-import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation3.runtime.NavKey
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.AboutSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.AppearanceSettingsRoute
@@ -21,65 +20,65 @@ import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 
 @Serializable
-object HomeRoute
+object HomeRoute : NavKey
 
 @Serializable
-object WatchHistoryRoute
+object WatchHistoryRoute : NavKey
 
 @Serializable
-object MyFavVideoRoute
+object MyFavVideoRoute : NavKey
 
 @Serializable
-object MyWatchLaterRoute
+object MyWatchLaterRoute : NavKey
 
 @Serializable
-object MyPlaylistRoute
+object MyPlaylistRoute : NavKey
 
 @Serializable
-object SubscriptionRoute
+object SubscriptionRoute : NavKey
 
 @Serializable
-object DailyCheckInRoute
+object DailyCheckInRoute : NavKey
 
 @Serializable
-object DownloadRoute
+object DownloadRoute : NavKey
 
 @Serializable
-object AccountRoute
+object AccountRoute : NavKey
 
 @Serializable
 data class AvatarCropRoute(
     val sourceUri: String,
-)
+) : NavKey
 
 @Serializable
 data class SearchRoute(
     val query: String? = null,
     val advancedSearchJson: String? = null,
-)
+) : NavKey
 
 @Serializable
-object PreviewRoute
+object PreviewRoute : NavKey
 
 @Serializable
-object GetchuPreviewRoute
+object GetchuPreviewRoute : NavKey
 
 @Serializable
 data class GetchuPreviewDetailRoute(
     val id: String,
-)
+) : NavKey
 
 @Serializable
 data class PreviewCommentRoute(
     val date: String,
     val dateCode: String,
-)
+) : NavKey
 
 @Serializable
 data class VideoRoute(
     val videoCode: String,
     val localUri: String? = null,
-)
+) : NavKey
 
 enum class MainDestinationSpec(
     val drawerDestination: MainDrawerDestination?,
@@ -243,9 +242,7 @@ enum class MainDestinationSpec(
     );
 
     companion object {
-        fun fromDestination(destination: NavDestination?): MainDestinationSpec? {
-            if (destination == null) return null
-            return entries.firstOrNull { destination.hasRoute(it.routeClass) }
-        }
+        fun fromRoute(route: NavKey?): MainDestinationSpec? =
+            entries.firstOrNull { spec -> route != null && spec.routeClass.isInstance(route) }
     }
 }

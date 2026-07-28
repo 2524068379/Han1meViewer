@@ -5,33 +5,31 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation3.runtime.NavKey
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeTopAppBar
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainNavigationState
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 
 @Composable
 fun SettingsScaffold(
-    navController: NavController,
-    fallbackDestination: Any,
+    navigationState: MainNavigationState,
+    fallbackDestination: NavKey,
     onNavigateBack: (() -> Boolean)? = null,
     actions: @Composable RowScope.() -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = SettingsDestinationSpec.fromDestination(backStackEntry?.destination)
+    val currentDestination = SettingsDestinationSpec.fromRoute(navigationState.currentRoute)
         ?: SettingsDestinationSpec.Home
 
     fun navigateBack() {
         if (onNavigateBack?.invoke() == true) return
-        if (!navController.popBackStack()) {
-            navController.navigate(fallbackDestination)
+        if (!navigationState.popBackStack()) {
+            navigationState.navigate(fallbackDestination, launchSingleTop = true)
         }
     }
 
