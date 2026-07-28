@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import java.util.Locale
@@ -14,6 +15,9 @@ lateinit var applicationContext: Context
 
 val application: Application
     get() = applicationContext as Application
+
+val isX86_64Device: Boolean
+    get() = Build.SUPPORTED_ABIS.any { it == "x86_64" }
 
 val Context.activity: Activity?
     get() {

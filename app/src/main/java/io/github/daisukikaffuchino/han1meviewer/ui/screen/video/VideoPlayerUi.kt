@@ -102,6 +102,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.player.PlaybackQuality
 import io.github.daisukikaffuchino.han1meviewer.ui.player.PlayerDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
+import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -148,6 +149,7 @@ fun VideoPlayerUi(
     selectedSuperResolutionIndex: Int = 0,
     onSuperResolutionSelected: (Int) -> Unit = {},
     hKeyframeLabel: String,
+    isHKeyframesEnabled: Boolean = true,
     hKeyframeOptions: List<String> = emptyList(),
     hKeyframes: List<HKeyframeEntity.Keyframe> = emptyList(),
     isHKeyframeLocal: Boolean = false,
@@ -644,8 +646,20 @@ fun VideoPlayerUi(
                     if (isFullscreen) {
                         PlayerMenuChip(
                             label = hKeyframeLabel,
-                            onClick = { activeSidePanel = PlayerSidePanel.HKeyframe },
-                            onLongClick = onHKeyframeLongPress,
+                            onClick = {
+                                if (isHKeyframesEnabled) {
+                                    activeSidePanel = PlayerSidePanel.HKeyframe
+                                } else {
+                                    SonnerToast.info(R.string.h_keyframes_not_enabled)
+                                }
+                            },
+                            onLongClick = {
+                                if (isHKeyframesEnabled) {
+                                    onHKeyframeLongPress()
+                                } else {
+                                    SonnerToast.info(R.string.h_keyframes_not_enabled)
+                                }
+                            },
                         )
 
                         if (superResolutionOptions.isNotEmpty()) {

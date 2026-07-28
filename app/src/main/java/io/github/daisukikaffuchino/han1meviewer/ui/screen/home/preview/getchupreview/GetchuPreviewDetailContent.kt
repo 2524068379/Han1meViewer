@@ -255,17 +255,23 @@ internal fun GetchuPreviewDetailContent(
 }
 
 
-@Preview
+@Preview(
+    showBackground = true,
+    widthDp = 412,
+    heightDp = 892,
+)
 @Composable
 private fun GetchuPreviewDetailContentPreview() {
     ComponentPreview {
-        val context = LocalContext.current
-        GetchuPreviewDetailContent(
-            detail = fakeGetchuPreviewDetail,
-            onOpenImage = { _, _ -> },
-            onNavigateToDetail = {},
-            onNavigateToVideoUrl = {},
-            imageLoader = ImageLoader(context).newBuilder().build()
-        )
+        Box(Modifier.fillMaxSize()) {
+            val context = LocalContext.current
+            GetchuPreviewDetailContent(
+                detail = fakeGetchuPreviewDetail,
+                onOpenImage = { _, _ -> },
+                onNavigateToDetail = {},
+                onNavigateToVideoUrl = {},
+                imageLoader = ImageLoader(context).newBuilder().build()
+            )
+        }
     }
 }

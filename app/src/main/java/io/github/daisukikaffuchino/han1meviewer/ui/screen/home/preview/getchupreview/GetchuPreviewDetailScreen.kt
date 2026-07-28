@@ -11,7 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.daisukikaffuchino.han1meviewer.R
@@ -40,11 +40,11 @@ fun GetchuPreviewDetailScreen(
     val state = detailState.collectAsStateWithLifecycle().value
     var imageViewerState by remember { mutableStateOf<PreviewImageViewerState?>(null) }
     val loadingHint = rememberRandomLoadingHint()
-    val context = LocalContext.current
-    val imageLoader = remember {
-        createGetchuImageLoader(context)
+    val isInspectionMode = LocalInspectionMode.current
+    val imageLoader = rememberGetchuImageLoader()
+    LaunchedEffect(id, isInspectionMode) {
+        if (!isInspectionMode) viewModel.getDetail(id)
     }
-    LaunchedEffect(id) { viewModel.getDetail(id) }
 
     HanimePageSurface {
         Column(Modifier.fillMaxSize()) {
@@ -57,7 +57,7 @@ fun GetchuPreviewDetailScreen(
             isError = state.isFirstPageError,
             isEmpty = state.isFirstPageEmpty,
             errorMessage = (state as? PageState.Error)?.throwable?.pienization.toString(),
-            onRetry = { viewModel.getDetail(id) },
+            onRetry = { if (!isInspectionMode) viewModel.getDetail(id) },
             modifier = Modifier.fillMaxSize(),
             loadingMessage = loadingHint
         ) {

@@ -606,6 +606,7 @@ fun VideoRouteHostScreen(
                 ?.setSuperResolution(index)
         },
         hKeyframeLabel = stringResource(R.string.player_h_keyframe),
+        isHKeyframesEnabled = Preferences.hKeyframesEnable,
         hKeyframeOptions = hKeyframes?.keyframes.orEmpty().mapIndexed { index, keyframe ->
             stringResource(
                 R.string.player_keyframe_option,

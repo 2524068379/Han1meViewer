@@ -26,6 +26,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavHostController
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.ANIME_URL
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
+import io.github.daisukikaffuchino.han1meviewer.BuildConfig
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logout
@@ -38,6 +39,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsP
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.main.MainActivityContent
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomePageViewModel
 import io.github.daisukikaffuchino.utils.ActivityManager
+import io.github.daisukikaffuchino.utils.isX86_64Device
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 class MainActivity : BaseActivity() {
@@ -294,6 +296,8 @@ class MainActivity : BaseActivity() {
     }
 
     init {
-        System.loadLibrary("chino")
+        if (!(BuildConfig.DEBUG && isX86_64Device)) {
+            System.loadLibrary("chino")
+        }
     }
 }

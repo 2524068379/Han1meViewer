@@ -16,13 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledTonalIconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
@@ -191,7 +187,7 @@ fun DownloadingItemCard(
                         modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Close,
+                            painter = painterResource(R.drawable.ic_close),
                             contentDescription = stringResource(R.string.cancel_download),
                             modifier = Modifier.size(20.dp),
                             tint = MaterialTheme.colorScheme.outline
@@ -220,7 +216,7 @@ fun DownloadingItemCard(
                                 modifier = Modifier.size(36.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.PlayArrow,
+                                    painter = painterResource(R.drawable.ic_play_arrow),
                                     contentDescription = stringResource(R.string.continues),
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -233,7 +229,7 @@ fun DownloadingItemCard(
                                 modifier = Modifier.size(36.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Refresh,
+                                    painter = painterResource(R.drawable.ic_refresh),
                                     contentDescription = stringResource(R.string.retry),
                                     modifier = Modifier.size(20.dp)
                                 )

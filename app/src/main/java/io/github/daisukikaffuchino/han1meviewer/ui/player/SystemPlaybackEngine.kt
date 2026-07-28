@@ -1,11 +1,11 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.player
 
 import android.content.Context
+import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.PlaybackParams
-import android.net.Uri
-import android.os.Build
 import android.view.Surface
+import androidx.core.net.toUri
 import io.github.daisukikaffuchino.utils.LogUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,11 +13,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class SystemPlaybackEngine(
     private val context: Context,
@@ -41,8 +42,11 @@ class SystemPlaybackEngine(
     override fun load(request: PlaybackRequest) {
         check(!released) { "Playback engine has already been released" }
         pendingRequest = request
-        mediaPlayer?.reset()
-        mediaPlayer?.release()
+        mediaPlayer?.apply {
+            setSurface(null)
+            reset()
+            release()
+        }
         mediaPlayer = MediaPlayer().apply {
             setOnPreparedListener(this@SystemPlaybackEngine)
             setOnCompletionListener(this@SystemPlaybackEngine)
@@ -50,8 +54,13 @@ class SystemPlaybackEngine(
             setOnVideoSizeChangedListener(this@SystemPlaybackEngine)
             setOnErrorListener(this@SystemPlaybackEngine)
             currentSurface?.let(::setSurface)
-            setAudioStreamType(android.media.AudioManager.STREAM_MUSIC)
-            setDataSource(context, Uri.parse(request.uri), request.headers)
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .build()
+                )
+            setDataSource(context, request.uri.toUri(), request.headers)
             isLooping = request.looping
             prepareAsync()
         }
@@ -78,9 +87,7 @@ class SystemPlaybackEngine(
 
     override fun setPlaybackSpeed(speed: Float) {
         requestedSpeed = speed.coerceIn(0.25f, 5f)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-            mutableState.value.phase == PlaybackPhase.Ready
-        ) {
+        if (mutableState.value.phase == PlaybackPhase.Ready) {
             mediaPlayer?.playbackParams = PlaybackParams().setSpeed(requestedSpeed)
         }
         mutableState.value = mutableState.value.copy(playbackSpeed = requestedSpeed)
@@ -118,11 +125,10 @@ class SystemPlaybackEngine(
     override fun onPrepared(player: MediaPlayer) {
         val request = pendingRequest ?: return
         if (request.startPositionMs > 0L) {
-            player.seekTo(request.startPositionMs.coerceIn(0L, Int.MAX_VALUE.toLong()).toInt())
+            val duration = player.duration.toLong().takeIf { it > 0L } ?: Long.MAX_VALUE
+            player.seekTo(request.startPositionMs.coerceIn(0L, duration).coerceAtMost(Int.MAX_VALUE.toLong()).toInt())
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            player.playbackParams = PlaybackParams().setSpeed(requestedSpeed)
-        }
+        player.playbackParams = PlaybackParams().setSpeed(requestedSpeed)
         if (request.playWhenReady) player.start()
         mutableState.value = mutableState.value.copy(
             phase = PlaybackPhase.Ready,
@@ -186,7 +192,7 @@ class SystemPlaybackEngine(
         progressJob = scope.launch {
             while (isActive) {
                 publishPlaybackState()
-                delay(250L)
+                delay(250L.milliseconds)
             }
         }
     }

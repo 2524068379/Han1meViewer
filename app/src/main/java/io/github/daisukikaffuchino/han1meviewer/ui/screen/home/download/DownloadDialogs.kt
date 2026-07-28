@@ -13,10 +13,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.sharp.Create
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -151,7 +148,7 @@ fun CreateGroupDialog(
                                     )
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Outlined.Delete,
+                                        painter = painterResource(R.drawable.ic_delete),
                                         contentDescription = stringResource(R.string.delete_group),
                                         modifier = Modifier.size(18.dp),
                                     )
@@ -238,7 +235,10 @@ fun GroupRenameDialog(
                 ) {
                     if (group != null && group.id != DownloadGroupEntity.DEFAULT_GROUP_ID) {
                         TextButton(onClick = { onDelete(header) }) {
-                            Icon(Icons.Outlined.Delete, contentDescription = null)
+                            Icon(
+                                painter = painterResource(R.drawable.ic_delete),
+                                contentDescription = null
+                            )
                             Text(stringResource(R.string.delete_group))
                         }
                     }
@@ -251,7 +251,10 @@ fun GroupRenameDialog(
                             onConfirm(header, trimmed)
                         }
                     }) {
-                        Icon(Icons.Outlined.Edit, contentDescription = null)
+                        Icon(
+                            painter = painterResource(R.drawable.ic_edit),
+                            contentDescription = null
+                        )
                         Text(stringResource(R.string.confirm))
                     }
                 }
@@ -304,7 +307,7 @@ fun MoveGroupDialog(
                                     .clickable { onConfirm(video, group.id) },
                                 leadingContent = {
                                     Icon(
-                                        imageVector = Icons.Sharp.Create,
+                                        painter = painterResource(R.drawable.ic_edit),
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

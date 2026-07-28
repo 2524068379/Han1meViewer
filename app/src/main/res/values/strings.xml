@@ -215,7 +215,7 @@ Some mirrors may not support login, may not share cookies, may fail verification
     <string name="sure_to_add_to_h_keyframe">Are you sure you want to add the current time to the H Keyframe?</string>
     <string name="current_position_d_ms">Current Time: %dms</string>
     <string name="pause_then_long_press">Pause first, then long press</string>
-    <string name="long_press_to_add_h_keyframe">Long press 🥵 to add H Keyframe</string>
+    <string name="long_press_to_add_h_keyframe">Long press button to add H Keyframe</string>
     <string name="video_deleted_sure_to_delete_item">Video has been deleted or moved, delete this entry?</string>
     <string name="delete_failed">Deletion Failed</string>
     <string name="delete_fav">Delete Favorite</string>
@@ -680,6 +680,7 @@ Recommendations are as follows:\n
     <string name="global_search">Global Search</string>
     <string name="player_anime4k_label" translatable="false">Anime4K</string>
     <string name="player_h_keyframe">H Keyframe</string>
+    <string name="h_keyframes_not_enabled">H Keyframes are not enabled</string>
     <string name="player_auto_quality">Auto</string>
     <string name="player_time_format">%1$s / %2$s</string>
     <string name="player_speed_format">%1$sx</string>

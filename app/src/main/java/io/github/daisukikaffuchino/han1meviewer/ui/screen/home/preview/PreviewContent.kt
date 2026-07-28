@@ -26,8 +26,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -103,7 +101,7 @@ fun PreviewContent(
             actions = {
                 IconButton(onClick = { onEvent(PreviewEvent.OnOpenGetchuPreview) }) {
                     Icon(
-                        imageVector = Icons.Default.CalendarMonth,
+                        painter = painterResource(R.drawable.ic_calendar_month),
                         contentDescription = stringResource(R.string.getchu_preview),
                     )
                 }

@@ -213,7 +213,7 @@
     <string name="sure_to_add_to_h_keyframe">確定要將目前時間點加入關鍵 H 幀嗎？</string>
     <string name="current_position_d_ms">目前時間點：%dms</string>
     <string name="pause_then_long_press">請先暫停再長按</string>
-    <string name="long_press_to_add_h_keyframe">請長按🥵新增關鍵 H 幀</string>
+    <string name="long_press_to_add_h_keyframe">請長按按鈕新增關鍵 H 幀</string>
     <string name="video_deleted_sure_to_delete_item">影片已被刪除或移動，是否刪除此項目？</string>
     <string name="delete_failed">刪除失敗</string>
     <string name="delete_fav">移除喜愛</string>
@@ -649,8 +649,8 @@
     <string name="no_license_items">沒有可顯示的項目</string>
     <string name="no_licenses_found">找不到項目</string>
     <string name="global_search">全站搜尋</string>
-    <string name="player_anime4k_label" translatable="false">Anime4K</string>
-    <string name="player_h_keyframe">H關鍵影格</string>
+    <string name="player_h_keyframe">關鍵H幀</string>
+    <string name="h_keyframes_not_enabled">尚未啟用關鍵H幀</string>
     <string name="player_auto_quality">自動</string>
     <string name="player_time_format">%1$s / %2$s</string>
     <string name="player_speed_format">%1$sx</string>

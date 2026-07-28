@@ -24,9 +24,6 @@ import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -43,8 +40,10 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.ui.player.PlaybackEngine
@@ -91,6 +90,7 @@ fun VideoShellContent(
     selectedSuperResolutionIndex: Int,
     onSuperResolutionSelected: (Int) -> Unit,
     hKeyframeLabel: String,
+    isHKeyframesEnabled: Boolean,
     hKeyframeOptions: List<String>,
     hKeyframes: List<HKeyframeEntity.Keyframe>,
     isHKeyframeLocal: Boolean,
@@ -201,6 +201,7 @@ fun VideoShellContent(
                     selectedSuperResolutionIndex = selectedSuperResolutionIndex,
                     onSuperResolutionSelected = onSuperResolutionSelected,
                     hKeyframeLabel = hKeyframeLabel,
+                    isHKeyframesEnabled = isHKeyframesEnabled,
                     hKeyframeOptions = hKeyframeOptions,
                     hKeyframes = hKeyframes,
                     isHKeyframeLocal = isHKeyframeLocal,
@@ -243,7 +244,8 @@ fun VideoShellContent(
                 Row(
                     modifier = Modifier
                         .width(sideWidth)
-                        .fillMaxHeight(),
+                        .fillMaxHeight()
+                        .background(MaterialTheme.colorScheme.background),
                 ) {
                     RelatedCollapseIndicator(
                         collapsed = isSideRelatedCollapsed,
@@ -291,10 +293,10 @@ private fun RelatedCollapseIndicator(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            imageVector = if (collapsed) {
-                Icons.AutoMirrored.Filled.KeyboardArrowLeft
+            painter = if (collapsed) {
+                painterResource(R.drawable.ic_chevron_left)
             } else {
-                Icons.AutoMirrored.Filled.KeyboardArrowRight
+                painterResource(R.drawable.ic_chevron_right)
             },
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
