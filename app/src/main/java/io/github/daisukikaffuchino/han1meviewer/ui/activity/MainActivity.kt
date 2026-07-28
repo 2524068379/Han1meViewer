@@ -31,7 +31,8 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logout
 import io.github.daisukikaffuchino.han1meviewer.ui.bridge.VideoPageHost
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.AccountRoute
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainNavigationState
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HanimeScreen
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.TopLevelBackStack
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.VideoRoute
 import io.github.daisukikaffuchino.han1meviewer.util.defaultSharedPreferences
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsPreferenceKeys
@@ -45,7 +46,8 @@ class MainActivity : BaseActivity() {
 
     val viewModel by viewModels<HomePageViewModel>()
 
-    lateinit var navigationState: MainNavigationState
+    val mainBackStack: TopLevelBackStack<HanimeScreen>
+        get() = viewModel.mainBackStack
     private var showAuthGuard by mutableStateOf(true)
     private val pendingNavigationRequests = MutableSharedFlow<Intent>(
         replay = 1,
@@ -86,7 +88,7 @@ class MainActivity : BaseActivity() {
                 viewModel = viewModel,
                 pendingNavigationRequests = pendingNavigationRequests,
                 showAuthGuard = showAuthGuard,
-                onOpenAccount = { navigationState.navigate(AccountRoute) },
+                onOpenAccount = { mainBackStack.add(AccountRoute) },
                 showSiteSwitchConfirm = showSiteSwitchConfirm,
                 logoutDialogCloseCurrentPage = logoutDialogCloseCurrentPage,
                 onLogoutClick = { showLogoutConfirmDialog() },
@@ -97,7 +99,6 @@ class MainActivity : BaseActivity() {
                 onDismissLogout = { logoutDialogCloseCurrentPage = null },
                 onConfirmLogout = ::confirmLogout,
                 onOpenClipboardVideo = ::showVideoDetailFragment,
-                onNavigationStateReady = { state -> navigationState = state },
             )
         }
     }
@@ -209,7 +210,7 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return if (::navigationState.isInitialized && navigationState.popBackStack()) {
+        return if (mainBackStack.removeLast()) {
             true
         } else {
             super.onSupportNavigateUp()
@@ -249,7 +250,7 @@ class MainActivity : BaseActivity() {
         val closeCurrentPage = logoutDialogCloseCurrentPage ?: return
         logoutDialogCloseCurrentPage = null
         if (closeCurrentPage) {
-            if (::navigationState.isInitialized) navigationState.popBackStack()
+            mainBackStack.removeLast()
         }
         logoutWithRefresh()
     }
@@ -260,9 +261,7 @@ class MainActivity : BaseActivity() {
     }
 
     fun showVideoDetailFragment(videoCode: String, fileUri: String? = null) {
-        if (::navigationState.isInitialized) {
-            navigationState.navigate(VideoRoute(videoCode, fileUri))
-        }
+        mainBackStack.add(VideoRoute(videoCode, fileUri))
     }
 
     fun registerCurrentVideoHost(host: VideoPageHost?) {

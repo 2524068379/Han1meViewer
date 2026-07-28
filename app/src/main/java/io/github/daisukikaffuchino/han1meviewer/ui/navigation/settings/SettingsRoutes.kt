@@ -1,54 +1,54 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings
 
-import androidx.navigation3.runtime.NavKey
 import io.github.daisukikaffuchino.han1meviewer.R
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HanimeScreen
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 
 @Serializable
-object HomeSettingsRoute : NavKey
+object HomeSettingsRoute : HanimeScreen
 
 @Serializable
-object VideoPlaybackSettingsRoute : NavKey
+object VideoPlaybackSettingsRoute : HanimeScreen
 
 @Serializable
-object NetworkDownloadSettingsRoute : NavKey
+object NetworkDownloadSettingsRoute : HanimeScreen
 
 @Serializable
-object AppearanceSettingsRoute : NavKey
+object AppearanceSettingsRoute : HanimeScreen
 
 @Serializable
-object InterfaceInteractionSettingsRoute : NavKey
+object InterfaceInteractionSettingsRoute : HanimeScreen
 
 @Serializable
-object DataPrivacySettingsRoute : NavKey
+object DataPrivacySettingsRoute : HanimeScreen
 
 @Serializable
-object AboutSettingsRoute : NavKey
+object AboutSettingsRoute : HanimeScreen
 
 @Serializable
-object OpenSourceLicensesRoute : NavKey
+object OpenSourceLicensesRoute : HanimeScreen
 
 @Serializable
-object PlayerSettingsRoute : NavKey
+object PlayerSettingsRoute : HanimeScreen
 
 @Serializable
-object NetworkSettingsRoute : NavKey
+object NetworkSettingsRoute : HanimeScreen
 
 @Serializable
-object DownloadSettingsRoute : NavKey
+object DownloadSettingsRoute : HanimeScreen
 
 @Serializable
-object MpvPlayerSettingsRoute : NavKey
+object MpvPlayerSettingsRoute : HanimeScreen
 
 @Serializable
-object HKeyframesRoute : NavKey
+object HKeyframesRoute : HanimeScreen
 
 @Serializable
-object SharedHKeyframesRoute : NavKey
+object SharedHKeyframesRoute : HanimeScreen
 
 @Serializable
-object HKeyframeSettingsRoute : NavKey
+object HKeyframeSettingsRoute : HanimeScreen
 
 enum class SettingsDestinationSpec(
     val routeKey: String,
@@ -148,7 +148,7 @@ enum class SettingsDestinationSpec(
         routeClass = HKeyframeSettingsRoute::class,
     );
 
-    val route: NavKey
+    val route: HanimeScreen
         get() = when (this) {
             Home -> HomeSettingsRoute
             VideoPlayback -> VideoPlaybackSettingsRoute
@@ -171,7 +171,7 @@ enum class SettingsDestinationSpec(
         fun fromRouteKey(routeKey: String?): SettingsDestinationSpec? =
             entries.firstOrNull { it.routeKey == routeKey }
 
-        fun fromRoute(route: NavKey?): SettingsDestinationSpec? =
+        fun fromRoute(route: HanimeScreen?): SettingsDestinationSpec? =
             entries.firstOrNull { spec -> route != null && spec.routeClass.isInstance(route) }
     }
 }

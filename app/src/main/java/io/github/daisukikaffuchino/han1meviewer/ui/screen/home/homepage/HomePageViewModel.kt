@@ -20,6 +20,9 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.logout
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HanimeScreen
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HomeRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.TopLevelBackStack
 import io.github.daisukikaffuchino.utils.getSpValue
 import io.github.daisukikaffuchino.utils.putSpValue
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +35,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 class HomePageViewModel: ViewModel() {
+    val mainBackStack = TopLevelBackStack<HanimeScreen>(HomeRoute)
+
     data class SessionExpiredMessage(
         val message: String?,
         @param:StringRes val fallbackResId: Int,

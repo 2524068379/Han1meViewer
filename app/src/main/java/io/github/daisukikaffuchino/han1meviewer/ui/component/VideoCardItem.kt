@@ -324,7 +324,7 @@ fun VideoCardItem(
                         text = { Text("搜索该作者所有作品") },
                         onClick = {
                             showContextMenu = false
-                            (context as? MainActivity)?.navigationState?.navigate(
+                            (context as? MainActivity)?.mainBackStack?.add(
                                 SearchRoute(query = currentArtist)
                             )
                         },

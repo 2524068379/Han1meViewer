@@ -2,6 +2,8 @@ package io.github.daisukikaffuchino.han1meviewer.ui.navigation.main
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -9,9 +11,9 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +50,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.OpenSourc
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.PlayerSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.PlayerSettingsRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsScaffold
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsDestinationSpec
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SharedHKeyframesRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SharedHKeyframesRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.VideoPlaybackSettingsRoute
@@ -56,6 +59,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.account.AvatarCropScre
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.HomeSettingsPage
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.OpenSourceLicensesScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.SettingsMainScreen
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.fadeScale
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.materialSharedAxisX
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.UserAccountViewModel
 import io.github.daisukikaffuchino.utils.VibrationUtil
@@ -63,61 +67,64 @@ import kotlinx.serialization.json.Json
 
 private const val PageTransitionOffsetFactor = 0.10f
 
+@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun MainNavHost(
+fun TopNavigation(
     activity: MainActivity,
-    navigationState: MainNavigationState,
+    backStack: TopLevelBackStack<HanimeScreen>,
     isDrawerOpen: Boolean,
     onOpenDrawer: () -> Unit,
-    onDestinationChanged: (MainDestinationSpec) -> Unit,
 ) {
-    val destinationSpec = MainDestinationSpec.fromRoute(navigationState.currentRoute)
     var pendingAvatarCropResult by remember { mutableStateOf<String?>(null) }
 
-    val onBack: () -> Unit = { navigationState.popBackStack() }
-    val onNavigateToVideo: (String) -> Unit = { code -> navigationState.navigate(VideoRoute(code)) }
+    val onBack: () -> Unit = { backStack.removeLast() }
+    val onNavigateToVideo: (String) -> Unit = { code -> backStack.add(VideoRoute(code)) }
     val onNavigateToLocalVideo: (String, String?) -> Unit =
-        { code, uri -> navigationState.navigate(VideoRoute(code, uri)) }
+        { code, uri -> backStack.add(VideoRoute(code, uri)) }
 
-    LaunchedEffect(destinationSpec) {
-        destinationSpec?.let(onDestinationChanged)
+    fun pageTransition() = NavDisplay.transitionSpec {
+        materialSharedAxisX(
+            initialOffsetX = { (it * PageTransitionOffsetFactor).toInt() },
+            targetOffsetX = { -(it * PageTransitionOffsetFactor).toInt() },
+        )
+    } + NavDisplay.popTransitionSpec {
+        materialSharedAxisX(
+            initialOffsetX = { -(it * PageTransitionOffsetFactor).toInt() },
+            targetOffsetX = { (it * PageTransitionOffsetFactor).toInt() },
+        )
+    } + NavDisplay.predictivePopTransitionSpec {
+        materialSharedAxisX(
+            initialOffsetX = { -(it * PageTransitionOffsetFactor).toInt() },
+            targetOffsetX = { (it * PageTransitionOffsetFactor).toInt() },
+        )
     }
 
+    val defaultTransition = fadeScale(
+        effectSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+        spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+    )
+
+    SharedTransitionLayout {
     NavDisplay(
-        backStack = navigationState.backStack,
+        backStack = backStack.backStack,
         onBack = onBack,
         entryDecorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator(),
             rememberViewModelStoreNavEntryDecorator(),
         ),
-        transitionSpec = {
-            materialSharedAxisX(
-                initialOffsetX = { (it * PageTransitionOffsetFactor).toInt() },
-                targetOffsetX = { -(it * PageTransitionOffsetFactor).toInt() },
-            )
-        },
-        popTransitionSpec = {
-            materialSharedAxisX(
-                initialOffsetX = { -(it * PageTransitionOffsetFactor).toInt() },
-                targetOffsetX = { (it * PageTransitionOffsetFactor).toInt() },
-            )
-        },
-        predictivePopTransitionSpec = { _ ->
-            materialSharedAxisX(
-                initialOffsetX = { -(it * PageTransitionOffsetFactor).toInt() },
-                targetOffsetX = { (it * PageTransitionOffsetFactor).toInt() },
-            )
-        },
+        transitionSpec = { defaultTransition },
+        popTransitionSpec = { defaultTransition },
+        predictivePopTransitionSpec = { defaultTransition },
         entryProvider = entryProvider {
         entry<HomeRoute> {
             HomeRouteScreen(
                 activity = activity,
                 isDrawerOpen = isDrawerOpen,
                 onOpenDrawer = onOpenDrawer,
-                onNavigateToPreview = { navigationState.navigate(PreviewRoute) },
-                onNavigateToSearch = { query -> navigationState.navigate(SearchRoute(query = query)) },
+                onNavigateToPreview = { backStack.add(PreviewRoute) },
+                onNavigateToSearch = { query -> backStack.add(SearchRoute(query = query)) },
                 onNavigateToSearchAdvanced = { params ->
-                    navigationState.navigate(
+                    backStack.add(
                         SearchRoute(advancedSearchJson = Json.encodeToString(params))
                     )
                 },
@@ -151,7 +158,7 @@ fun MainNavHost(
         entry<SubscriptionRoute> {
             SubscriptionRouteScreen(
                 onBack = onBack,
-                onNavigateToSearch = { query -> navigationState.navigate(SearchRoute(query = query)) },
+                onNavigateToSearch = { query -> backStack.add(SearchRoute(query = query)) },
                 onNavigateToVideo = onNavigateToVideo,
             )
         }
@@ -168,13 +175,13 @@ fun MainNavHost(
                 onNavigateToLocalVideo = onNavigateToLocalVideo,
             )
         }
-        entry<AccountRoute> {
+        entry<AccountRoute>(metadata = pageTransition()) {
             val accountViewModel: UserAccountViewModel = viewModel()
             AccountScreen(
                 viewModel = accountViewModel,
                 onBack = onBack,
                 onOpenAvatarCrop = { sourceUri ->
-                    navigationState.navigate(AvatarCropRoute(sourceUri))
+                    backStack.add(AvatarCropRoute(sourceUri))
                 },
                 pendingAvatarCropResult = pendingAvatarCropResult,
                 onAvatarCropResultConsumed = { pendingAvatarCropResult = null },
@@ -182,7 +189,7 @@ fun MainNavHost(
                 onLogout = { activity.showLogoutConfirmDialog(closeCurrentPageOnConfirm = true) },
             )
         }
-        entry<AvatarCropRoute> { route ->
+        entry<AvatarCropRoute>(metadata = pageTransition()) { route ->
             AvatarCropScreen(
                 sourceUri = route.sourceUri,
                 onBack = onBack,
@@ -194,82 +201,108 @@ fun MainNavHost(
         }
         entry<HomeSettingsRoute> {
             SettingsScaffold(
-                navigationState = navigationState,
+                backStack = backStack,
+                destination = SettingsDestinationSpec.Home,
                 fallbackDestination = HomeRoute,
             ) {
                 SettingsMainScreen(
-                    onOpenVideoPlayback = { navigationState.navigate(VideoPlaybackSettingsRoute) },
-                    onOpenPlayerSettings = { navigationState.navigate(PlayerSettingsRoute) },
-                    onOpenNetworkDownload = { navigationState.navigate(NetworkDownloadSettingsRoute) },
-                    onOpenAppearance = { navigationState.navigate(AppearanceSettingsRoute) },
+                    onOpenVideoPlayback = { backStack.add(VideoPlaybackSettingsRoute) },
+                    onOpenPlayerSettings = { backStack.add(PlayerSettingsRoute) },
+                    onOpenNetworkDownload = { backStack.add(NetworkDownloadSettingsRoute) },
+                    onOpenAppearance = { backStack.add(AppearanceSettingsRoute) },
                     onOpenInterfaceInteraction = {
-                        navigationState.navigate(InterfaceInteractionSettingsRoute)
+                        backStack.add(InterfaceInteractionSettingsRoute)
                     },
-                    onOpenDataPrivacy = { navigationState.navigate(DataPrivacySettingsRoute) },
-                    onOpenAbout = { navigationState.navigate(AboutSettingsRoute) },
+                    onOpenDataPrivacy = { backStack.add(DataPrivacySettingsRoute) },
+                    onOpenAbout = { backStack.add(AboutSettingsRoute) },
                 )
             }
         }
-        entry<VideoPlaybackSettingsRoute> {
-            SettingsScaffold(navigationState, HomeSettingsRoute) {
+        entry<VideoPlaybackSettingsRoute>(metadata = pageTransition()) {
+            SettingsScaffold(
+                backStack = backStack,
+                destination = SettingsDestinationSpec.VideoPlayback,
+                fallbackDestination = HomeSettingsRoute,
+            ) {
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.VideoPlayback,
-                    onNavigateToHKeyframes = { navigationState.navigate(HKeyframesRoute) },
-                    onNavigateToSharedHKeyframes = { navigationState.navigate(SharedHKeyframesRoute) },
+                    onNavigateToHKeyframes = { backStack.add(HKeyframesRoute) },
+                    onNavigateToSharedHKeyframes = { backStack.add(SharedHKeyframesRoute) },
                 )
             }
         }
-        entry<NetworkDownloadSettingsRoute> {
-            SettingsScaffold(navigationState, HomeSettingsRoute) {
+        entry<NetworkDownloadSettingsRoute>(metadata = pageTransition()) {
+            SettingsScaffold(
+                backStack = backStack,
+                destination = SettingsDestinationSpec.NetworkDownload,
+                fallbackDestination = HomeSettingsRoute,
+            ) {
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.NetworkDownload,
                 )
             }
         }
-        entry<AppearanceSettingsRoute> {
-            SettingsScaffold(navigationState, HomeSettingsRoute) {
+        entry<AppearanceSettingsRoute>(metadata = pageTransition()) {
+            SettingsScaffold(
+                backStack = backStack,
+                destination = SettingsDestinationSpec.Appearance,
+                fallbackDestination = HomeSettingsRoute,
+            ) {
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.Appearance,
                 )
             }
         }
-        entry<InterfaceInteractionSettingsRoute> {
-            SettingsScaffold(navigationState, HomeSettingsRoute) {
+        entry<InterfaceInteractionSettingsRoute>(metadata = pageTransition()) {
+            SettingsScaffold(
+                backStack = backStack,
+                destination = SettingsDestinationSpec.InterfaceInteraction,
+                fallbackDestination = HomeSettingsRoute,
+            ) {
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.InterfaceInteraction,
                 )
             }
         }
-        entry<DataPrivacySettingsRoute> {
-            SettingsScaffold(navigationState, HomeSettingsRoute) {
+        entry<DataPrivacySettingsRoute>(metadata = pageTransition()) {
+            SettingsScaffold(
+                backStack = backStack,
+                destination = SettingsDestinationSpec.DataPrivacy,
+                fallbackDestination = HomeSettingsRoute,
+            ) {
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.DataPrivacy,
                 )
             }
         }
-        entry<AboutSettingsRoute> {
-            SettingsScaffold(navigationState, HomeSettingsRoute) {
+        entry<AboutSettingsRoute>(metadata = pageTransition()) {
+            SettingsScaffold(
+                backStack = backStack,
+                destination = SettingsDestinationSpec.About,
+                fallbackDestination = HomeSettingsRoute,
+            ) {
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.About,
                     onNavigateToOpenSourceLicenses = {
-                        navigationState.navigate(OpenSourceLicensesRoute)
+                        backStack.add(OpenSourceLicensesRoute)
                     },
                 )
             }
         }
-        entry<OpenSourceLicensesRoute> {
+        entry<OpenSourceLicensesRoute>(metadata = pageTransition()) {
             var searchMode by remember { mutableStateOf(false) }
             BackHandler(enabled = searchMode) {
                 searchMode = false
             }
             SettingsScaffold(
-                navigationState = navigationState,
+                backStack = backStack,
+                destination = SettingsDestinationSpec.OpenSourceLicenses,
                 fallbackDestination = AboutSettingsRoute,
                 onNavigateBack = {
                     if (searchMode) {
@@ -304,45 +337,50 @@ fun MainNavHost(
                 )
             }
         }
-        entry<PlayerSettingsRoute> {
+        entry<PlayerSettingsRoute>(metadata = pageTransition()) {
             SettingsScaffold(
-                navigationState = navigationState,
+                backStack = backStack,
+                destination = SettingsDestinationSpec.Player,
                 fallbackDestination = HomeSettingsRoute,
             ) {
                 PlayerSettingsRouteScreen(
-                    onNavigateToMpvSettings = { navigationState.navigate(MpvPlayerSettingsRoute) },
+                    onNavigateToMpvSettings = { backStack.add(MpvPlayerSettingsRoute) },
                 )
             }
         }
-        entry<NetworkSettingsRoute> {
+        entry<NetworkSettingsRoute>(metadata = pageTransition()) {
             SettingsScaffold(
-                navigationState = navigationState,
+                backStack = backStack,
+                destination = SettingsDestinationSpec.Network,
                 fallbackDestination = NetworkDownloadSettingsRoute,
             ) {
                 NetworkSettingsRouteScreen()
             }
         }
-        entry<DownloadSettingsRoute> {
+        entry<DownloadSettingsRoute>(metadata = pageTransition()) {
             SettingsScaffold(
-                navigationState = navigationState,
+                backStack = backStack,
+                destination = SettingsDestinationSpec.Download,
                 fallbackDestination = NetworkDownloadSettingsRoute,
             ) {
                 DownloadSettingsRouteScreen()
             }
         }
-        entry<MpvPlayerSettingsRoute> {
+        entry<MpvPlayerSettingsRoute>(metadata = pageTransition()) {
             SettingsScaffold(
-                navigationState = navigationState,
+                backStack = backStack,
+                destination = SettingsDestinationSpec.Mpv,
                 fallbackDestination = PlayerSettingsRoute,
             ) {
                 MpvPlayerSettingsRouteScreen()
             }
         }
-        entry<HKeyframesRoute> {
+        entry<HKeyframesRoute>(metadata = pageTransition()) {
             var showImportDialog by remember { mutableStateOf(false) }
             val view = LocalView.current
             SettingsScaffold(
-                navigationState = navigationState,
+                backStack = backStack,
+                destination = SettingsDestinationSpec.HKeyframes,
                 fallbackDestination = VideoPlaybackSettingsRoute,
                 floatingActionButton = {
                     FloatingActionButton(
@@ -365,9 +403,10 @@ fun MainNavHost(
                 )
             }
         }
-        entry<SharedHKeyframesRoute> {
+        entry<SharedHKeyframesRoute>(metadata = pageTransition()) {
             SettingsScaffold(
-                navigationState = navigationState,
+                backStack = backStack,
+                destination = SettingsDestinationSpec.SharedHKeyframes,
                 fallbackDestination = VideoPlaybackSettingsRoute,
             ) {
                 SharedHKeyframesRouteScreen(
@@ -375,59 +414,60 @@ fun MainNavHost(
                 )
             }
         }
-        entry<HKeyframeSettingsRoute> {
+        entry<HKeyframeSettingsRoute>(metadata = pageTransition()) {
             SettingsScaffold(
-                navigationState = navigationState,
+                backStack = backStack,
+                destination = SettingsDestinationSpec.HKeyframeSettings,
                 fallbackDestination = VideoPlaybackSettingsRoute,
             ) {
                 HKeyframeSettingsRouteScreen(
-                    onNavigateToHKeyframes = { navigationState.navigate(HKeyframesRoute) },
-                    onNavigateToSharedHKeyframes = { navigationState.navigate(SharedHKeyframesRoute) },
+                    onNavigateToHKeyframes = { backStack.add(HKeyframesRoute) },
+                    onNavigateToSharedHKeyframes = { backStack.add(SharedHKeyframesRoute) },
                 )
             }
         }
-        entry<SearchRoute> { route ->
+        entry<SearchRoute>(metadata = pageTransition()) { route ->
             SearchRouteScreen(
                 route = route,
                 onBack = onBack,
                 onNavigateToVideo = onNavigateToVideo,
             )
         }
-        entry<PreviewRoute> {
+        entry<PreviewRoute>(metadata = pageTransition()) {
             PreviewRouteScreen(
                 activity = activity,
                 onBack = onBack,
                 onNavigateToGetchuPreview = {
-                    navigationState.navigate(GetchuPreviewRoute)
+                    backStack.add(GetchuPreviewRoute)
                 },
                 onNavigateToPreviewComment = { date, dateCode ->
-                    navigationState.navigate(PreviewCommentRoute(date, dateCode))
+                    backStack.add(PreviewCommentRoute(date, dateCode))
                 },
                 onNavigateToVideo = onNavigateToVideo,
             )
         }
-        entry<GetchuPreviewRoute> {
+        entry<GetchuPreviewRoute>(metadata = pageTransition()) {
             GetchuPreviewRouteScreen(
                 onBack = onBack,
-                onNavigateToDetail = { id -> navigationState.navigate(GetchuPreviewDetailRoute(id)) },
+                onNavigateToDetail = { id -> backStack.add(GetchuPreviewDetailRoute(id)) },
             )
         }
-        entry<GetchuPreviewDetailRoute> { route ->
+        entry<GetchuPreviewDetailRoute>(metadata = pageTransition()) { route ->
             GetchuPreviewDetailRouteScreen(
                 route = route,
                 onBack = onBack,
-                onNavigateToDetail = { id -> navigationState.navigate(GetchuPreviewDetailRoute(id)) },
-                onNavigateToVideoUrl = { url -> navigationState.navigate(VideoRoute("-1", url)) },
+                onNavigateToDetail = { id -> backStack.add(GetchuPreviewDetailRoute(id)) },
+                onNavigateToVideoUrl = { url -> backStack.add(VideoRoute("-1", url)) },
             )
         }
-        entry<PreviewCommentRoute> { route ->
+        entry<PreviewCommentRoute>(metadata = pageTransition()) { route ->
             PreviewCommentRouteScreen(
                 activity = activity,
                 route = route,
                 onBack = onBack,
             )
         }
-        entry<VideoRoute> { route ->
+        entry<VideoRoute>(metadata = pageTransition()) { route ->
             VideoRouteScreen(
                 activity = activity,
                 route = route,
@@ -435,4 +475,5 @@ fun MainNavHost(
         }
         },
     )
+    }
 }

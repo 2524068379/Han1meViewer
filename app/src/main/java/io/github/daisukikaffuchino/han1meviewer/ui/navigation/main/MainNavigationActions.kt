@@ -1,7 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.navigation.main
 
 import android.content.Intent
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HomeSettingsRoute
 import kotlinx.serialization.json.Json
 
 private val loginRequiredDrawerItems = setOf(
@@ -13,7 +12,7 @@ private val loginRequiredDrawerItems = setOf(
 
 const val EXTRA_OPEN_DAILY_CHECK_IN = "openDailyCheckIn"
 
-fun MainNavigationState.navigateDrawerDestination(
+fun TopLevelBackStack<HanimeScreen>.navigateDrawerDestination(
     destination: MainDrawerDestination,
     isLoggedIn: Boolean,
     onRequireLogin: () -> Unit,
@@ -23,33 +22,23 @@ fun MainNavigationState.navigateDrawerDestination(
         return false
     }
 
-    when (destination) {
-        MainDrawerDestination.Home -> navigate(HomeRoute)
-        MainDrawerDestination.Settings -> navigate(HomeSettingsRoute)
-        MainDrawerDestination.DailyCheckIn -> navigate(DailyCheckInRoute)
-        MainDrawerDestination.WatchLater -> navigate(MyWatchLaterRoute)
-        MainDrawerDestination.FavVideo -> navigate(MyFavVideoRoute)
-        MainDrawerDestination.Playlist -> navigate(MyPlaylistRoute)
-        MainDrawerDestination.Subscription -> navigate(SubscriptionRoute)
-        MainDrawerDestination.WatchHistory -> navigate(WatchHistoryRoute)
-        MainDrawerDestination.Download -> navigate(DownloadRoute)
-    }
+    addTopLevel(destination.route)
     return true
 }
 
-fun MainNavigationState.handleMainIntent(intent: Intent) {
+fun TopLevelBackStack<HanimeScreen>.handleMainIntent(intent: Intent) {
     if (intent.action == Intent.ACTION_VIEW) {
         val uri = intent.data ?: return
         when (uri.scheme) {
             "http", "https" -> {
                 val videoCode = uri.getQueryParameter("v")
                 if (videoCode != null) {
-                    navigate(VideoRoute(videoCode))
+                    add(VideoRoute(videoCode))
                 }
             }
 
             "file", "content" -> {
-                navigate(VideoRoute("-1", uri.toString()))
+                add(VideoRoute("-1", uri.toString()))
             }
         }
         return
@@ -57,13 +46,13 @@ fun MainNavigationState.handleMainIntent(intent: Intent) {
 
     if (intent.getBooleanExtra(EXTRA_OPEN_DAILY_CHECK_IN, false)) {
         intent.removeExtra(EXTRA_OPEN_DAILY_CHECK_IN)
-        navigate(DailyCheckInRoute, launchSingleTop = true)
+        add(DailyCheckInRoute, launchSingleTop = true)
         return
     }
 
     intent.getStringExtra("startSearchFromTag")?.let { tag ->
         intent.removeExtra("startSearchFromTag")
-        navigate(SearchRoute(query = tag))
+        add(SearchRoute(query = tag))
         return
     }
 
@@ -71,13 +60,13 @@ fun MainNavigationState.handleMainIntent(intent: Intent) {
     val map = intent.getSerializableExtra("startSearchFromMap") as? HashMap<String, String>
     if (map != null) {
         intent.removeExtra("startSearchFromMap")
-        navigate(SearchRoute(advancedSearchJson = Json.encodeToString(map)))
+        add(SearchRoute(advancedSearchJson = Json.encodeToString(map)))
         return
     }
 
     val videoCode = intent.getStringExtra("startVideoCode")
     if (!videoCode.isNullOrEmpty()) {
         intent.removeExtra("startVideoCode")
-        navigate(VideoRoute(videoCode))
+        add(VideoRoute(videoCode))
     }
 }

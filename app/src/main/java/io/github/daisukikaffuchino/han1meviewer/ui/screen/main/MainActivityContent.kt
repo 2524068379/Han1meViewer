@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.HCacheManager
@@ -34,10 +33,9 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.component.UsageNoticeDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainDestinationSpec
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainNavHost
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainNavigationState
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HomeRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainDrawerDestination
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.TopNavigation
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.handleMainIntent
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.navigateDrawerDestination
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomePageViewModel
@@ -63,15 +61,12 @@ fun MainActivityContent(
     onDismissLogout: () -> Unit,
     onConfirmLogout: () -> Unit,
     onOpenClipboardVideo: (String) -> Unit,
-    onNavigationStateReady: (MainNavigationState) -> Unit,
 ) {
-        val backStack = rememberNavBackStack(HomeRoute)
-        val navigationState = remember(backStack) { MainNavigationState(backStack) }
+        val backStack = viewModel.mainBackStack
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
         val clipboard = LocalClipboard.current
         val snackbarHostState = remember { SnackbarHostState() }
-        var currentMainDestination by remember { mutableStateOf(MainDestinationSpec.Home) }
         var showUsageNotice by remember { mutableStateOf(!Preferences.usageNoticeAccepted) }
         val isDrawerOpen =
             drawerState.currentValue == DrawerValue.Open || drawerState.targetValue == DrawerValue.Open
@@ -91,11 +86,9 @@ fun MainActivityContent(
             null
         }
         val headerIsLoading = isLoggedIn && homeState is PageState.Loading
-        val selectedDrawerDestination = currentMainDestination.drawerDestination
-
-        LaunchedEffect(navigationState) {
-            onNavigationStateReady(navigationState)
-        }
+        val currentRoute = backStack.currentKey
+        val selectedDrawerDestination = MainDrawerDestination.fromRoute(backStack.topLevelKey)
+        val drawerEnabled = currentRoute == HomeRoute
         LaunchedEffect(Unit) {
             val clipboardText = clipboard.getClipEntry()
                 ?.clipData
@@ -116,7 +109,7 @@ fun MainActivityContent(
         }
         LaunchedEffect(Unit) {
             pendingNavigationRequests.collect { intent ->
-                navigationState.handleMainIntent(intent)
+                backStack.handleMainIntent(intent)
             }
         }
         LaunchedEffect(viewModel) {
@@ -134,7 +127,7 @@ fun MainActivityContent(
         }
         MainActivityScaffold(
             drawerState = drawerState,
-            drawerEnabled = currentMainDestination.drawerEnabled,
+            drawerEnabled = drawerEnabled,
             selectedDestination = selectedDrawerDestination,
             avatarUrl = headerAvatarUrl,
             username = headerUsername,
@@ -155,7 +148,7 @@ fun MainActivityContent(
             },
             onSwitchSiteClick = onSwitchSiteClick,
             onDrawerItemSelected = { destination ->
-                val handled = navigationState.navigateDrawerDestination(
+                val handled = backStack.navigateDrawerDestination(
                     destination = destination,
                     isLoggedIn = isLoggedIn,
                     onRequireLogin = { SonnerToast.warning(R.string.login_first) },
@@ -167,17 +160,14 @@ fun MainActivityContent(
             },
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                MainNavHost(
+                TopNavigation(
                     activity = activity,
-                    navigationState = navigationState,
+                    backStack = backStack,
                     isDrawerOpen = isDrawerOpen,
                     onOpenDrawer = {
-                        if (currentMainDestination.drawerEnabled) {
+                        if (drawerEnabled) {
                             scope.launch { drawerState.open() }
                         }
-                    },
-                    onDestinationChanged = { destination ->
-                        currentMainDestination = destination
                     },
                 )
                 if (showAuthGuard) {
