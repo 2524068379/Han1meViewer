@@ -1,10 +1,10 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
-import android.app.Application
 import android.os.Parcelable
 import io.github.daisukikaffuchino.utils.LogUtil
 import android.util.SparseArray
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
 import io.github.daisukikaffuchino.han1meviewer.Preferences
@@ -17,7 +17,6 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.utils.loadAssetAs
-import io.github.daisukikaffuchino.utils.ApplicationViewModel
 import io.github.daisukikaffuchino.utils.unsafeLazy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -36,9 +35,8 @@ import kotlinx.coroutines.withContext
  * @time 2022/06/13 013 22:29
  */
 class SearchViewModel(
-    application: Application,
     private val state: SavedStateHandle
-) : ApplicationViewModel(application) {
+) : ViewModel() {
 
     var page: Int = 1
     var query: String?

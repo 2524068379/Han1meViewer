@@ -1,21 +1,21 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.mylist
 
-import android.app.Application
-import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListType
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
-import io.github.daisukikaffuchino.utils.ApplicationViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-abstract class MyListSubViewModel(application: Application) : ApplicationViewModel(application) {
+abstract class MyListSubViewModel(
+    private val scope: CoroutineScope,
+) {
 
     protected val itemsStateFlow: MutableStateFlow<PageLoadingState<MyListItems<HanimeInfo>>> =
         MutableStateFlow(PageLoadingState.Loading)
@@ -37,7 +37,7 @@ abstract class MyListSubViewModel(application: Application) : ApplicationViewMod
         onSuccess: (MyListItems<HanimeInfo>) -> Unit = {},
     ) {
         mutableIsLoadingMore.value = !isRefreshing && itemsFlow.value.isNotEmpty()
-        viewModelScope.launch {
+        scope.launch {
             NetworkRepo.getMyListItems(userId, listType, page).collect { state ->
                 itemsStateFlow.value = state
                 itemsFlow.update { prevList ->
@@ -73,7 +73,7 @@ abstract class MyListSubViewModel(application: Application) : ApplicationViewMod
         mapState: (WebsiteState<T>) -> WebsiteState<R>,
         isSuccess: (WebsiteState<T>) -> Boolean = { it is WebsiteState.Success },
     ) {
-        viewModelScope.launch {
+        scope.launch {
             deleteCall().collect { deleteState ->
                 emitTo.emit(mapState(deleteState))
                 itemsFlow.update { list ->

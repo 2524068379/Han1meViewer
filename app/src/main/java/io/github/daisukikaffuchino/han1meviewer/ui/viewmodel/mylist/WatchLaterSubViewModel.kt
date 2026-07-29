@@ -1,6 +1,5 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.mylist
 
-import android.app.Application
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
@@ -13,8 +12,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.CoroutineScope
 
-class WatchLaterSubViewModel(application: Application) : MyListSubViewModel(application) {
+class WatchLaterSubViewModel(scope: CoroutineScope) : MyListSubViewModel(scope) {
 
     var watchLaterPage = 1
 
