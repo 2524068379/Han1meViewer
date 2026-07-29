@@ -319,6 +319,8 @@ Recommendations are as follows:\n
     <string name="long_press_speed_summary">Uses %1$s the current playback speed</string>
     <string name="haptic_feedback">Haptic Feedback</string>
     <string name="haptic_feedback_summary">Provide vibration feedback for certain actions</string>
+    <string name="secure_mode">Security mode</string>
+    <string name="secure_mode_summary">Block screenshots and protect recent-app previews</string>
     <string name="fun_loading_hints">More playful loading messages</string>
     <string name="fun_loading_hints_summary">You are as cute as ever today~</string>
     <string name="slide_sensitivity">Slide Sensitivity for Progress Adjustment</string>

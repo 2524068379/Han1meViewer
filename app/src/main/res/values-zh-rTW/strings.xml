@@ -311,6 +311,8 @@
     <string name="long_press_speed_summary">目前速度的 %1$s</string>
     <string name="haptic_feedback">觸感回饋</string>
     <string name="haptic_feedback_summary">為部分操作提供震動回饋</string>
+    <string name="secure_mode">安全模式</string>
+    <string name="secure_mode_summary">阻止截圖並保護背景預覽圖</string>
     <string name="fun_loading_hints">更有趣的載入文案</string>
     <string name="fun_loading_hints_summary">今天也很可愛哦~</string>
     <string name="slide_sensitivity">滑動調整進度的靈敏度</string>

@@ -24,6 +24,7 @@ data class HomeSettingsUiState(
     val hapticFeedbackEnabled: Boolean,
     val funLoadingHints: Boolean,
     val useLockScreen: Boolean,
+    val secureMode: Boolean,
     val fakeLauncherIconName: String,
     val cacheSummary: String,
     val versionSummary: String,

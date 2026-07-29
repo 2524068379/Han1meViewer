@@ -349,6 +349,9 @@ object Preferences {
     val funLoadingHints: Boolean
         get() = preferenceSp.getBoolean(SettingsPreferenceKeys.FUN_LOADING_HINTS, true)
 
+    val secureMode: Boolean
+        get() = preferenceSp.getBoolean(SettingsPreferenceKeys.SECURE_MODE, false)
+
     /**
      * MPV播放器设置
      */

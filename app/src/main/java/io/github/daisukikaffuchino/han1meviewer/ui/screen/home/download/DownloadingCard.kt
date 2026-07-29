@@ -16,13 +16,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledTonalIconButton
-import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
-import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
@@ -45,12 +43,14 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeDownloadEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.state.DownloadState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.CardContainerSurface
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledTonalIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeHomePageVideos
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
-import io.github.daisukikaffuchino.utils.formatFileSize
 import io.github.daisukikaffuchino.utils.VibrationUtil
+import io.github.daisukikaffuchino.utils.formatFileSize
 
 /**
  * 下载中任务卡片。
@@ -149,7 +149,10 @@ fun DownloadingItemCard(
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             if (item.state == DownloadState.Downloading) {
-                                LoadingIndicator(modifier = Modifier.size(12.dp))
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(10.dp),
+                                    strokeWidth = 1.6.dp
+                                )
                             } else {
                                 Icon(
                                     painter = painterResource(downloadStateIcon(item.state)),

@@ -294,6 +294,11 @@ fun HomeSettingsRouteScreen(
             saveBoolean(HOME_USE_LOCK_SCREEN, value)
             refreshKey++
         },
+        onSecureModeChange = { enabled ->
+            saveBoolean(SettingsPreferenceKeys.SECURE_MODE, enabled)
+            activity.setSecureMode(enabled)
+            refreshKey++
+        },
         hKeyframeSettingsContent = {
             HKeyframeSettingsRouteScreen(
                 onNavigateToHKeyframes = onNavigateToHKeyframes,
@@ -537,6 +542,7 @@ private fun buildHomeSettingsUiState(
         hapticFeedbackEnabled = Preferences.hapticFeedbackEnabled,
         funLoadingHints = Preferences.funLoadingHints,
         useLockScreen = Preferences.preferenceSp.getBoolean(HOME_USE_LOCK_SCREEN, false),
+        secureMode = Preferences.secureMode,
         fakeLauncherIconName = currentItem.name,
         cacheSummary = cacheSummary,
         versionSummary = context.getString(

@@ -79,6 +79,7 @@ fun HomeSettingsScreen(
     onSearchGridColumnsConfigChange: (SearchGridColumnsConfig) -> Unit,
     onHorizontalCardCountConfigChange: (HorizontalCardCountConfig) -> Unit,
     onUseLockScreenChange: (Boolean) -> Unit,
+    onSecureModeChange: (Boolean) -> Unit,
     onHomeCategoryPreferencesChange: (List<String>, Set<String>) -> Unit,
     hKeyframeSettingsContent: @Composable () -> Unit,
     networkSettingsContent: @Composable () -> Unit,
@@ -405,6 +406,13 @@ fun HomeSettingsScreen(
                             iconRes = R.drawable.ic_setting_applock,
                             onCheckedChange = onUseLockScreenChange,
                         )
+                        SettingSwitchItem(
+                            title = stringResource(R.string.secure_mode),
+                            summary = stringResource(R.string.secure_mode_summary),
+                            checked = state.secureMode,
+                            iconRes = R.drawable.ic_admin_panel_settings,
+                            onCheckedChange = onSecureModeChange,
+                        )
                         SettingNavigationItem(
                             title = stringResource(R.string.fake_app_icon),
                             summary = stringResource(R.string.select_fake_icon),
@@ -548,6 +556,7 @@ private fun HomeSettingsScreenPreview() {
             onSearchGridColumnsConfigChange = {},
             onHorizontalCardCountConfigChange = {},
             onUseLockScreenChange = {},
+            onSecureModeChange = {},
             onHomeCategoryPreferencesChange = { _, _ -> },
             hKeyframeSettingsContent = {},
             networkSettingsContent = {},
@@ -585,6 +594,7 @@ private fun previewHomeSettingsState() = HomeSettingsUiState(
     hapticFeedbackEnabled = false,
     funLoadingHints = true,
     useLockScreen = false,
+    secureMode = false,
     fakeLauncherIconName = "Han1meViewer",
     cacheSummary = "12 MB",
     versionSummary = "v26.1.0",
