@@ -93,10 +93,6 @@ class ComposePlaybackController(
 
     fun setVolume(volume: Float) = playbackEngine.setVolume(volume)
 
-    fun attachSurface(surface: Surface) = playbackEngine.attachSurface(surface)
-
-    fun detachSurface(surface: Surface) = playbackEngine.detachSurface(surface)
-
     fun release() {
         engineCollectionJob.cancel()
         playbackEngine.release()

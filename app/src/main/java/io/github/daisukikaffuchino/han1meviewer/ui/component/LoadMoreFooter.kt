@@ -26,6 +26,7 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * 加载更多底部组件
@@ -110,9 +111,9 @@ fun LoadMoreFooterPreview() {
     }
 
     LaunchedEffect(Unit) {
-        delay(5000)
+        delay(5000.milliseconds)
         loadMoreState = PageLoadingState.Loading
-        delay(5000)
+        delay(5000.milliseconds)
         loadMoreState = PageLoadingState.NoMoreData
     }
 }

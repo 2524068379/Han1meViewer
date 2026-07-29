@@ -24,8 +24,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import io.github.daisukikaffuchino.han1meviewer.R
+import io.github.daisukikaffuchino.han1meviewer.BuildConfig
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun UsageNoticeDialog(
@@ -35,7 +37,8 @@ fun UsageNoticeDialog(
 ) {
     if (!visible) return
 
-    var remainingSeconds by remember { mutableIntStateOf(20) }
+    val requiredSeconds = if (BuildConfig.DEBUG) 5 else 20
+    var remainingSeconds by remember { mutableIntStateOf(requiredSeconds) }
     var isResumed by remember { mutableStateOf(true) }
     var resetVersion by remember { mutableIntStateOf(0) }
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -44,14 +47,14 @@ fun UsageNoticeDialog(
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
-                    remainingSeconds = 20
+                    remainingSeconds = requiredSeconds
                     isResumed = true
                     resetVersion++
                 }
 
                 Lifecycle.Event.ON_PAUSE,
                 Lifecycle.Event.ON_STOP -> {
-                    remainingSeconds = 20
+                    remainingSeconds = requiredSeconds
                     isResumed = false
                     resetVersion++
                 }
@@ -65,7 +68,7 @@ fun UsageNoticeDialog(
 
     LaunchedEffect(visible, isResumed, resetVersion) {
         while (visible && isResumed && remainingSeconds > 0) {
-            delay(1_000L)
+            delay(1_000L.milliseconds)
             remainingSeconds--
         }
     }

@@ -3,9 +3,13 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.main
 import android.content.Intent
 import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -15,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -24,6 +29,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Text
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
@@ -32,6 +41,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.exception.CloudflareBlocke
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.component.UsageNoticeDialog
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HomeRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainDrawerDestination
@@ -68,6 +78,24 @@ fun MainActivityContent(
         val clipboard = LocalClipboard.current
         val snackbarHostState = remember { SnackbarHostState() }
         var showUsageNotice by remember { mutableStateOf(!Preferences.usageNoticeAccepted) }
+        var showSourceDialog by remember {
+            mutableStateOf(
+                Preferences.usageNoticeAccepted &&
+                    !Preferences.usageSourceVerified &&
+                    !Preferences.usageSourcePending,
+            )
+        }
+        var showSourceWarning by rememberSaveable {
+            mutableStateOf(
+                Preferences.usageNoticeAccepted &&
+                    !Preferences.usageSourceVerified &&
+                    Preferences.usageSourcePending,
+            )
+        }
+        var sourceLink by rememberSaveable { mutableStateOf("") }
+        var appAccessGranted by remember {
+            mutableStateOf(Preferences.usageNoticeAccepted && Preferences.usageSourceVerified)
+        }
         val isDrawerOpen =
             drawerState.currentValue == DrawerValue.Open || drawerState.targetValue == DrawerValue.Open
 
@@ -160,16 +188,18 @@ fun MainActivityContent(
             },
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                TopNavigation(
-                    activity = activity,
-                    backStack = backStack,
-                    isDrawerOpen = isDrawerOpen,
-                    onOpenDrawer = {
-                        if (drawerEnabled) {
-                            scope.launch { drawerState.open() }
-                        }
-                    },
-                )
+                if (appAccessGranted) {
+                    TopNavigation(
+                        activity = activity,
+                        backStack = backStack,
+                        isDrawerOpen = isDrawerOpen,
+                        onOpenDrawer = {
+                            if (drawerEnabled) {
+                                scope.launch { drawerState.open() }
+                            }
+                        },
+                    )
+                }
                 if (showAuthGuard) {
                     Box(
                         modifier = Modifier
@@ -182,9 +212,68 @@ fun MainActivityContent(
                     onAccepted = {
                         Preferences.usageNoticeAccepted = true
                         showUsageNotice = false
+                        if (Preferences.usageSourceVerified) {
+                            appAccessGranted = true
+                            viewModel.initializeHomePage()
+                        }
+                        if (!Preferences.usageSourceVerified) {
+                            if (Preferences.usageSourcePending) {
+                                showSourceWarning = true
+                            } else {
+                                showSourceDialog = true
+                            }
+                        }
                     },
                     onDeclined = { activity.finish() },
                 )
+                AppSourceDialog(
+                    visible = showSourceDialog,
+                    onSelect = { source ->
+                        if (source.equals("github", ignoreCase = true)) {
+                            Preferences.usageSourceVerified = true
+                            Preferences.usageSourcePending = false
+                            showSourceDialog = false
+                            appAccessGranted = true
+                            viewModel.initializeHomePage()
+                        } else {
+                            Preferences.usageSourcePending = true
+                            showSourceDialog = false
+                            sourceLink = ""
+                            showSourceWarning = true
+                        }
+                    },
+                )
+                if (showSourceWarning) {
+                    val expectedRepository = "https://github.com/daisukiKaffuChino/Han1meViewer"
+                    val linkValid = sourceLink.trim().equals(expectedRepository, ignoreCase = true)
+                    AlertDialog(
+                        onDismissRequest = {},
+                        title = { Text(stringResource(R.string.app_source_illegal_title)) },
+                        text = {
+                            androidx.compose.foundation.layout.Column {
+                                Text(stringResource(R.string.app_source_illegal_message))
+                                OutlinedTextField(
+                                    value = sourceLink,
+                                    onValueChange = { sourceLink = it },
+                                    label = { Text(stringResource(R.string.app_source_repository_link)) },
+                                    singleLine = true,
+                                )
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(
+                                enabled = linkValid,
+                                onClick = {
+                                    Preferences.usageSourceVerified = true
+                                    Preferences.usageSourcePending = false
+                                    showSourceWarning = false
+                                    appAccessGranted = true
+                                    viewModel.initializeHomePage()
+                                },
+                            ) { Text(stringResource(R.string.app_source_verify)) }
+                        },
+                    )
+                }
                 SnackbarHost(
                     hostState = snackbarHostState,
                     modifier = Modifier
@@ -220,4 +309,51 @@ fun MainActivityContent(
             onConfirm = HCacheManager::dismissStorageSwitchNotice,
             onDismiss = HCacheManager::dismissStorageSwitchNotice,
         )
+}
+
+@Composable
+private fun AppSourceDialog(
+    visible: Boolean,
+    onSelect: (String) -> Unit,
+) {
+    if (!visible) return
+
+    var selectedSource by rememberSaveable { mutableStateOf<String?>(null) }
+    val options = listOf(
+        stringResource(R.string.app_source_forum) to "forum",
+        stringResource(R.string.app_source_telegram) to "telegram",
+        stringResource(R.string.app_source_github) to "github",
+        stringResource(R.string.app_source_qq_group) to "qq_group",
+        stringResource(R.string.app_source_wechat) to "wechat",
+        stringResource(R.string.app_source_douyin_tiktok) to "douyin_tiktok",
+    )
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text(stringResource(R.string.app_source_title)) },
+        text = {
+            Column {
+                options.forEach { (label, value) ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedSource = value }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = selectedSource == value,
+                            onClick = { selectedSource = value },
+                        )
+                        Text(label)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = selectedSource != null,
+                onClick = { selectedSource?.let(onSelect) },
+            ) { Text(stringResource(R.string.app_source_confirm)) }
+        },
+    )
 }

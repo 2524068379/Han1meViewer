@@ -19,7 +19,9 @@ import io.github.daisukikaffuchino.utils.putSpValue
 import kotlinx.coroutines.flow.MutableStateFlow
 
 object Preferences {
-    private const val USAGE_NOTICE_ACCEPTED = "usage_notice_accepted"
+    private const val USAGE_NOTICE_ACCEPTED = "usage_notice_accepted_v2"
+    private const val USAGE_SOURCE_VERIFIED = "usage_source_verified"
+    private const val USAGE_SOURCE_PENDING = "usage_source_pending"
 
     val preferenceSp: SharedPreferences
         get() = applicationContext.defaultSharedPreferences
@@ -41,6 +43,14 @@ object Preferences {
     var usageNoticeAccepted: Boolean
         get() = preferenceSp.getBoolean(USAGE_NOTICE_ACCEPTED, false)
         set(value) = preferenceSp.edit { putBoolean(USAGE_NOTICE_ACCEPTED, value) }
+
+    var usageSourceVerified: Boolean
+        get() = preferenceSp.getBoolean(USAGE_SOURCE_VERIFIED, false)
+        set(value) = preferenceSp.edit { putBoolean(USAGE_SOURCE_VERIFIED, value) }
+
+    var usageSourcePending: Boolean
+        get() = preferenceSp.getBoolean(USAGE_SOURCE_PENDING, false)
+        set(value) = preferenceSp.edit { putBoolean(USAGE_SOURCE_PENDING, value) }
 
     val savedUserId: String
         get() = preferenceSp.getString(SAVED_USER_ID,"") ?: ""

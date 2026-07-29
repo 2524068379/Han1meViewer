@@ -65,6 +65,7 @@ class HomePageViewModel: ViewModel() {
     }
 
     fun initializeHomePage() {
+        if (!Preferences.usageNoticeAccepted || !Preferences.usageSourceVerified) return
         if (initializationJob != null || _appUpdateState.value !is AppUpdateState.Checking) return
         initializationJob = viewModelScope.launch {
             val updateResult = AppUpdateChecker.checkForUpdate()
@@ -87,6 +88,7 @@ class HomePageViewModel: ViewModel() {
     }
 
     fun getHomePage(isRefresh: Boolean = false){
+        if (!Preferences.usageNoticeAccepted || !Preferences.usageSourceVerified) return
         when (val updateState = _appUpdateState.value) {
             AppUpdateState.Checking -> {
                 initializeHomePage()

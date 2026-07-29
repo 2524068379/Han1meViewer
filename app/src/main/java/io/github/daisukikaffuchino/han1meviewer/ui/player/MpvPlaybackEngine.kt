@@ -4,24 +4,25 @@ import android.content.Context
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.view.Surface
+import androidx.core.net.toUri
+import io.github.daisukikaffuchino.han1meviewer.BuildConfig
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.USER_AGENT
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HProxySelector
 import io.github.daisukikaffuchino.han1meviewer.util.AnimeShaders
 import io.github.daisukikaffuchino.han1meviewer.util.AnimeShaders.getCert
-import io.github.daisukikaffuchino.utils.LogUtil
-import io.github.daisukikaffuchino.han1meviewer.BuildConfig
 import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class MpvPlaybackEngine(
     private val context: Context,
@@ -95,7 +96,7 @@ class MpvPlaybackEngine(
         hasRenderedFrame = false
         MPVLib.setPropertyBoolean("pause", true)
         MPVLib.command(arrayOf("loadfile", "", "replace"))
-        val path = prepareUri(Uri.parse(request.uri))
+        val path = prepareUri(request.uri.toUri())
         if (path == null) {
             mutableState.value = mutableState.value.copy(
                 phase = PlaybackPhase.Error,
@@ -203,7 +204,7 @@ class MpvPlaybackEngine(
         scope.launch {
             while (isActive) {
                 publishState()
-                delay(250L)
+                delay(250L.milliseconds)
             }
         }
     }

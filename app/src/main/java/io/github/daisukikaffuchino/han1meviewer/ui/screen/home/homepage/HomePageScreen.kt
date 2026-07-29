@@ -177,7 +177,6 @@ fun HomePageScreen(
                     PullRefreshOverlay(
                         state = refreshState,
                         isRefreshing = isCurrentlyRefreshing,
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     )
                 }
             }

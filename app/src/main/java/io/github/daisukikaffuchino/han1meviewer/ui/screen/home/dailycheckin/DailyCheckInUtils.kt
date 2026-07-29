@@ -68,39 +68,6 @@ fun typeEmoji(type: String): String = when (type) {
 }
 
 /**
- * 计算连续打卡天数。
- *
- * @param records 各日期打卡记录数
- * @param month 目标月份
- * @return 当前连续天数与当月最佳连续天数的 Pair
- */
-fun computeStreaks(
-    records: Map<LocalDate, Int>,
-    month: YearMonth,
-): Pair<Int, Int> {
-    val today = LocalDate.now()
-    var currentStreak = 0
-    var cursor = today
-    while ((records[cursor] ?: 0) > 0) {
-        currentStreak++
-        cursor = cursor.minusDays(1)
-    }
-
-    var bestStreak = 0
-    var streak = 0
-    for (day in 1..month.lengthOfMonth()) {
-        val date = month.atDay(day)
-        if ((records[date] ?: 0) > 0) {
-            streak++
-            if (streak > bestStreak) bestStreak = streak
-        } else {
-            streak = 0
-        }
-    }
-    return currentStreak to bestStreak
-}
-
-/**
  * 将一年按周分组，用于热力图渲染。
  *
  * @param year 目标年份

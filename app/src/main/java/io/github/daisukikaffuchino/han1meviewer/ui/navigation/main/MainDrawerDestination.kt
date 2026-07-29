@@ -9,7 +9,6 @@ enum class MainDrawerDestination(
     val route: HanimeScreen,
     @param:DrawableRes val iconRes: Int,
     @param:StringRes val titleRes: Int,
-    val requiresLogin: Boolean = false,
 ) {
     Home(
         route = HomeRoute,
@@ -30,25 +29,21 @@ enum class MainDrawerDestination(
         route = MyWatchLaterRoute,
         iconRes = R.drawable.ic_access_time,
         titleRes = R.string.watch_later,
-        requiresLogin = true,
     ),
     FavVideo(
         route = MyFavVideoRoute,
         iconRes = R.drawable.ic_favorite_border,
         titleRes = R.string.fav_video,
-        requiresLogin = true,
     ),
     Playlist(
         route = MyPlaylistRoute,
         iconRes = R.drawable.ic_format_list_bulleted,
         titleRes = R.string.play_list,
-        requiresLogin = true,
     ),
     Subscription(
         route = SubscriptionRoute,
         iconRes = R.drawable.ic_subscribtion,
         titleRes = R.string.my_subscribe,
-        requiresLogin = true,
     ),
     WatchHistory(
         route = WatchHistoryRoute,

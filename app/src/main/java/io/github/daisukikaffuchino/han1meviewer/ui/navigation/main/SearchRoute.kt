@@ -20,7 +20,6 @@ fun SearchRouteScreen(
     onNavigateToVideo: (String) -> Unit,
 ) {
     val viewModel: SearchViewModel = viewModel()
-    val copyTextToClipboard = rememberCopyTextToClipboard()
     var showAdvancedSearchSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(route.advancedSearchJson) {

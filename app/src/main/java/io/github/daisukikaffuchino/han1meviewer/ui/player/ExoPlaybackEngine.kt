@@ -1,9 +1,9 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.player
 
 import android.content.Context
-import android.net.Uri
 import android.view.Surface
 import androidx.annotation.OptIn
+import androidx.core.net.toUri
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
@@ -25,11 +25,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(UnstableApi::class)
 class ExoPlaybackEngine(
@@ -150,7 +151,7 @@ class ExoPlaybackEngine(
         progressJob = scope.launch {
             while (isActive) {
                 publishState()
-                delay(PROGRESS_UPDATE_INTERVAL_MS)
+                delay(PROGRESS_UPDATE_INTERVAL_MS.milliseconds)
             }
         }
     }
@@ -182,7 +183,7 @@ class ExoPlaybackEngine(
             .setUserAgent(USER_AGENT)
             .setDefaultRequestProperties(request.headers)
         val dataSourceFactory = DefaultDataSource.Factory(appContext, httpFactory)
-        val item = MediaItem.fromUri(Uri.parse(request.uri))
+        val item = MediaItem.fromUri(request.uri.toUri())
         return if (request.uri.substringBefore('?').endsWith(".m3u8", ignoreCase = true)) {
             HlsMediaSource.Factory(dataSourceFactory).createMediaSource(item)
         } else {
