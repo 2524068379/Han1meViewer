@@ -52,61 +52,6 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.utils.VibrationUtil
 
-private val robotoFont = FontFamily(
-    Font(R.font.roboto)
-)
-
-@Composable
-private fun Han1meViewerText(
-    modifier: Modifier = Modifier,
-    fontSize: Int = 24,
-    maxLines: Int = Int.MAX_VALUE,
-    overflow: TextOverflow = TextOverflow.Clip,
-) {
-    val onSurface = MaterialTheme.colorScheme.onSurface
-    val onSurfaceVariant= MaterialTheme.colorScheme.onSurfaceVariant
-
-    val annotatedString = buildAnnotatedString {
-        withStyle(
-            style = SpanStyle(
-                color = Color(0xFFFA0201), // #FA0201
-                fontFamily = robotoFont,
-                fontWeight = FontWeight.Bold,
-            )
-        ) {
-            append("H")
-        }
-        withStyle(
-            style = SpanStyle(
-                color = onSurface,
-                fontFamily = robotoFont,
-                fontWeight = FontWeight.Bold,
-            )
-        ) {
-            append("an1me")
-        }
-        withStyle(
-            style = SpanStyle(
-                color = onSurfaceVariant,
-                fontFamily = robotoFont,
-                fontWeight = FontWeight.Normal,
-            )
-        ) {
-            append("Viewer")
-        }
-    }
-
-    BasicText(
-        text = annotatedString,
-        modifier = modifier,
-        style = androidx.compose.ui.text.TextStyle(
-            fontSize = fontSize.sp,
-        ),
-        maxLines = maxLines,
-        overflow = overflow,
-    )
-}
-
 @Composable
 fun MainDrawerHeader(
     avatarUrl: String?,
@@ -118,137 +63,133 @@ fun MainDrawerHeader(
     onAvatarLongClick: () -> Unit,
     onSwitchSiteClick: () -> Unit,
 ) {
-val view = LocalView.current
-val cardShape = RoundedCornerShape(28.dp)
-val cardInteractionSource = remember { MutableInteractionSource() }
-val isCardPressed = cardInteractionSource.collectIsPressedAsState().value
-val cardScale = animateFloatAsState(
-    targetValue = if (isCardPressed) 0.98f else 1f,
-    label = "drawerHeaderCardScale"
-).value
-Column(
-    modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 12.dp)
-        .padding(top = 12.dp),
-){
-    Han1meViewerText(
-        modifier = Modifier.padding(horizontal = 8.dp)
-    )
-    ElevatedCard(
+    val view = LocalView.current
+    val cardShape = RoundedCornerShape(28.dp)
+    val cardInteractionSource = remember { MutableInteractionSource() }
+    val isCardPressed = cardInteractionSource.collectIsPressedAsState().value
+    val cardScale = animateFloatAsState(
+        targetValue = if (isCardPressed) 0.98f else 1f,
+        label = "drawerHeaderCardScale"
+    ).value
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 12.dp, bottom = 8.dp)
-            .graphicsLayer {
-                scaleX = cardScale
-                scaleY = cardScale
-            }
-            .clip(cardShape)
-            .combinedClickable(
-                interactionSource = cardInteractionSource,
-                indication = ripple(),
-                onClick = {
-                    VibrationUtil.performHapticFeedback(view)
-                    onAvatarClick()
-                },
-            ),
-        shape = cardShape,
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-        ),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
+            .padding(horizontal = 12.dp)
     ) {
-        Row(
+        ElevatedCard(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(132.dp)
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            AsyncImage(
-                model = avatarUrl,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .combinedClickable(
-                        onClick = {
-                            VibrationUtil.performHapticFeedback(view)
-                            onAvatarClick()
-                        },
-                        onLongClick = {
-                            VibrationUtil.performHapticFeedback(view)
-                            onAvatarLongClick()
-                        },
-                    ),
-                contentScale = ContentScale.Crop,
-                placeholder = painterResource(id = R.drawable.bg_default_header),
-                fallback = painterResource(id = R.drawable.bg_default_header),
-                error = painterResource(id = R.drawable.bg_default_header),
-            )
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 16.dp, end = 8.dp)
-                    .align(Alignment.CenterVertically)
-            ) {
-                Text(
-                    text = when {
-                        isLoading -> stringResource(R.string.loading)
-                        isLoggedIn -> username
-                            ?: stringResource(R.string.refresh_page_or_login_expired)
-
-                        else -> stringResource(R.string.not_logged_in)
+                .padding(top = 16.dp, bottom = 8.dp)
+                .graphicsLayer {
+                    scaleX = cardScale
+                    scaleY = cardScale
+                }
+                .clip(cardShape)
+                .combinedClickable(
+                    interactionSource = cardInteractionSource,
+                    indication = ripple(),
+                    onClick = {
+                        VibrationUtil.performHapticFeedback(view)
+                        onAvatarClick()
                     },
-                    style = MaterialTheme.typography.titleLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = currentSite,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            Column(
+                ),
+            shape = cardShape,
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer
+            ),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
+        ) {
+            Row(
                 modifier = Modifier
-                    .width(IntrinsicSize.Min)
-                    .align(Alignment.CenterVertically)
-                    .padding(top = 6.dp)
-                    .clickable(
-                        onClick = {
-                            VibrationUtil.performHapticFeedback(view)
-                            onSwitchSiteClick()
-                        },
-                        indication = ripple(bounded = false),
-                        interactionSource = remember { MutableInteractionSource() }
-                    ),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth()
+                    .height(132.dp)
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
+                AsyncImage(
+                    model = avatarUrl,
+                    contentDescription = null,
                     modifier = Modifier
-                        .size(36.dp)
-                        .padding(6.dp),
-                    contentAlignment = Alignment.Center
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .combinedClickable(
+                            onClick = {
+                                VibrationUtil.performHapticFeedback(view)
+                                onAvatarClick()
+                            },
+                            onLongClick = {
+                                VibrationUtil.performHapticFeedback(view)
+                                onAvatarLongClick()
+                            },
+                        ),
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(id = R.drawable.bg_default_header),
+                    fallback = painterResource(id = R.drawable.bg_default_header),
+                    error = painterResource(id = R.drawable.bg_default_header),
+                )
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 16.dp, end = 8.dp)
+                        .align(Alignment.CenterVertically)
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_switch),
-                        contentDescription = stringResource(R.string.switch_site)
+                    Text(
+                        text = when {
+                            isLoading -> stringResource(R.string.loading)
+                            isLoggedIn -> username
+                                ?: stringResource(R.string.refresh_page_or_login_expired)
+
+                            else -> stringResource(R.string.not_logged_in)
+                        },
+                        style = MaterialTheme.typography.titleLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = currentSite,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
+                Column(
+                    modifier = Modifier
+                        .width(IntrinsicSize.Min)
+                        .align(Alignment.CenterVertically)
+                        .padding(top = 6.dp)
+                        .clickable(
+                            onClick = {
+                                VibrationUtil.performHapticFeedback(view)
+                                onSwitchSiteClick()
+                            },
+                            indication = ripple(bounded = false),
+                            interactionSource = remember { MutableInteractionSource() }
+                        ),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .padding(6.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_switch),
+                            contentDescription = stringResource(R.string.switch_site)
+                        )
+                    }
 
-                Text(
-                    text = stringResource(R.string.switch_site),
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.alpha(0.7f),
-                    textAlign = TextAlign.Center
-                )
+                    Text(
+                        text = stringResource(R.string.switch_site),
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.alpha(0.7f),
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
-    }
     }
 }
 

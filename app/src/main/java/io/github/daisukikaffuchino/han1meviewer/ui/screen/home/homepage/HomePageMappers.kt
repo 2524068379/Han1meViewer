@@ -1,7 +1,5 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage
 
-import io.github.daisukikaffuchino.han1meviewer.HanimeConstants
-import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HomePage
 
@@ -11,9 +9,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.HomePage
  * @param homePage 仓库层返回的首页原始数据。
  * @return 当前站点类型下存在视频内容的分类行列表。
  */
-fun buildCategoryList(homePage: HomePage): List<HomeCategory> {
-    val isAVSite = Preferences.baseUrl == HanimeConstants.HANIME_URL[3]
-
+fun buildCategoryList(homePage: HomePage, isAVSite: Boolean): List<HomeCategory> {
     return listOfNotNull(
         HomeCategory(
             key = HOME_CATEGORY_LATEST_HANIME,

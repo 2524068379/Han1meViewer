@@ -444,7 +444,7 @@ fun SearchAppBar(
     query: String, onQueryChange: (String) -> Unit, onSearch: () -> Unit,
     onBack: () -> Unit, onOpenAdvancedSearch: () -> Unit,
     onFocusChanged: (Boolean) -> Unit, focusRequester: FocusRequester,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val kb = LocalSoftwareKeyboardController.current
     HanimeTopAppBar(

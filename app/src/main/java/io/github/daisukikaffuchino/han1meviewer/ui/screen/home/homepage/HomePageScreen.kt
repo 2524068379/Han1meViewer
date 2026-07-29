@@ -2,17 +2,20 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
@@ -20,15 +23,19 @@ import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.daisukikaffuchino.han1meviewer.HanimeConstants
+import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
 import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateState
@@ -42,6 +49,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.componen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.component.AppUpdateCard
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.component.AnnouncementCard
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberRandomLoadingHint
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.util.toNetworkErrorMessageRes
 import io.github.daisukikaffuchino.utils.SonnerToast
 
@@ -58,15 +66,35 @@ fun HomePageScreen(
     viewModel: HomePageViewModel,
     isDrawerOpen: Boolean,
     onEvent: (HomeUiEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     val pageState by viewModel.homePageFlow.collectAsStateWithLifecycle()
     val updateState by viewModel.appUpdateState.collectAsStateWithLifecycle()
     val updateAnnouncement by viewModel.updateAnnouncement.collectAsStateWithLifecycle()
     val refreshState = rememberPullToRefreshState()
+    val homeListState = rememberLazyListState()
     var wasRefreshing by remember { mutableStateOf(false) }
     val loadingHint = rememberRandomLoadingHint()
+    val topBarScrollProgress by remember(homeListState) {
+        derivedStateOf {
+            when {
+                homeListState.firstVisibleItemIndex > 0 -> 1f
+                else -> (homeListState.firstVisibleItemScrollOffset / 160f).coerceIn(0f, 1f)
+            }
+        }
+    }
+    val topBarContainerColor by animateColorAsState(
+        targetValue = HanimeDefaults.Colors.pageSurface.copy(
+            alpha = 0.68f + (0.28f * topBarScrollProgress)
+        ),
+        animationSpec = tween(durationMillis = 150),
+        label = "HomeTopBarContainerColor",
+    )
+    val density = LocalDensity.current
+    val contentTopPadding = with(density) {
+        WindowInsets.statusBars.getTop(this).toDp() + 72.dp
+    }
+    val isAVSite = Preferences.baseUrl == HanimeConstants.HANIME_URL[3]
     LaunchedEffect(Unit) {
         viewModel.initializeHomePage()
     }
@@ -92,16 +120,15 @@ fun HomePageScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            HomePageTopBar(
-                onOpenDrawer = { onEvent(HomeUiEvent.OpenDrawer) },
-                onSearchClick = { onEvent(HomeUiEvent.OpenSearchPage()) },
-                onNavigateToPreview = { onEvent(HomeUiEvent.NavigateToPreview) }
-            )
-            if (forcedUpdate != null) {
+        if (forcedUpdate != null) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(12.dp),
+                    contentPadding = PaddingValues(
+                        top = contentTopPadding,
+                        start = 12.dp,
+                        end = 12.dp,
+                        bottom = 12.dp,
+                    ),
                     verticalArrangement = Arrangement.Center,
                 ) {
                     updateAnnouncement?.let { announcement ->
@@ -167,8 +194,11 @@ fun HomePageScreen(
                                     data = data,
                                     updateInfo = availableUpdate,
                                     updateAnnouncement = updateAnnouncement,
+                                    isAVSite = isAVSite,
                                     onEvent = onEvent,
                                     onCloseAnnouncement = viewModel::dismissAnnouncements,
+                                    contentTopPadding = contentTopPadding,
+                                    listState = homeListState,
                                 )
                             }
                         }
@@ -179,7 +209,13 @@ fun HomePageScreen(
                         isRefreshing = isCurrentlyRefreshing,
                     )
                 }
-            }
         }
+        HomePageTopBar(
+            onOpenDrawer = { onEvent(HomeUiEvent.OpenDrawer) },
+            onSearchClick = { onEvent(HomeUiEvent.OpenSearchPage()) },
+            onNavigateToPreview = { onEvent(HomeUiEvent.NavigateToPreview) },
+            containerColor = topBarContainerColor,
+            modifier = Modifier.zIndex(1f),
+        )
     }
 }

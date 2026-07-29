@@ -1,34 +1,30 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.component
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.daisukikaffuchino.han1meviewer.R
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeTopAppBar
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
-import io.github.daisukikaffuchino.utils.VibrationUtil
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 
 /**
  * 渲染首页顶部栏，包含抽屉入口、搜索入口和新番列表入口。
@@ -37,49 +33,19 @@ import io.github.daisukikaffuchino.utils.VibrationUtil
  * @param onNavigateToPreview 点击新番按钮时调用。
  * @param modifier 应用于顶部栏根布局的修饰符。
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomePageTopBar(
     onOpenDrawer: () -> Unit,
     onSearchClick: () -> Unit,
     onNavigateToPreview: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    containerColor: Color = HanimeDefaults.Colors.pageSurface,
 ) {
-    val view = LocalView.current
     HanimeTopAppBar(
         modifier = modifier,
         title = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Box(
-                    modifier = Modifier
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(28.dp))
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                        .clickable {
-                            VibrationUtil.performHapticFeedback(view)
-                            onSearchClick()
-                        }
-                        .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.CenterStart,
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_search),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(20.dp),
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            stringResource(R.string.global_search),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    }
-                }
-            }
+            Han1meViewerText()
         },
         navigationIcon = {
             IconButton(onClick = onOpenDrawer) {
@@ -90,13 +56,81 @@ fun HomePageTopBar(
             }
         },
         actions = {
-            IconButton(onClick = onNavigateToPreview) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_newspaper),
-                    contentDescription = stringResource(R.string.hanime_list),
-                )
+            Row {
+                IconButton(onClick = onSearchClick) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_search),
+                        contentDescription = stringResource(R.string.global_search),
+                    )
+                }
+                IconButton(onClick = onNavigateToPreview) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_newspaper),
+                        contentDescription = stringResource(R.string.hanime_list),
+                    )
+                }
             }
         },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = containerColor,
+            scrolledContainerColor = containerColor,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+        ),
+    )
+}
+
+private val robotoFont = FontFamily(
+    Font(R.font.roboto)
+)
+
+@Composable
+private fun Han1meViewerText(
+    modifier: Modifier = Modifier,
+    fontSize: Int = 20,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+) {
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
+
+    val annotatedString = buildAnnotatedString {
+        withStyle(
+            style = SpanStyle(
+                color = MaterialTheme.colorScheme.primary,
+                fontFamily = robotoFont,
+                fontWeight = FontWeight.Bold,
+            )
+        ) {
+            append("H")
+        }
+        withStyle(
+            style = SpanStyle(
+                color = onSurface,
+                fontFamily = robotoFont,
+                fontWeight = FontWeight.Bold,
+            )
+        ) {
+            append("an1me")
+        }
+        withStyle(
+            style = SpanStyle(
+                color = onSurfaceVariant,
+                fontFamily = robotoFont,
+                fontWeight = FontWeight.Normal,
+            )
+        ) {
+            append("Viewer")
+        }
+    }
+
+    BasicText(
+        text = annotatedString,
+        modifier = modifier,
+        style = androidx.compose.ui.text.TextStyle(
+            fontSize = fontSize.sp,
+        ),
+        maxLines = maxLines,
+        overflow = overflow,
     )
 }
 
