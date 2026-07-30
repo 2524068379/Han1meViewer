@@ -168,7 +168,10 @@ fun MainActivityContent(
                     scope.launch { drawerState.close() }
                     onOpenAccount()
                 } else {
-                    onRequireLogin()
+                    scope.launch {
+                        drawerState.close()
+                        onRequireLogin()
+                    }
                 }
             },
             onAvatarLongClick = {

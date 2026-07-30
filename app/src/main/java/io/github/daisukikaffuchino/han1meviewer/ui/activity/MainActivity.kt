@@ -12,7 +12,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import io.github.daisukikaffuchino.utils.LogUtil
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -32,6 +31,7 @@ import io.github.daisukikaffuchino.han1meviewer.logout
 import io.github.daisukikaffuchino.han1meviewer.ui.bridge.VideoPageHost
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.AccountRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HanimeScreen
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.LoginRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.TopLevelBackStack
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.VideoRoute
 import io.github.daisukikaffuchino.han1meviewer.util.defaultSharedPreferences
@@ -61,13 +61,6 @@ class MainActivity : BaseActivity() {
         const val ACTION_TOGGLE_PLAY = "io.github.daisukikaffuchino.han1meviewer.ACTION_TOGGLE_PLAY"
     }
 
-    // 登錄完了後讓activity刷新主頁
-    private val loginResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                viewModel.getHomePage()
-            }
-        }
     private var hasAuthenticated = false
     private val pipActionReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -239,7 +232,7 @@ class MainActivity : BaseActivity() {
     }
 
     fun openLogin() {
-        loginResultLauncher.launch(AuthActivity.loginIntent(this))
+        mainBackStack.add(LoginRoute, launchSingleTop = true)
     }
 
     fun showLogoutConfirmDialog(closeCurrentPageOnConfirm: Boolean = false) {

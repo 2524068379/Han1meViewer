@@ -11,6 +11,10 @@ private val loginRequiredDrawerItems = setOf(
 )
 
 const val EXTRA_OPEN_DAILY_CHECK_IN = "openDailyCheckIn"
+const val ACTION_OPEN_CLOUDFLARE_VERIFICATION =
+    "io.github.daisukikaffuchino.han1meviewer.action.OPEN_CLOUDFLARE_VERIFICATION"
+const val EXTRA_CLOUDFLARE_URL = "cloudflare_url"
+const val EXTRA_CLOUDFLARE_HOST = "cloudflare_host"
 
 fun TopLevelBackStack<HanimeScreen>.navigateDrawerDestination(
     destination: MainDrawerDestination,
@@ -27,6 +31,18 @@ fun TopLevelBackStack<HanimeScreen>.navigateDrawerDestination(
 }
 
 fun TopLevelBackStack<HanimeScreen>.handleMainIntent(intent: Intent) {
+    if (intent.action == ACTION_OPEN_CLOUDFLARE_VERIFICATION) {
+        val url = intent.getStringExtra(EXTRA_CLOUDFLARE_URL)
+        val host = intent.getStringExtra(EXTRA_CLOUDFLARE_HOST)
+        intent.removeExtra(EXTRA_CLOUDFLARE_URL)
+        intent.removeExtra(EXTRA_CLOUDFLARE_HOST)
+        intent.action = null
+        if (!url.isNullOrBlank() && !host.isNullOrBlank()) {
+            add(CloudflareRoute(url = url, host = host), launchSingleTop = true)
+        }
+        return
+    }
+
     intent.data?.let { uri ->
         when (uri.scheme) {
             "http", "https" -> {

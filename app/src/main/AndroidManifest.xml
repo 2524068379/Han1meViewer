@@ -31,12 +31,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Hanime"
         tools:targetApi="34">
-        <activity
-            android:name=".ui.activity.AuthActivity"
-            android:configChanges="screenSize|orientation"
-            android:exported="false"
-            android:theme="@style/Theme.Hanime" />
-
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="dataSync"

@@ -189,6 +189,33 @@ fun TopNavigation(
                 onLogout = { activity.showLogoutConfirmDialog(closeCurrentPageOnConfirm = true) },
             )
         }
+        entry<LoginRoute>(metadata = pageTransition()) {
+            LoginRouteScreen(
+                activity = activity,
+                onBack = onBack,
+                onOpenManualCookies = { backStack.add(ManualCookiesRoute) },
+                onLoginSucceeded = {
+                    backStack.popTo(LoginRoute, inclusive = true)
+                    activity.viewModel.getHomePage()
+                },
+            )
+        }
+        entry<ManualCookiesRoute>(metadata = pageTransition()) {
+            ManualCookiesRouteScreen(
+                onBack = onBack,
+                onLoginSucceeded = {
+                    backStack.popTo(LoginRoute, inclusive = true)
+                    activity.viewModel.getHomePage()
+                },
+            )
+        }
+        entry<CloudflareRoute>(metadata = pageTransition()) { route ->
+            CloudflareRouteScreen(
+                activity = activity,
+                route = route,
+                onBack = onBack,
+            )
+        }
         entry<AvatarCropRoute>(metadata = pageTransition()) { route ->
             AvatarCropScreen(
                 sourceUri = route.sourceUri,

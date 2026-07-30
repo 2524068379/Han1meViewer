@@ -33,6 +33,18 @@ object DownloadRoute : HanimeScreen
 object AccountRoute : HanimeScreen
 
 @Serializable
+object LoginRoute : HanimeScreen
+
+@Serializable
+object ManualCookiesRoute : HanimeScreen
+
+@Serializable
+data class CloudflareRoute(
+    val url: String,
+    val host: String,
+) : HanimeScreen
+
+@Serializable
 data class AvatarCropRoute(
     val sourceUri: String,
 ) : HanimeScreen

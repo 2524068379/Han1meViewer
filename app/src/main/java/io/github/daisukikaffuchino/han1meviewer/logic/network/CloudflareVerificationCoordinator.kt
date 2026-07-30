@@ -3,7 +3,10 @@ package io.github.daisukikaffuchino.han1meviewer.logic.network
 import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
-import io.github.daisukikaffuchino.han1meviewer.ui.activity.AuthActivity
+import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.ACTION_OPEN_CLOUDFLARE_VERIFICATION
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.EXTRA_CLOUDFLARE_HOST
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.EXTRA_CLOUDFLARE_URL
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -39,9 +42,11 @@ object CloudflareVerificationCoordinator {
         if (shouldLaunch) {
             try {
                 context.startActivity(
-                    AuthActivity.cloudflareIntent(context, url, host).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    },
+                    Intent(context, MainActivity::class.java)
+                        .setAction(ACTION_OPEN_CLOUDFLARE_VERIFICATION)
+                        .putExtra(EXTRA_CLOUDFLARE_URL, url)
+                        .putExtra(EXTRA_CLOUDFLARE_HOST, host)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
                 )
             } catch (_: Exception) {
                 complete(host, succeeded = false)
