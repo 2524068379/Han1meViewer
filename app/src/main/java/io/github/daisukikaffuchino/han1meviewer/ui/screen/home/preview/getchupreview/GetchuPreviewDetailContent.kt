@@ -12,17 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticButton as Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,10 +35,14 @@ import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.model.GetchuPreviewDetail
+import io.github.daisukikaffuchino.han1meviewer.ui.component.CardContainerSurface
+import io.github.daisukikaffuchino.han1meviewer.ui.component.OutlinedButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyRow
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeGetchuPreviewDetail
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticButton as Button
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 
 @Composable
 internal fun GetchuPreviewDetailContent(
@@ -55,15 +54,12 @@ internal fun GetchuPreviewDetailContent(
 ) {
     val uriHandler = LocalUriHandler.current
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+        modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item {
-            ElevatedCard(
-                shape = RoundedCornerShape(24.dp),
+            CardContainerSurface(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column {
@@ -150,8 +146,7 @@ internal fun GetchuPreviewDetailContent(
                             if (detail.videoUrls.isNotEmpty()) {
                                 Button(
                                     modifier = Modifier.weight(1f),
-                                    onClick = { onNavigateToVideoUrl(detail.videoUrls.first()) },
-                                    contentPadding = PaddingValues(vertical = 12.dp)
+                                    onClick = { onNavigateToVideoUrl(detail.videoUrls.first()) }
                                 ) {
                                     Icon(painterResource(R.drawable.ic_play_arrow), contentDescription = null)
                                     Spacer(Modifier.width(4.dp))
@@ -160,14 +155,13 @@ internal fun GetchuPreviewDetailContent(
                             }
 
                             OutlinedButton(
-                                modifier = Modifier.weight(1f),
-                                onClick = { uriHandler.openUri(detail.productUrl) },
-                                contentPadding = PaddingValues(vertical = 12.dp)
-                            ) {
-                                Icon(painterResource(R.drawable.ic_ext_link), contentDescription = null)
-                                Spacer(Modifier.width(4.dp))
-                                Text(stringResource(R.string.jump_to_webpage))
-                            }
+                                 modifier = Modifier.weight(1f),
+                                 onClick = { uriHandler.openUri(detail.productUrl) }
+                             ) {
+                                 Icon(painterResource(R.drawable.ic_ext_link), contentDescription = null)
+                                 Spacer(Modifier.width(4.dp))
+                                 Text(stringResource(R.string.jump_to_webpage))
+                             }
                         }
 
                         if (detail.videoUrls.size > 1) {
@@ -216,9 +210,8 @@ internal fun GetchuPreviewDetailContent(
                         itemsIndexed(
                             detail.sampleImages,
                             key = { index, url -> "$index-$url" }) { index, url ->
-                            ElevatedCard(
+                            CardContainerSurface(
                                 onClick = { onOpenImage(index, detail.sampleImages) },
-                                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
                             ) {
                                 AsyncImage(
                                     model = getchuImageRequest(url),

@@ -2,7 +2,6 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.preview.getchupr
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,8 +34,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.dataOrNull
 import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
-import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimePageSurface
-import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeTopAppBar
+import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
 import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageEmpty
 import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageError
 import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageLoading
@@ -46,7 +43,6 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberRandomLoadingH
 import io.github.daisukikaffuchino.han1meviewer.util.toNetworkErrorMessageRes
 import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GetchuPreviewScreen(
     onBack: () -> Unit,
@@ -66,15 +62,13 @@ fun GetchuPreviewScreen(
         if (!isInspectionMode) viewModel.getPreview(dateCode)
     }
 
-    HanimePageSurface {
-        Column(Modifier.fillMaxSize()) {
-        HanimeTopAppBar(
+    HanimeScaffold(
             title = {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     TextButton(onClick = { monthMenuExpanded = true }) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = stringResource(R.string.getchu_preview_title, dateLabel),
+                                text = dateLabel,
                                 modifier = Modifier.weight(1f, fill = false),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.SemiBold,
@@ -106,6 +100,7 @@ fun GetchuPreviewScreen(
                 }
             },
             onBack = onBack,
+            contentHorizontalPadding = 0.dp,
             actions = {
                 IconButton(onClick = { dateCode = shiftGetchuMonthCode(dateCode, -1) }) {
                     Icon(painterResource(R.drawable.ic_chevron_left), null)
@@ -114,9 +109,8 @@ fun GetchuPreviewScreen(
                     Icon(painterResource(R.drawable.ic_chevron_right), null)
                 }
             },
-        )
-
-        PageContent(
+        ) {
+            PageContent(
             isLoading = state.isFirstPageLoading,
             isError = state.isFirstPageError,
             isEmpty = state.isFirstPageEmpty || state.dataOrNull?.groups?.isEmpty() == true,
@@ -126,17 +120,16 @@ fun GetchuPreviewScreen(
             onRetry = { if (!isInspectionMode) viewModel.getPreview(dateCode) },
             modifier = Modifier.fillMaxSize(),
             loadingMessage = loadingHint
-        ) {
-            state.dataOrNull?.let { preview ->
-                GetchuPreviewContent(
-                    preview = preview,
-                    onOpenDetail = onNavigateToDetail,
-                    imageLoader = imageLoader
-                )
+            ) {
+                state.dataOrNull?.let { preview ->
+                    GetchuPreviewContent(
+                        preview = preview,
+                        onOpenDetail = onNavigateToDetail,
+                        imageLoader = imageLoader
+                    )
+                }
             }
         }
-        }
-    }
 }
 
 @SuppressLint("ViewModelConstructorInComposable")
