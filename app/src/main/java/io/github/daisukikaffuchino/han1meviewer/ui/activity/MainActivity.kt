@@ -12,7 +12,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import io.github.daisukikaffuchino.utils.LogUtil
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -20,31 +19,35 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
-import androidx.core.content.edit
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
-import androidx.navigation.NavHostController
+import androidx.lifecycle.lifecycleScope
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.ANIME_URL
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.BuildConfig
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logout
 import io.github.daisukikaffuchino.han1meviewer.ui.bridge.VideoPageHost
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.navigateSafely
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.AccountRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HanimeScreen
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.LoginRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.TopLevelBackStack
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.VideoRoute
-import io.github.daisukikaffuchino.han1meviewer.util.defaultSharedPreferences
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsPreferenceKeys
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.main.MainActivityContent
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomePageViewModel
 import io.github.daisukikaffuchino.utils.ActivityManager
+import io.github.daisukikaffuchino.utils.isX86_64Device
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity() {
 
     val viewModel by viewModels<HomePageViewModel>()
 
-    lateinit var navController: NavHostController
+    val mainBackStack: TopLevelBackStack<HanimeScreen>
+        get() = viewModel.mainBackStack
     private var showAuthGuard by mutableStateOf(true)
     private val pendingNavigationRequests = MutableSharedFlow<Intent>(
         replay = 1,
@@ -58,13 +61,6 @@ class MainActivity : BaseActivity() {
         const val ACTION_TOGGLE_PLAY = "io.github.daisukikaffuchino.han1meviewer.ACTION_TOGGLE_PLAY"
     }
 
-    // 登錄完了後讓activity刷新主頁
-    private val loginDataLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                viewModel.getHomePage()
-            }
-        }
     private var hasAuthenticated = false
     private val pipActionReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -85,18 +81,17 @@ class MainActivity : BaseActivity() {
                 viewModel = viewModel,
                 pendingNavigationRequests = pendingNavigationRequests,
                 showAuthGuard = showAuthGuard,
-                onOpenAccount = { navController.navigateSafely(AccountRoute) },
+                onOpenAccount = { mainBackStack.add(AccountRoute) },
                 showSiteSwitchConfirm = showSiteSwitchConfirm,
                 logoutDialogCloseCurrentPage = logoutDialogCloseCurrentPage,
                 onLogoutClick = { showLogoutConfirmDialog() },
-                onRequireLogin = { gotoLoginActivity() },
+                onRequireLogin = { openLogin() },
                 onSwitchSiteClick = { showSiteSwitchConfirm = true },
                 onDismissSiteSwitch = { showSiteSwitchConfirm = false },
                 onConfirmSiteSwitch = ::confirmSiteSwitch,
                 onDismissLogout = { logoutDialogCloseCurrentPage = null },
                 onConfirmLogout = ::confirmLogout,
                 onOpenClipboardVideo = ::showVideoDetailFragment,
-                onNavigateControllerReady = { controller -> navController = controller },
             )
         }
     }
@@ -110,8 +105,7 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        val prefs = defaultSharedPreferences
-        val useLock = prefs.getBoolean("use_lock_screen", false)
+        val useLock = SettingsRepository.current.useLockScreen
 
         if (useLock && isDeviceSecureCompat(this)) {
             authenticate(
@@ -208,33 +202,30 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return navController.navigateUp() || super.onSupportNavigateUp()
+        return if (mainBackStack.removeLast()) {
+            true
+        } else {
+            super.onSupportNavigateUp()
+        }
     }
 
     private fun confirmSiteSwitch() {
         showSiteSwitchConfirm = false
-        val currentSite = Preferences.baseUrl
+        val currentSite = SettingsRepository.baseUrl
         val avSite = HANIME_URL[3]
-        val selectedBaseUrl = Preferences.selectedBaseUrl
-        if (currentSite in ANIME_URL) {
-            Preferences.preferenceSp.edit(true) {
-                putString(SettingsPreferenceKeys.SELECTED_BASE_URL, currentSite)
-                putString(SettingsPreferenceKeys.DOMAIN_NAME, avSite)
+        val selectedBaseUrl = SettingsRepository.selectedBaseUrl
+        lifecycleScope.launch {
+            SettingsRepository.update {
+                if (currentSite in ANIME_URL) it.copy(selectedBaseUrl = currentSite, domainName = avSite)
+                else it.copy(selectedBaseUrl = selectedBaseUrl, domainName = selectedBaseUrl)
             }
-        } else {
-            Preferences.preferenceSp.edit(true) {
-                putString(SettingsPreferenceKeys.SELECTED_BASE_URL, selectedBaseUrl)
-                putString(SettingsPreferenceKeys.DOMAIN_NAME, selectedBaseUrl)
-            }
-        }
-        Handler(Looper.getMainLooper()).postDelayed({
+            delay(500)
             ActivityManager.restart(killProcess = true)
-        }, 500)
+        }
     }
 
-    fun gotoLoginActivity() {
-        val intent = Intent(this, LoginActivity::class.java)
-        loginDataLauncher.launch(intent)
+    fun openLogin() {
+        mainBackStack.add(LoginRoute, launchSingleTop = true)
     }
 
     fun showLogoutConfirmDialog(closeCurrentPageOnConfirm: Boolean = false) {
@@ -245,18 +236,20 @@ class MainActivity : BaseActivity() {
         val closeCurrentPage = logoutDialogCloseCurrentPage ?: return
         logoutDialogCloseCurrentPage = null
         if (closeCurrentPage) {
-            navController.popBackStack()
+            mainBackStack.removeLast()
         }
         logoutWithRefresh()
     }
 
     fun logoutWithRefresh() {
-        logout()
-        viewModel.getHomePage()
+        lifecycleScope.launch {
+            logout()
+            viewModel.getHomePage()
+        }
     }
 
     fun showVideoDetailFragment(videoCode: String, fileUri: String? = null) {
-        navController.navigateSafely(VideoRoute(videoCode, fileUri))
+        mainBackStack.add(VideoRoute(videoCode, fileUri))
     }
 
     fun registerCurrentVideoHost(host: VideoPageHost?) {
@@ -267,8 +260,7 @@ class MainActivity : BaseActivity() {
         super.onUserLeaveHint()
         val currentFragment = currentVideoHost
 
-        val prefs = defaultSharedPreferences
-        val allowPip = prefs.getBoolean("allow_pip_mode", true)
+        val allowPip = SettingsRepository.current.allowPipMode
 
         LogUtil.i("pipmode", "enter pip mode?\n$currentFragment\nallowpip:$allowPip\n")
 
@@ -294,6 +286,8 @@ class MainActivity : BaseActivity() {
     }
 
     init {
-        System.loadLibrary("chino")
+        if (!(BuildConfig.DEBUG && isX86_64Device)) {
+            System.loadLibrary("chino")
+        }
     }
 }

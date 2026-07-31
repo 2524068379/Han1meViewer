@@ -49,7 +49,6 @@ import io.github.daisukikaffuchino.han1meviewer.getHanimeShareText
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoItemType
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.SearchRoute
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.navigateSafely
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeVideosItem
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.RetryableImage
@@ -77,6 +76,7 @@ fun VideoCardItem(
     isHomePage: Boolean = false,
     isWatched: Boolean = false,
     isPlaying: Boolean = false,
+    containerColor: Color? = null,
     onClickVideosItem: (String) -> Unit,
     onLongClickVideosItem: (String, String) -> Unit,
 ) {
@@ -101,7 +101,11 @@ fun VideoCardItem(
             .fillMaxWidth()
             .animateContentSize(),
         shape = cardShape,
-        color = if (isHomePage) HanimeDefaults.Colors.homeVideoCard else HanimeDefaults.Colors.card,
+        color = containerColor ?: if (isHomePage) {
+            HanimeDefaults.Colors.homeVideoCard
+        } else {
+            HanimeDefaults.Colors.card
+        },
     ) {
         Box {
             Column(
@@ -320,7 +324,7 @@ fun VideoCardItem(
                         text = { Text("搜索该作者所有作品") },
                         onClick = {
                             showContextMenu = false
-                            (context as? MainActivity)?.navController?.navigateSafely(
+                            (context as? MainActivity)?.mainBackStack?.add(
                                 SearchRoute(query = currentArtist)
                             )
                         },

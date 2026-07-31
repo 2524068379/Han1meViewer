@@ -12,29 +12,15 @@ import android.os.Process
 import android.provider.Settings
 import androidx.annotation.IntRange
 import androidx.annotation.RequiresApi
-import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.text.parseAsHtml
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_HOSTNAME
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
-import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.han1meviewer.ui.view.video.HJzvdStd
+import io.github.daisukikaffuchino.han1meviewer.ui.player.PlayerDefaults
 import io.github.daisukikaffuchino.utils.formatBytesPerSecond
 import io.github.daisukikaffuchino.utils.formatFileSize
 import io.github.daisukikaffuchino.utils.SonnerToast
-
-internal fun saveBoolean(key: String, value: Boolean) {
-    Preferences.preferenceSp.edit { putBoolean(key, value) }
-}
-
-internal fun saveString(key: String, value: String) {
-    Preferences.preferenceSp.edit { putString(key, value) }
-}
-
-internal fun saveInt(key: String, value: Int) {
-    Preferences.preferenceSp.edit { putInt(key, value) }
-}
 
 internal fun buildDomainOptions(context: Context): List<Pair<String, String>> = listOf(
     "${HANIME_HOSTNAME[0]} (${context.getString(R.string.default_)})" to HANIME_URL[0],
@@ -49,16 +35,16 @@ internal fun generateClearCacheSummary(context: Context, size: Long): CharSequen
 
 internal fun toPrettySensitivityString(
     context: Context,
-    @IntRange(from = 1, to = 9) value: Int
+    @IntRange(from = 1, to = 7) value: Int
 ): String {
     val pretty = when (value) {
-        1, 2 -> context.getString(R.string.high)
-        3, 4 -> context.getString(R.string.moderately_high)
-        5 -> context.getString(R.string.moderate)
-        6 -> context.getString(R.string.slightly_low)
-        7 -> context.getString(R.string.low)
-        8 -> context.getString(R.string.very_low)
-        9 -> context.getString(R.string.extremely_low)
+        1 -> context.getString(R.string.extremely_low)
+        2 -> context.getString(R.string.low)
+        3 -> context.getString(R.string.slightly_low)
+        4 -> context.getString(R.string.moderate)
+        5 -> context.getString(R.string.slightly_high)
+        6 -> context.getString(R.string.high)
+        7 -> context.getString(R.string.extremely_high)
         else -> error("Invalid sensitivity value: $value")
     }
     return context.getString(R.string.current_slide_sensitivity, pretty)
@@ -70,7 +56,9 @@ internal fun toPrettyCountdownRemindString(
 ): String {
     return buildString {
         append(context.getString(R.string.will_remind_before_d_seconds, value))
-        if (value == HJzvdStd.DEF_COUNTDOWN_SEC) append(" (${context.getString(R.string.default_)})")
+        if (value == PlayerDefaults.DEFAULT_COUNTDOWN_SECONDS) {
+            append(" (${context.getString(R.string.default_)})")
+        }
     }
 }
 

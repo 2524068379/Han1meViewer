@@ -171,20 +171,6 @@ fun PreviewImageViewerDialog(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        repeat(imageUrls.size) { index ->
-                            val selected = pagerState.currentPage == index
-                            Box(
-                                modifier = Modifier
-                                    .size(if (selected) 8.dp else 6.dp)
-                                    .background(
-                                        color = if (selected) Color.White else Color.White.copy(
-                                            alpha = 0.45f
-                                        ),
-                                        shape = CircleShape,
-                                    )
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "${pagerState.currentPage + 1}/${imageUrls.size}",
                             color = MaterialTheme.colorScheme.onSurface,

@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.network
 
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 
 data class DohPreset(
     val key: String,
@@ -31,26 +31,26 @@ object DohConfig {
         ),
     )
 
-    fun selectedPreset(): DohPreset = presets.firstOrNull { it.key == Preferences.dohPreset } ?: presets.first()
+    fun selectedPreset(): DohPreset = presets.firstOrNull { it.key == SettingsRepository.dohPreset } ?: presets.first()
 
-    fun customUrl(): String = Preferences.dohCustomUrl.trim()
+    fun customUrl(): String = SettingsRepository.dohCustomUrl.trim()
 
     fun bootstrapIps(): List<String> {
-        val customBootstrapIps = Preferences.dohBootstrapIps
+        val customBootstrapIps = SettingsRepository.dohBootstrapIps
             .split(',', '\n', ';', ' ')
             .map { it.trim() }
             .filter { it.isNotBlank() }
             .distinct()
         if (customBootstrapIps.isNotEmpty()) return customBootstrapIps
-        if (Preferences.dohPreset == "custom") return emptyList()
+        if (SettingsRepository.dohPreset == "custom") return emptyList()
         return selectedPreset().bootstrapIps
     }
 
-    fun timeoutSeconds(): Int = Preferences.dohTimeoutSeconds.coerceIn(1, 60)
+    fun timeoutSeconds(): Int = SettingsRepository.dohTimeoutSeconds.coerceIn(1, 60)
 
     fun resolveUrl(): String? {
-        if (!Preferences.useDoH) return null
-        return when (Preferences.dohPreset) {
+        if (!SettingsRepository.useDoH) return null
+        return when (SettingsRepository.dohPreset) {
             "custom" -> customUrl().takeIf { it.isNotBlank() }
             else -> selectedPreset().url
         }

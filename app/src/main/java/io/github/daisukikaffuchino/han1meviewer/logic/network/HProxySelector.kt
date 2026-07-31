@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.network
 
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import okhttp3.internal.proxy.NullProxySelector
 import java.io.IOException
 import java.net.InetAddress
@@ -48,11 +48,11 @@ class HProxySelector : ProxySelector() {
         // #issue-39: 代理沒有應用到 WebView 上，只能通過此種方式來全局代理。
         fun rebuildNetwork() {
             val properties = System.getProperties()
-            when (Preferences.proxyType) {
+            when (SettingsRepository.proxyType) {
                 TYPE_HTTP, TYPE_SOCKS -> {
                     properties["proxySet"] = true.toString()
-                    properties["proxyHost"] = Preferences.proxyIp
-                    properties["proxyPort"] = Preferences.proxyPort.toString()
+                    properties["proxyHost"] = SettingsRepository.proxyIp
+                    properties["proxyPort"] = SettingsRepository.proxyPort.toString()
                 }
 
                 else -> {
@@ -65,7 +65,7 @@ class HProxySelector : ProxySelector() {
     }
 
     private fun updateProxy() {
-        delegation = when (Preferences.proxyType) {
+        delegation = when (SettingsRepository.proxyType) {
             TYPE_DIRECT -> NullProxySelector
             TYPE_SYSTEM -> alternative
             TYPE_HTTP, TYPE_SOCKS -> null
@@ -74,10 +74,10 @@ class HProxySelector : ProxySelector() {
     }
 
     override fun select(uri: URI?): MutableList<Proxy> {
-        val type = Preferences.proxyType
+        val type = SettingsRepository.proxyType
         if (type == TYPE_HTTP || type == TYPE_SOCKS) {
-            val ip = Preferences.proxyIp
-            val port = Preferences.proxyPort
+            val ip = SettingsRepository.proxyIp
+            val port = SettingsRepository.proxyPort
             if (ip.isNotBlank() && port != -1) {
                 val inetAddress = InetAddress.getByName(ip)
                 val socketAddress = InetSocketAddress(inetAddress, port)

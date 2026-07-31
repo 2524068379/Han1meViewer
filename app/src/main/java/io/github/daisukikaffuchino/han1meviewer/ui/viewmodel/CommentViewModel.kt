@@ -1,9 +1,9 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
-import android.app.Application
 import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.ViewModel
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.CommentPlace
@@ -13,8 +13,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoComments
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.video.CommentSortType
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
-import io.github.daisukikaffuchino.han1meviewer.util.loadAssetAs
-import io.github.daisukikaffuchino.utils.ApplicationViewModel
+import io.github.daisukikaffuchino.utils.loadAssetAs
 import io.github.daisukikaffuchino.utils.SonnerToast
 import io.github.daisukikaffuchino.utils.unsafeLazy
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -29,7 +28,7 @@ import kotlinx.coroutines.launch
  * @author Yenaly Liew
  * @time 2022/06/28 028 14:18
  */
-class CommentViewModel(application: Application) : ApplicationViewModel(application) {
+class CommentViewModel : ViewModel() {
 
     data class CommentUiState(
         val firstVisibleItemIndex: Int = 0,

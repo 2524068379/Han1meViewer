@@ -2,8 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer.logic
 
 import android.util.Base64
 import io.github.daisukikaffuchino.utils.LogUtil
-import androidx.core.content.edit
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Announcement
 import io.github.daisukikaffuchino.utils.applicationContext
@@ -55,9 +54,7 @@ object AppUpdateChecker {
     private const val ENCODED_UPDATE_URL =
         "aHR0cHM6Ly9obm0tMTI1ODY2NDI3Ni5jb3MuYXAtc2hhbmdoYWkubXlxY2xvdWQuY29tL3VwZGF0ZS5qc29u"
     private const val ENCODED_UPDATE_REFERER = "aG5tdmlld2VydXAuY29t"
-    private const val CURRENT_VERSION_CODE = 260723
-    private const val CACHED_JSON_KEY = "app_update_cached_json"
-    private const val IGNORED_VERSION_CODE_KEY = "app_update_ignored_version_code"
+    private const val CURRENT_VERSION_CODE = 260801
 
     private val jsonParser = Json {
         ignoreUnknownKeys = true
@@ -73,18 +70,13 @@ object AppUpdateChecker {
     }
 
     suspend fun checkForUpdate(): AppUpdateCheckResult = withContext(Dispatchers.IO) {
-        val preferences = Preferences.preferenceSp
-        val cachedJson = preferences.getString(CACHED_JSON_KEY, null)
+        val cachedJson = SettingsRepository.current.cachedUpdateJson
 
         val responseJson = runCatching { requestUpdateJson() }
             .onFailure { LogUtil.e(TAG, "Failed to check for updates", it) }
             .getOrNull()
 
-        preferences.edit {
-            if (responseJson != null) {
-                putString(CACHED_JSON_KEY, responseJson)
-            }
-        }
+        if (responseJson != null) SettingsRepository.setCachedUpdateJson(responseJson)
 
         val jsonToUse = responseJson ?: cachedJson
         if (responseJson == null) {
@@ -93,11 +85,7 @@ object AppUpdateChecker {
         jsonToUse.toUpdateCheckResult()
     }
 
-    fun ignoreUpdate(versionCode: Int) {
-        Preferences.preferenceSp.edit {
-            putInt(IGNORED_VERSION_CODE_KEY, versionCode)
-        }
-    }
+    suspend fun ignoreUpdate(versionCode: Int) = SettingsRepository.setIgnoredVersionCode(versionCode)
 
     private fun requestUpdateJson(): String {
         val request = Request.Builder()
@@ -139,10 +127,7 @@ object AppUpdateChecker {
         }
 
         val currentVersionCode = CURRENT_VERSION_CODE
-        val ignoredVersionCode = Preferences.preferenceSp.getInt(
-            IGNORED_VERSION_CODE_KEY,
-            -1,
-        )
+        val ignoredVersionCode = SettingsRepository.current.ignoredVersionCode
         return AppUpdateInfo(
             versionName = versionName,
             versionCode = versionCode,

@@ -30,8 +30,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -680,7 +678,7 @@ private fun WatchHistoryCard(
                         modifier = Modifier.size(25.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Delete,
+                            painter = painterResource(R.drawable.ic_delete),
                             contentDescription = stringResource(R.string.delete_history),
                             modifier = Modifier.size(16.dp)
                         )

@@ -22,7 +22,9 @@ data class HomeSettingsUiState(
     val collapseDownloadedGroup: Boolean,
     val useDynamicColor: Boolean,
     val hapticFeedbackEnabled: Boolean,
+    val funLoadingHints: Boolean,
     val useLockScreen: Boolean,
+    val secureMode: Boolean,
     val fakeLauncherIconName: String,
     val cacheSummary: String,
     val versionSummary: String,
@@ -38,4 +40,6 @@ data class HomeSettingsUiState(
     val homeCategoryOrder: List<String>,
     val hiddenHomeCategoryKeys: Set<String>,
     val useAvHomeCategoryTitles: Boolean,
+    val alwaysShowUpdateCard: Boolean,
+    val displayDensityPercent: Int,
 )

@@ -14,7 +14,7 @@ import io.github.daisukikaffuchino.han1meviewer.HFileManager.HANIME_DOWNLOAD_FOL
 import io.github.daisukikaffuchino.han1meviewer.HFileManager.createVideoCoverName
 import io.github.daisukikaffuchino.han1meviewer.HFileManager.getAppDownloadFolder
 import io.github.daisukikaffuchino.han1meviewer.HFileManager.getDownloadVideoCoverFile
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.download.HanimeDownloadDao
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeDownloadEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.state.DownloadState
@@ -54,7 +54,7 @@ object SafFileManager {
     private val VIDEO_EXTENSIONS = setOf("mp4", "mkv", "avi", "flv", "mov", "webm")
     private val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "webp")
 
-    private fun isSafReady(): Boolean = !Preferences.safDownloadPath.isNullOrBlank()
+    private fun isSafReady(): Boolean = !SettingsRepository.safDownloadPath.isNullOrBlank()
     fun buildOpenDirectoryIntent(): Intent {
         return Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
             putExtra("android.provider.extra.SHOW_ADVANCED", true)
@@ -62,20 +62,18 @@ object SafFileManager {
     }
 
     /**
-     * 持久化保存URI权限并将URI存储到SharedPreferences中。
+     * 持久化保存 URI 权限并将 URI 存储到设置仓储中。
      *
      * @param context 上下文对象，用于获取ContentResolver
      * @param data 包含URI数据的Intent对象，通常来自ActivityResult回调
      */
-    fun persistUriPermission(context: Context, data: Intent?) {
+    suspend fun persistUriPermission(context: Context, data: Intent?) {
         val treeUri = data?.data ?: return
         val contentResolver = context.contentResolver
         val flags = (Intent.FLAG_GRANT_READ_URI_PERMISSION
                 or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
         contentResolver.takePersistableUriPermission(treeUri, flags)
-        Preferences.preferenceSp.edit {
-            putString(KEY_TREE_URI, treeUri.toString())
-        }
+        SettingsRepository.setDownloadStorage(usePrivate = false, path = treeUri.toString())
     }
 
     /**
@@ -84,7 +82,7 @@ object SafFileManager {
      * @return 从Preferences中读取的URI字符串转换而成的Uri对象，若未保存则返回null
      */
     fun getSavedUri(): Uri? {
-        val uriStr = Preferences.safDownloadPath
+        val uriStr = SettingsRepository.safDownloadPath
         return uriStr?.toUri()
     }
 
@@ -99,7 +97,7 @@ object SafFileManager {
      */
     fun getAppDownloadFolderSaf(context: Context): DocumentFile? {
         if (!isSafReady()) return null
-        val uri = runCatching { Preferences.safDownloadPath?.toUri() }.getOrNull() ?: return null
+        val uri = runCatching { SettingsRepository.safDownloadPath?.toUri() }.getOrNull() ?: return null
         val tree = DocumentFile.fromTreeUri(context, uri) ?: return null
         if (!tree.isDirectory) return null
         tree.ensureNoMedia()
@@ -206,7 +204,7 @@ object SafFileManager {
         fileName: String
     ): Uri? {
         if (!isSafReady()) return null
-        val treeUri = Preferences.safDownloadPath?.toUri() ?: return null
+        val treeUri = SettingsRepository.safDownloadPath?.toUri() ?: return null
         val docTree = DocumentFile.fromTreeUri(context, treeUri) ?: return null
         val rootDir = docTree.findFile(HANIME_DOWNLOAD_FOLDER)
             ?: docTree.createDirectory(HANIME_DOWNLOAD_FOLDER)
@@ -262,7 +260,7 @@ object SafFileManager {
             return@launch
         }
 
-        val treeUri = Preferences.safDownloadPath?.toUri()
+        val treeUri = SettingsRepository.safDownloadPath?.toUri()
         if (treeUri == null) {
             withContext(Dispatchers.Main) {
                 onProgress?.invoke(0, -1)
@@ -380,7 +378,7 @@ object SafFileManager {
         context: Context,
         dao: HanimeDownloadDao
     ) {
-        val treeUri = Preferences.safDownloadPath?.toUri() ?: return
+        val treeUri = SettingsRepository.safDownloadPath?.toUri() ?: return
         val rootDocFile = DocumentFile.fromTreeUri(context, treeUri) ?: return
         val hanimeDownloadDoc = rootDocFile.findFile(HANIME_DOWNLOAD_FOLDER) ?: return
 
@@ -504,7 +502,7 @@ object SafFileManager {
      * @return true 表示创建成功
      */
     fun checkSafPermissions(context: Context): Boolean {
-        val treeUri = Preferences.safDownloadPath?.toUri() ?: return false
+        val treeUri = SettingsRepository.safDownloadPath?.toUri() ?: return false
         val docTree = DocumentFile.fromTreeUri(context, treeUri) ?: return false
         return try {
             val testFile = docTree.createFile("text/plain", ".test_permission")
@@ -523,13 +521,13 @@ object SafFileManager {
      * @return
      */
     fun deleteDownloadVideoFolder(context: Context, videoCode: String) {
-        if (Preferences.isUsePrivateStorage) {
+        if (SettingsRepository.isUsePrivateStorage) {
             // 私有存储模式，使用 File.deleteRecursively
             val folder = File(getAppDownloadFolder(context), "$HANIME_DOWNLOAD_FOLDER/$videoCode")
             if (folder.exists()) folder.deleteRecursively()
         } else {
             // SAF 模式
-            val treeUri = Preferences.safDownloadPath?.toUri() ?: return
+            val treeUri = SettingsRepository.safDownloadPath?.toUri() ?: return
             val docTree = DocumentFile.fromTreeUri(context, treeUri) ?: return
 
             val rootDir = docTree.findFile(HANIME_DOWNLOAD_FOLDER) ?: return

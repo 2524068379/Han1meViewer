@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.daisukikaffuchino.han1meviewer.BuildConfig
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingNavigationItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
@@ -24,6 +25,7 @@ fun SettingsMainScreen(
     onOpenAppearance: () -> Unit,
     onOpenInterfaceInteraction: () -> Unit,
     onOpenDataPrivacy: () -> Unit,
+    onOpenDeveloperOptions: () -> Unit,
     onOpenAbout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -87,6 +89,17 @@ fun SettingsMainScreen(
                 onClick = onOpenDataPrivacy,
             )
         }
+        if (BuildConfig.DEBUG) {
+            item {
+                SettingNavigationItem(
+                    title = stringResource(R.string.developer_options),
+                    summary = stringResource(R.string.developer_options_summary),
+                    iconRes = R.drawable.ic_code,
+                    shapes = HanimeDefaults.cardShapes(),
+                    onClick = onOpenDeveloperOptions,
+                )
+            }
+        }
         item {
             SettingNavigationItem(
                 title = stringResource(R.string.about),
@@ -103,6 +116,6 @@ fun SettingsMainScreen(
 @Composable
 private fun SettingsMainScreenPreview() {
     ComponentPreview {
-        SettingsMainScreen({}, {}, {}, {}, {}, {}, {})
+        SettingsMainScreen({}, {}, {}, {}, {}, {}, {}, {})
     }
 }

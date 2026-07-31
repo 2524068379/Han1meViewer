@@ -114,6 +114,9 @@ sealed interface PreviewEvent {
     /** 打开 Getchu 新番预告 */
     data object OnOpenGetchuPreview : PreviewEvent
 
+    /** Open the current month's official preview page in the browser. */
+    data object OnOpenWebPreview : PreviewEvent
+
     /** 打开评论页 */
     data class OnOpenComment(val label: String, val dateCode: String) : PreviewEvent
 

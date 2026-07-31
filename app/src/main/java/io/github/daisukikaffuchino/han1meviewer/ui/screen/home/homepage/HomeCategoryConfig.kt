@@ -1,10 +1,8 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage
 
 import androidx.annotation.StringRes
-import androidx.core.content.edit
 import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.han1meviewer.Preferences
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsPreferenceKeys
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 
 const val HOME_CATEGORY_LATEST_HANIME = "latest_hanime"
 const val HOME_CATEGORY_LATEST_RELEASE = "latest_release"
@@ -44,29 +42,16 @@ val defaultHomeCategoryOrder: List<String>
     get() = defaultHomeCategoryPreferenceItems.map { it.key }
 
 val homeCategoryOrder: List<String>
-    get() = normalizeHomeCategoryKeys(
-        Preferences.preferenceSp.getString(SettingsPreferenceKeys.HOME_CATEGORY_ORDER, null)
-            ?.split(',')
-            .orEmpty()
-            .filter { it.isNotBlank() }
-    )
+    get() = normalizeHomeCategoryKeys(SettingsRepository.current.homeCategoryOrder)
 
 val hiddenHomeCategoryKeys: Set<String>
-    get() = Preferences.preferenceSp.getString(SettingsPreferenceKeys.HOME_CATEGORY_HIDDEN, null)
-        ?.split(',')
-        .orEmpty()
-        .filter { it.isNotBlank() }
-        .toSet()
+    get() = SettingsRepository.current.hiddenHomeCategoryKeys
 
-fun saveHomeCategoryPreferences(order: List<String>, hiddenKeys: Set<String>) {
-    Preferences.preferenceSp.edit {
-        putString(SettingsPreferenceKeys.HOME_CATEGORY_ORDER, normalizeHomeCategoryKeys(order).joinToString(","))
-        putString(
-            SettingsPreferenceKeys.HOME_CATEGORY_HIDDEN,
-            hiddenKeys.filter { it in defaultHomeCategoryOrder }.joinToString(",")
-        )
-    }
-}
+suspend fun saveHomeCategoryPreferences(order: List<String>, hiddenKeys: Set<String>) =
+    SettingsRepository.setHomeCategories(
+        normalizeHomeCategoryKeys(order),
+        hiddenKeys.filterTo(linkedSetOf()) { it in defaultHomeCategoryOrder },
+    )
 
 private fun normalizeHomeCategoryKeys(keys: List<String>): List<String> {
     val defaults = defaultHomeCategoryOrder

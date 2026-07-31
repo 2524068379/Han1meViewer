@@ -36,7 +36,7 @@ abstract class CheckInRecordDatabase : RoomDatabase() {
                 while (cursor.moveToNext()) {
                     val date = cursor.getString(0)
                     val count = cursor.getInt(1)
-                    for (i in 0 until count.coerceAtMost(20)) {
+                    repeat(count.coerceAtMost(20)) {
                         db.execSQL(
                             "INSERT INTO check_in_records_new (date, type, feeling) VALUES (?, '自慰', '')",
                             arrayOf(date)

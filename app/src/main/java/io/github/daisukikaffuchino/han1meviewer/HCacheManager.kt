@@ -1,12 +1,12 @@
 package io.github.daisukikaffuchino.han1meviewer
 
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
+
 import android.content.Context
 import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.annotation.WorkerThread
-import androidx.core.content.edit
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsPreferenceKeys
 import io.github.daisukikaffuchino.han1meviewer.util.SafFileManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -39,7 +39,7 @@ object HCacheManager {
      */
     @OptIn(ExperimentalSerializationApi::class)
     @WorkerThread
-    fun saveHanimeVideoInfo(context: Context, videoCode: String, info: HanimeVideo) {
+    suspend fun saveHanimeVideoInfo(context: Context, videoCode: String, info: HanimeVideo) {
         val folder = HFileManager.getDownloadVideoFolder(context, videoCode) // 已封装 SAF/普通路径
         val cacheFile = File(folder, CACHE_INFO_FILE)
         val cacheUri = SafFileManager.getDownloadVideoFileUri(context, videoCode, CACHE_INFO_FILE)
@@ -68,14 +68,12 @@ object HCacheManager {
                     errorMsg.contains("EEXIST") ||
                     errorMsg.contains("Permission denied") ||
                     errorMsg.contains("failed"))
-            val shouldSwitch = isPathRelatedError && !Preferences.isUsePrivateStorage
+            val shouldSwitch = isPathRelatedError && !SettingsRepository.isUsePrivateStorage
 
             if (shouldSwitch) {
                 notifyStorageSwitch()
                 LogUtil.w("FileSave", "⛔ 写入失败 (${e.message})，切换为私有路径")
-                Preferences.preferenceSp.edit {
-                    putBoolean(SettingsPreferenceKeys.USE_PRIVATE_STORAGE, true)
-                }
+                SettingsRepository.setUsePrivateStorage(true)
                 return saveHanimeVideoInfo(context, videoCode, info) // ⬅️ 重试一次
             }
 

@@ -1,13 +1,13 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
-import android.app.Application
 import android.os.Parcelable
 import io.github.daisukikaffuchino.utils.LogUtil
 import android.util.SparseArray
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo.HanimeAdvancedSearchRepo.toSearchOptionSet
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
@@ -16,8 +16,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.SearchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
-import io.github.daisukikaffuchino.han1meviewer.util.loadAssetAs
-import io.github.daisukikaffuchino.utils.ApplicationViewModel
+import io.github.daisukikaffuchino.utils.loadAssetAs
 import io.github.daisukikaffuchino.utils.unsafeLazy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -36,9 +35,8 @@ import kotlinx.coroutines.withContext
  * @time 2022/06/13 013 22:29
  */
 class SearchViewModel(
-    application: Application,
     private val state: SavedStateHandle
-) : ApplicationViewModel(application) {
+) : ViewModel() {
 
     var page: Int = 1
     var query: String?
@@ -89,7 +87,7 @@ class SearchViewModel(
     var brandMap = SparseArray<Set<SearchOption>>()
 
     val genres by unsafeLazy {
-        loadAssetAs<List<SearchOption>>(if (Preferences.baseUrl == HANIME_URL[3]) "search_options/genre_av.json" else "search_options/genre.json").orEmpty()
+        loadAssetAs<List<SearchOption>>(if (SettingsRepository.baseUrl == HANIME_URL[3]) "search_options/genre_av.json" else "search_options/genre.json").orEmpty()
     }
 
     val tags by unsafeLazy {
@@ -161,7 +159,7 @@ class SearchViewModel(
 //                        is PageLoadingState.Success -> prevList + state.info
                         is PageLoadingState.Success -> {
                             val list = state.info
-                            val updatedList = if (Preferences.showPlayedIndicator) {
+                            val updatedList = if (SettingsRepository.showPlayedIndicator) {
                                 val codes = list.map { it.videoCode }
                                 val watchedCodes = withContext(Dispatchers.IO) {
                                     DatabaseRepo.WatchHistory.getWatched(codes).toSet()

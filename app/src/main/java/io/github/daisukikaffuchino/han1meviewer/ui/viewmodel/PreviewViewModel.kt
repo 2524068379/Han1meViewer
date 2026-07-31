@@ -1,12 +1,11 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
-import android.app.Application
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimePreview
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.util.TagLocalizer
-import io.github.daisukikaffuchino.utils.ApplicationViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +19,7 @@ import kotlinx.coroutines.withContext
  * @author Yenaly Liew
  * @time 2022/06/23 023 16:47
  */
-class PreviewViewModel(application: Application) : ApplicationViewModel(application) {
+class PreviewViewModel : ViewModel() {
 
     private val previewCache = linkedMapOf<String, WebsiteState<HanimePreview>>()
 

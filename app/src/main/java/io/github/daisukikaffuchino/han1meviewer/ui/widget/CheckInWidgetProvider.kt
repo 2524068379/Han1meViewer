@@ -32,7 +32,7 @@ import androidx.glance.layout.padding
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.CheckInRecordDatabase
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.CheckInRecordEntity
@@ -66,7 +66,7 @@ class CheckInWidget : GlanceAppWidget() {
             checkIn = context.getString(R.string.checkin),
             disabled = context.getString(R.string.widget_feature_disabled),
         )
-        val enabled = Preferences.isCheckInEnabled
+        val enabled = SettingsRepository.isCheckInEnabled
         val openCheckInAction = actionStartActivity(
             Intent(context, MainActivity::class.java).putExtra(EXTRA_OPEN_DAILY_CHECK_IN, true)
         )
@@ -87,7 +87,7 @@ class CheckInWidgetAction : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters,
     ) {
-        if (Preferences.isCheckInEnabled) {
+        if (SettingsRepository.isCheckInEnabled) {
             withContext(Dispatchers.IO) {
                 val dao = CheckInRecordDatabase.getDatabase(context).checkInDao()
                 val today = LocalDate.now().toString()

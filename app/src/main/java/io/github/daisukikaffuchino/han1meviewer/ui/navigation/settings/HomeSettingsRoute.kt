@@ -40,17 +40,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.edit
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.glance.appwidget.updateAll
 import io.github.daisukikaffuchino.han1meviewer.BuildConfig
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants
 import io.github.daisukikaffuchino.han1meviewer.HA1_GITHUB_FORUM_URL
 import io.github.daisukikaffuchino.han1meviewer.HA1_GITHUB_ISSUE_URL
 import io.github.daisukikaffuchino.han1meviewer.HanimeApplication
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.BackupManager
 import io.github.daisukikaffuchino.han1meviewer.logic.model.AppLanguage
+import io.github.daisukikaffuchino.han1meviewer.logic.model.DisplayDensity
+import io.github.daisukikaffuchino.han1meviewer.logic.model.PaletteStyle
+import io.github.daisukikaffuchino.han1meviewer.logic.model.ThemeAccent
+import io.github.daisukikaffuchino.han1meviewer.logic.model.ThemeMode
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.HomeSettingsPage
@@ -69,32 +73,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private const val HOME_VIDEO_LANGUAGE = "video_language"
-private const val HOME_DEFAULT_VIDEO_QUALITY = "default_video_quality"
-private const val HOME_SHOW_PLAYED_INDICATOR = "show_played_indicator"
-private const val HOME_ALLOW_PIP_MODE = "allow_pip_mode"
-private const val HOME_FAKE_LAUNCHER_ICON = "pref_fake_launcher_icon"
-private const val HOME_USE_DARK_MODE = "use_dark_mode"
-private const val HOME_USE_DYNAMIC_COLOR = "use_dynamic_color"
-private const val HOME_THEME_ACCENT_COLOR = "theme_accent_color"
-private const val HOME_APP_PALETTE_STYLE = "app_palette_style"
-private const val HOME_ALLOW_RESUME_PLAYBACK = "allow_resume_playback"
-private const val HOME_SEARCH_ARTIST_IGNORE_VIDEO_TYPE = "search_artist_ignore_video_type"
-private const val HOME_DISABLE_MOBILE_DATA_WARNING = "disable_mobile_data_warning"
-private const val HOME_COLLAPSE_DOWNLOADED_GROUP = "collapse_downloaded_group"
-private const val HOME_DISABLE_PREDICTIVE_BACK = "disable_predictive_back"
-private const val HOME_TABLET_MODE = "tablet_mode"
-private const val HOME_DISABLE_COMMENTS = "disable_comments"
-private const val HOME_USE_LOCK_SCREEN = "use_lock_screen"
-private const val HOME_SEARCH_GRID_COLUMNS_COMPACT = "search_grid_columns_compact"
-private const val HOME_SEARCH_GRID_COLUMNS_MEDIUM = "search_grid_columns_medium"
-private const val HOME_SEARCH_GRID_COLUMNS_EXPANDED = "search_grid_columns_expanded"
-private const val HOME_SEARCH_GRID_COLUMNS_LARGE = "search_grid_columns_large"
-private const val HOME_HORIZONTAL_CARD_COUNT_NARROW = "horizontal_card_count_narrow"
-private const val HOME_HORIZONTAL_CARD_COUNT_COMPACT = "horizontal_card_count_compact"
-private const val HOME_HORIZONTAL_CARD_COUNT_MEDIUM = "horizontal_card_count_medium"
-private const val HOME_HORIZONTAL_CARD_COUNT_EXPANDED = "horizontal_card_count_expanded"
-
 @SuppressLint("ResourceType")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,7 +86,7 @@ fun HomeSettingsRouteScreen(
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val coroutineScope = rememberCoroutineScope()
-    var refreshKey by remember { mutableIntStateOf(0) }
+    val settings by SettingsRepository.settings.collectAsStateWithLifecycle()
     var cacheKey by remember { mutableIntStateOf(0) }
     var showClearCacheConfirm by remember { mutableStateOf(false) }
     var showRestartConfirmDialog by remember { mutableStateOf(false) }
@@ -169,7 +147,7 @@ fun HomeSettingsRouteScreen(
             generateClearCacheSummary(context, context.cacheDir?.folderSize ?: 0L).toString()
         }
     }
-    val uiState = remember(refreshKey, cacheSummary, launcherItems, context) {
+    val uiState = remember(settings, cacheSummary, launcherItems, context) {
         buildHomeSettingsUiState(
             context = context,
             launcherItems = launcherItems,
@@ -181,114 +159,109 @@ fun HomeSettingsRouteScreen(
         page = page,
         state = uiState,
         onVideoLanguageChange = { value ->
-            if (value != Preferences.videoLanguage) {
-                saveString(HOME_VIDEO_LANGUAGE, value)
-                showRestartConfirmDialog = true
+            if (value != SettingsRepository.videoLanguage) {
+                coroutineScope.launch {
+                    SettingsRepository.update { it.copy(videoLanguage = value) }
+                    showRestartConfirmDialog = true
+                }
             }
         },
         onVideoQualityChange = { value ->
-            saveString(HOME_DEFAULT_VIDEO_QUALITY, value)
-            refreshKey++
-            SonnerToast.success(R.string.success_value, value)
+            coroutineScope.launch {
+                SettingsRepository.update { it.copy(videoQuality = value) }
+                SonnerToast.success(R.string.success_value, value)
+            }
         },
         onDarkModeChange = { value ->
-            if (value != Preferences.useDarkMode) {
-                saveString(HOME_USE_DARK_MODE, value)
-                refreshKey++
+            if (value != SettingsRepository.useDarkMode) {
+                coroutineScope.launch { SettingsRepository.setThemeMode(ThemeMode.fromValue(value)) }
             }
         },
         onUseDynamicColorChange = { enabled ->
-            saveBoolean(HOME_USE_DYNAMIC_COLOR, enabled)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.setDynamicColor(enabled) }
         },
         onHapticFeedbackChange = { enabled ->
-            Preferences.hapticFeedbackEnabled = enabled
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.setHapticFeedback(enabled) }
+        },
+        onFunLoadingHintsChange = { enabled ->
+            coroutineScope.launch { SettingsRepository.update { it.copy(funLoadingHints = enabled) } }
         },
         onThemeAccentColorChange = { id ->
-            saveInt(HOME_THEME_ACCENT_COLOR, id)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.setThemeAccent(ThemeAccent.fromId(id)) }
         },
         onAppPaletteStyleChange = { id ->
-            saveInt(HOME_APP_PALETTE_STYLE, id)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.setPaletteStyle(PaletteStyle.fromId(id)) }
         },
         onAllowPipModeChange = { enabled ->
             if (enabled && !isPipPermissionGranted(context)) {
                 SonnerToast.warning(R.string.request_pip_alert)
                 openPipPermissionSettings(context)
-                saveBoolean(HOME_ALLOW_PIP_MODE, false)
-                refreshKey++
+                coroutineScope.launch { SettingsRepository.update { it.copy(allowPipMode = false) } }
                 return@HomeSettingsScreen
             }
-            saveBoolean(HOME_ALLOW_PIP_MODE, enabled)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { it.copy(allowPipMode = enabled) } }
         },
         onAllowResumePlaybackChange = {
-            saveBoolean(HOME_ALLOW_RESUME_PLAYBACK, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(allowResumePlayback = it) } }
         },
         onShowPlayedIndicatorChange = {
-            saveBoolean(HOME_SHOW_PLAYED_INDICATOR, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(showPlayedIndicator = it) } }
         },
         onSearchArtistIgnoreVideoTypeChange = {
-            saveBoolean(HOME_SEARCH_ARTIST_IGNORE_VIDEO_TYPE, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(searchArtistIgnoreVideoType = it) } }
         },
         onDisableMobileDataWarningChange = {
-            saveBoolean(HOME_DISABLE_MOBILE_DATA_WARNING, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(disableMobileDataWarning = it) } }
         },
         onDisablePredictiveBackChange = {
-            saveBoolean(HOME_DISABLE_PREDICTIVE_BACK, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(disablePredictiveBack = it) } }
         },
         onTabletModeChange = {
-            saveBoolean(HOME_TABLET_MODE, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(tabletMode = it) } }
         },
         onCheckInEnabledChange = {
-            Preferences.isCheckInEnabled = it
-            refreshKey++
-            coroutineScope.launch { CheckInWidget().updateAll(context) }
+            coroutineScope.launch {
+                SettingsRepository.setCheckInEnabled(it)
+                CheckInWidget().updateAll(context)
+            }
         },
         onDisableCommentsChange = {
-            saveBoolean(HOME_DISABLE_COMMENTS, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(disableComments = it) } }
         },
         onCollapseDownloadedGroupChange = {
-            saveBoolean(HOME_COLLAPSE_DOWNLOADED_GROUP, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(collapseDownloadedGroup = it) } }
         },
         onSearchGridColumnsConfigChange = { config ->
-            saveInt(HOME_SEARCH_GRID_COLUMNS_COMPACT, config.compactColumns)
-            saveInt(HOME_SEARCH_GRID_COLUMNS_MEDIUM, config.mediumColumns)
-            saveInt(HOME_SEARCH_GRID_COLUMNS_EXPANDED, config.expandedColumns)
-            saveInt(HOME_SEARCH_GRID_COLUMNS_LARGE, config.largeColumns)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { it.copy(searchGridColumnsCompact = config.compactColumns, searchGridColumnsMedium = config.mediumColumns, searchGridColumnsExpanded = config.expandedColumns, searchGridColumnsLarge = config.largeColumns) } }
         },
         onHorizontalCardCountConfigChange = { config ->
-            saveString(HOME_HORIZONTAL_CARD_COUNT_NARROW, config.narrowCount.toString())
-            saveString(HOME_HORIZONTAL_CARD_COUNT_COMPACT, config.compactCount.toString())
-            saveString(HOME_HORIZONTAL_CARD_COUNT_MEDIUM, config.mediumCount.toString())
-            saveString(HOME_HORIZONTAL_CARD_COUNT_EXPANDED, config.expandedCount.toString())
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { it.copy(horizontalCardCountNarrow = config.narrowCount, horizontalCardCountCompact = config.compactCount, horizontalCardCountMedium = config.mediumCount, horizontalCardCountExpanded = config.expandedCount) } }
         },
         onHomeCategoryPreferencesChange = { order, hiddenKeys ->
-            saveHomeCategoryPreferences(order, hiddenKeys)
-            refreshKey++
+            coroutineScope.launch { saveHomeCategoryPreferences(order, hiddenKeys) }
         },
         onUseLockScreenChange = { value ->
             if (value) {
                 if (!isDeviceSecureCompat(context)) {
                     SonnerToast.warning(R.string.not_set_sys_lock)
-                    refreshKey++
                     return@HomeSettingsScreen
                 }
             }
-            saveBoolean(HOME_USE_LOCK_SCREEN, value)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { it.copy(useLockScreen = value) } }
+        },
+        onSecureModeChange = { enabled ->
+            coroutineScope.launch {
+                SettingsRepository.update { it.copy(secureMode = enabled) }
+                activity.setSecureMode(enabled)
+            }
+        },
+        onAlwaysShowUpdateCardChange = { enabled ->
+            coroutineScope.launch { SettingsRepository.setAlwaysShowUpdateCard(enabled) }
+        },
+        onDisplayDensityChange = { percent ->
+            coroutineScope.launch {
+                SettingsRepository.setDisplayDensity(DisplayDensity.fromPercent(percent))
+            }
         },
         hKeyframeSettingsContent = {
             HKeyframeSettingsRouteScreen(
@@ -302,8 +275,7 @@ fun HomeSettingsRouteScreen(
         onOpenAppLanguageSettings = { value ->
             val language = AppLanguage.fromPreference(value)
             if (AppLanguageManager.current(context) != language) {
-                AppLanguageManager.select(context, language)
-                refreshKey++
+                coroutineScope.launch { AppLanguageManager.select(context, language) }
             }
         },
         onOpenApplyDeepLinks = {
@@ -348,7 +320,6 @@ fun HomeSettingsRouteScreen(
                     .onSuccess {
                         withContext(Dispatchers.Main) {
                             SonnerToast.success(R.string.backup_import_success)
-                            refreshKey++
                             activity.recreate()
                         }
                     }
@@ -375,7 +346,6 @@ fun HomeSettingsRouteScreen(
                 val success = cacheDir?.deleteRecursively() == true
                 withContext(Dispatchers.Main) {
                     cacheKey++
-                    refreshKey++
                     if (success) SonnerToast.success(R.string.clear_success) else SonnerToast.error(R.string.clear_failed)
                 }
             }
@@ -453,15 +423,12 @@ fun HomeSettingsRouteScreen(
                     launcherItems.forEach { item ->
                         TextButton(
                             onClick = {
-                                Preferences.preferenceSp.edit {
-                                    putString(HOME_FAKE_LAUNCHER_ICON, item.alias)
+                                coroutineScope.launch {
+                                    SettingsRepository.setLauncherIcon(item.alias)
+                                    (context.applicationContext as? HanimeApplication)?.switchLauncher(item.alias)
+                                    SonnerToast.info(R.string.fake_icon_hint)
+                                    showLauncherPicker = false
                                 }
-                                (context.applicationContext as? HanimeApplication)?.switchLauncher(
-                                    item.alias
-                                )
-                                SonnerToast.info(R.string.fake_icon_hint)
-                                refreshKey++
-                                showLauncherPicker = false
                             },
                             modifier = Modifier.fillMaxWidth(),
                         ) {
@@ -497,12 +464,12 @@ private fun buildHomeSettingsUiState(
     launcherItems: List<LauncherItem>,
     cacheSummary: String,
 ): HomeSettingsUiState {
-    val currentAlias = Preferences.fakeLauncherIcon
+    val currentAlias = SettingsRepository.fakeLauncherIcon
     val currentItem = launcherItems.find { it.alias == currentAlias } ?: launcherItems.first()
-    val videoLanguageLabel = when (Preferences.videoLanguage) {
+    val videoLanguageLabel = when (SettingsRepository.videoLanguage) {
         "zht" -> context.getString(R.string.traditional_chinese)
         "zhs" -> context.getString(R.string.simplified_chinese)
-        else -> Preferences.videoLanguage
+        else -> SettingsRepository.videoLanguage
     }
     val appLanguage = AppLanguageManager.current(context)
     val appLanguageLabel = when (appLanguage) {
@@ -511,27 +478,29 @@ private fun buildHomeSettingsUiState(
         AppLanguage.CHINESE_SIMPLIFIED -> "简体中文"
         AppLanguage.CHINESE_TRADITIONAL -> "繁體中文"
     }
-    val searchGridColumnsConfig = Preferences.searchGridColumnsConfig
-    val horizontalCardCountConfig = Preferences.horizontalCardCountConfig
+    val searchGridColumnsConfig = SettingsRepository.searchGridColumnsConfig
+    val horizontalCardCountConfig = SettingsRepository.horizontalCardCountConfig
     return HomeSettingsUiState(
-        videoLanguage = Preferences.videoLanguage,
+        videoLanguage = SettingsRepository.videoLanguage,
         videoLanguageLabel = videoLanguageLabel,
-        defaultVideoQuality = Preferences.videoQuality,
-        darkMode = Preferences.useDarkMode,
+        defaultVideoQuality = SettingsRepository.videoQuality,
+        darkMode = SettingsRepository.useDarkMode,
         appLanguage = appLanguage.preferenceValue,
         appLanguageLabel = appLanguageLabel,
-        allowPipMode = Preferences.preferenceSp.getBoolean(HOME_ALLOW_PIP_MODE, false),
-        allowResumePlayback = Preferences.allowResumePlayback,
-        showPlayedIndicator = Preferences.showPlayedIndicator,
-        searchArtistIgnoreVideoType = Preferences.searchArtistIgnoreVideoType,
-        disableMobileDataWarning = Preferences.disableMobileDataWarning,
-        disablePredictiveBack = Preferences.disablePredictiveBack,
-        tabletMode = Preferences.tabletMode,
-        disableComments = Preferences.preferenceSp.getBoolean(HOME_DISABLE_COMMENTS, false),
-        collapseDownloadedGroup = Preferences.collapseDownloadedGroup,
-        useDynamicColor = Preferences.useDynamicColor,
-        hapticFeedbackEnabled = Preferences.hapticFeedbackEnabled,
-        useLockScreen = Preferences.preferenceSp.getBoolean(HOME_USE_LOCK_SCREEN, false),
+        allowPipMode = SettingsRepository.current.allowPipMode,
+        allowResumePlayback = SettingsRepository.allowResumePlayback,
+        showPlayedIndicator = SettingsRepository.showPlayedIndicator,
+        searchArtistIgnoreVideoType = SettingsRepository.searchArtistIgnoreVideoType,
+        disableMobileDataWarning = SettingsRepository.disableMobileDataWarning,
+        disablePredictiveBack = SettingsRepository.disablePredictiveBack,
+        tabletMode = SettingsRepository.tabletMode,
+        disableComments = SettingsRepository.current.disableComments,
+        collapseDownloadedGroup = SettingsRepository.collapseDownloadedGroup,
+        useDynamicColor = SettingsRepository.useDynamicColor,
+        hapticFeedbackEnabled = SettingsRepository.hapticFeedbackEnabled,
+        funLoadingHints = SettingsRepository.funLoadingHints,
+        useLockScreen = SettingsRepository.current.useLockScreen,
+        secureMode = SettingsRepository.secureMode,
         fakeLauncherIconName = currentItem.name,
         cacheSummary = cacheSummary,
         versionSummary = context.getString(
@@ -539,8 +508,8 @@ private fun buildHomeSettingsUiState(
             "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
         ),
         dynamicColorEnabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
-        themeAccentColorId = Preferences.preferenceSp.getInt(HOME_THEME_ACCENT_COLOR, 0),
-        appPaletteStyleId = Preferences.preferenceSp.getInt(HOME_APP_PALETTE_STYLE, 1),
+        themeAccentColorId = SettingsRepository.current.themeAccent.id,
+        appPaletteStyleId = SettingsRepository.current.paletteStyle.id,
         searchGridColumnsSummary = listOf(
             searchGridColumnsConfig.compactColumns,
             searchGridColumnsConfig.mediumColumns,
@@ -550,10 +519,12 @@ private fun buildHomeSettingsUiState(
         searchGridColumnsConfig = searchGridColumnsConfig,
         horizontalCardCountSummary = "${horizontalCardCountConfig.narrowCount}~${horizontalCardCountConfig.expandedCount}",
         horizontalCardCountConfig = horizontalCardCountConfig,
-        checkInEnabled = Preferences.isCheckInEnabled,
+        checkInEnabled = SettingsRepository.isCheckInEnabled,
         homeCategoryItems = defaultHomeCategoryPreferenceItems,
         homeCategoryOrder = homeCategoryOrder,
         hiddenHomeCategoryKeys = hiddenHomeCategoryKeys,
-        useAvHomeCategoryTitles = Preferences.baseUrl == HanimeConstants.HANIME_URL[3],
+        useAvHomeCategoryTitles = SettingsRepository.baseUrl == HanimeConstants.HANIME_URL[3],
+        alwaysShowUpdateCard = SettingsRepository.alwaysShowUpdateCard,
+        displayDensityPercent = SettingsRepository.displayDensity.percent,
     )
 }

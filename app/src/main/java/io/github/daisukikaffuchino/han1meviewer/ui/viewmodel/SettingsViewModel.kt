@@ -1,10 +1,9 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
-import android.app.Application
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
-import io.github.daisukikaffuchino.utils.ApplicationViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
@@ -14,7 +13,7 @@ import kotlinx.coroutines.launch
  * @author Yenaly Liew
  * @time 2022/07/01 001 13:40
  */
-class SettingsViewModel(application: Application) : ApplicationViewModel(application) {
+class SettingsViewModel : ViewModel() {
 
     fun loadAllHKeyframes(keyword: String? = null) =
         DatabaseRepo.HKeyframe.loadAll(keyword).flowOn(Dispatchers.IO)

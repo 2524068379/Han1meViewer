@@ -2,33 +2,23 @@ package io.github.daisukikaffuchino.han1meviewer.util
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.edit
 import androidx.core.os.LocaleListCompat
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.AppLanguage
 
 object AppLanguageManager {
     const val PREFERENCE_KEY = "app_language"
 
-    fun current(context: Context): AppLanguage {
-        val preferences = context.defaultSharedPreferences
-        return AppLanguage.fromPreference(
-            preferences.getString(PREFERENCE_KEY, AppLanguage.SYSTEM_VALUE)
-        )
-    }
+    fun current(@Suppress("UNUSED_PARAMETER") context: Context): AppLanguage =
+        SettingsRepository.current.appLanguage
 
     fun applyStoredLanguage(context: Context) {
-        val preferences = context.defaultSharedPreferences
         val language = current(context)
-        if (preferences.getString(PREFERENCE_KEY, null) != language.preferenceValue) {
-            preferences.edit { putString(PREFERENCE_KEY, language.preferenceValue) }
-        }
         setAppLanguage(language)
     }
 
-    fun select(context: Context, language: AppLanguage) {
-        context.defaultSharedPreferences.edit {
-            putString(PREFERENCE_KEY, language.preferenceValue)
-        }
+    suspend fun select(context: Context, language: AppLanguage) {
+        SettingsRepository.setLanguage(language)
         setAppLanguage(language)
     }
 

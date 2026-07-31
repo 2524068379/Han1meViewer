@@ -1,5 +1,8 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.account
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,21 +21,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticButton as Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -40,16 +33,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -70,14 +59,18 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccount
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccountAction
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccountSubmittingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.ErrorContent
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberRandomLoadingHint
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.UserAccountViewModel
 import io.github.daisukikaffuchino.utils.SonnerToast
 import io.github.daisukikaffuchino.utils.VibrationUtil
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticButton as Button
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -122,6 +115,7 @@ fun AccountScreen(
                     when (event.action) {
                         UserAccountAction.ProfileUpdated,
                         UserAccountAction.AvatarUpdated -> onRefreshHome()
+
                         UserAccountAction.PasswordUpdated -> Unit
                     }
                     val message = when (event.action) {
@@ -219,8 +213,8 @@ private fun AccountContent(
             .fillMaxSize()
             .verticalScroll(scrollState)
             .padding(contentPadding)
-            .padding(vertical = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+            .padding(top = HanimeDefaults.Spacing.itemVertical),
+        verticalArrangement = Arrangement.spacedBy(HanimeDefaults.Spacing.itemVertical),
     ) {
         Card(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
@@ -298,7 +292,11 @@ private fun AccountContent(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = stringResource(R.string.account_stats_summary, account.subscriberCount, account.videoCount),
+                    text = stringResource(
+                        R.string.account_stats_summary,
+                        account.subscriberCount,
+                        account.videoCount
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -319,7 +317,9 @@ private fun AccountContent(
             shape = MaterialTheme.shapes.large,
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
@@ -333,7 +333,12 @@ private fun AccountContent(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text(stringResource(R.string.username)) },
-                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_person),
+                            contentDescription = null
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = MaterialTheme.shapes.medium
@@ -343,7 +348,12 @@ private fun AccountContent(
                     value = email,
                     onValueChange = { email = it },
                     label = { Text(stringResource(R.string.email)) },
-                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_mail),
+                            contentDescription = null
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = MaterialTheme.shapes.medium
@@ -356,7 +366,9 @@ private fun AccountContent(
                 ) {
                     if (isUpdatingProfile) {
                         LoadingIndicator(
-                            modifier = Modifier.size(18.dp).padding(end = 8.dp)
+                            modifier = Modifier
+                                .size(18.dp)
+                                .padding(end = 8.dp)
                         )
                         Text(stringResource(R.string.updating))
                     } else {
@@ -371,7 +383,9 @@ private fun AccountContent(
             shape = MaterialTheme.shapes.large,
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
@@ -385,11 +399,18 @@ private fun AccountContent(
                     value = oldPassword,
                     onValueChange = { oldPassword = it },
                     label = { Text(stringResource(R.string.old_password)) },
-                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_lock),
+                            contentDescription = null
+                        )
+                    },
                     trailingIcon = {
                         IconButton(onClick = { oldPasswordVisible = !oldPasswordVisible }) {
                             Icon(
-                                imageVector = if (oldPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                painter = if (oldPasswordVisible) painterResource(R.drawable.ic_visibility) else painterResource(
+                                    R.drawable.ic_visibility_off
+                                ),
                                 contentDescription = null
                             )
                         }
@@ -404,11 +425,18 @@ private fun AccountContent(
                     value = newPassword,
                     onValueChange = { newPassword = it },
                     label = { Text(stringResource(R.string.new_password)) },
-                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_lock),
+                            contentDescription = null
+                        )
+                    },
                     trailingIcon = {
                         IconButton(onClick = { newPasswordVisible = !newPasswordVisible }) {
                             Icon(
-                                imageVector = if (newPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                painter = if (oldPasswordVisible) painterResource(R.drawable.ic_visibility) else painterResource(
+                                    R.drawable.ic_visibility_off
+                                ),
                                 contentDescription = null
                             )
                         }
@@ -423,11 +451,18 @@ private fun AccountContent(
                     value = newPasswordConfirm,
                     onValueChange = { newPasswordConfirm = it },
                     label = { Text(stringResource(R.string.confirm_new_password)) },
-                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_lock),
+                            contentDescription = null
+                        )
+                    },
                     trailingIcon = {
                         IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                             Icon(
-                                imageVector = if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                painter = if (oldPasswordVisible) painterResource(R.drawable.ic_visibility) else painterResource(
+                                    R.drawable.ic_visibility_off
+                                ),
                                 contentDescription = null
                             )
                         }
@@ -443,7 +478,11 @@ private fun AccountContent(
                     modifier = Modifier.align(Alignment.Start),
                     contentPadding = PaddingValues(horizontal = 0.dp)
                 ) {
-                    Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Icon(
+                        painter = painterResource(R.drawable.ic_info),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = stringResource(R.string.forgot_password),
@@ -467,7 +506,9 @@ private fun AccountContent(
                 ) {
                     if (isUpdatingPassword) {
                         LoadingIndicator(
-                            modifier = Modifier.size(18.dp).padding(end = 8.dp)
+                            modifier = Modifier
+                                .size(18.dp)
+                                .padding(end = 8.dp)
                         )
                         Text(stringResource(R.string.changing))
                     } else {
@@ -476,8 +517,6 @@ private fun AccountContent(
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(4.dp))
 
         OutlinedButton(
             onClick = onLogout,
@@ -488,7 +527,11 @@ private fun AccountContent(
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.errorContainer),
             shape = MaterialTheme.shapes.medium
         ) {
-            Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, modifier = Modifier.size(18.dp))
+            Icon(
+                painter = painterResource(R.drawable.ic_exit_to_app),
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
             Spacer(modifier = Modifier.width(8.dp))
             Text(stringResource(R.string.logout), fontWeight = FontWeight.Medium)
         }

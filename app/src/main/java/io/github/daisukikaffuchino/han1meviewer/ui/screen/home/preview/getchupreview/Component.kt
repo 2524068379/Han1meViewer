@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +26,7 @@ import coil3.compose.AsyncImage
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.model.GetchuPreview
 import io.github.daisukikaffuchino.han1meviewer.logic.model.GetchuPreviewDetail
+import io.github.daisukikaffuchino.han1meviewer.ui.component.CardContainerSurface
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyRow
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeGetchuPreviewItem
@@ -38,10 +38,9 @@ internal fun GetchuPreviewItemCard(
     modifier: Modifier = Modifier,
     imageLoader: ImageLoader,
 ) {
-    ElevatedCard(
+    CardContainerSurface(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -89,7 +88,7 @@ internal fun GetchuPreviewItemCard(
 internal fun GetchuTextSection(section: GetchuPreviewDetail.TextSection) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         GetchuSectionTitle(getchuTextSectionTitle(section.title))
-        ElevatedCard(shape = RoundedCornerShape(20.dp), modifier = Modifier.fillMaxWidth()) {
+        CardContainerSurface(modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
                 SelectionContainer {
                     Text(
