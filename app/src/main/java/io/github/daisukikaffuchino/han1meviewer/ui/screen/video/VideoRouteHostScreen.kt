@@ -21,6 +21,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -69,6 +72,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.VideoViewModel
 import io.github.daisukikaffuchino.utils.loadAssetAs
 import io.github.daisukikaffuchino.utils.OrientationManager
 import io.github.daisukikaffuchino.utils.SonnerToast
+import io.github.daisukikaffuchino.utils.isX86_64Device
 import io.github.daisukikaffuchino.utils.rememberCopyTextToClipboard
 import io.github.daisukikaffuchino.utils.rememberShareText
 import kotlinx.coroutines.launch
@@ -121,7 +125,10 @@ fun VideoRouteHostScreen(
         ).orEmpty()
     }
 
-    var checkedQuality by remember(route.videoCode, route.localUri) { mutableStateOf<String?>(null) }
+    var checkedQuality by remember(
+        route.videoCode,
+        route.localUri
+    ) { mutableStateOf<String?>(null) }
     var pendingDownloadPrompt by remember(route.videoCode, route.localUri) {
         mutableStateOf<DownloadPromptState?>(null)
     }
@@ -149,6 +156,7 @@ fun VideoRouteHostScreen(
     ) { granted ->
         if (!granted) showNotificationPermissionReason = true
     }
+    var showDialog by remember { mutableStateOf(false) }
 
     val actions = remember(activity, scope, viewModel, genres) {
         VideoRouteActions(
@@ -176,7 +184,8 @@ fun VideoRouteHostScreen(
     }
 
     fun setSystemBars(hidden: Boolean) {
-        val controller = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
+        val controller =
+            WindowCompat.getInsetsController(activity.window, activity.window.decorView)
         if (hidden) {
             controller.hide(WindowInsetsCompat.Type.systemBars())
             controller.systemBarsBehavior =
@@ -245,7 +254,8 @@ fun VideoRouteHostScreen(
         val intent = PendingIntent.getBroadcast(
             activity,
             0,
-            android.content.Intent(MainActivity.ACTION_TOGGLE_PLAY).setPackage(activity.packageName),
+            android.content.Intent(MainActivity.ACTION_TOGGLE_PLAY)
+                .setPackage(activity.packageName),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
         activity.setPictureInPictureParams(
@@ -272,14 +282,15 @@ fun VideoRouteHostScreen(
             override fun shouldEnterPip(): Boolean {
                 val state = playbackController.state.value.engine
                 return state.phase == PlaybackPhase.Ready &&
-                    (state.isPlaying || state.positionMs > 0L)
+                        (state.isPlaying || state.positionMs > 0L)
             }
 
             override fun enterPipMode() {
                 val intent = PendingIntent.getBroadcast(
                     activity,
                     0,
-                    android.content.Intent(MainActivity.ACTION_TOGGLE_PLAY).setPackage(activity.packageName),
+                    android.content.Intent(MainActivity.ACTION_TOGGLE_PLAY)
+                        .setPackage(activity.packageName),
                     PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
                 )
                 val state = playbackController.state.value.engine
@@ -324,7 +335,8 @@ fun VideoRouteHostScreen(
     SideEffect {
         activity.window.statusBarColor = Color.BLACK
         activity.window.navigationBarColor = Color.TRANSPARENT
-        val controller = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
+        val controller =
+            WindowCompat.getInsetsController(activity.window, activity.window.decorView)
         controller.isAppearanceLightStatusBars = false
         controller.isAppearanceLightNavigationBars = false
         activity.window.isStatusBarContrastEnforced = false
@@ -354,7 +366,7 @@ fun VideoRouteHostScreen(
         val orientationManager = OrientationManager(activity) { orientation ->
             val engineState = playbackController.state.value.engine
             val isPortraitVideo = engineState.videoWidth > 0 &&
-                engineState.videoHeight > engineState.videoWidth
+                    engineState.videoHeight > engineState.videoWidth
             if (!SettingsRepository.tabletMode && !isPortraitVideo && engineState.phase == PlaybackPhase.Ready) {
                 if (orientation.isLandscape && !isFullscreen) enterFullscreen()
                 if (orientation == OrientationManager.ScreenOrientation.PORTRAIT && isFullscreen) {
@@ -367,7 +379,12 @@ fun VideoRouteHostScreen(
                 Lifecycle.Event.ON_PAUSE -> {
                     if (route.videoCode != "-1") {
                         val progress = playbackController.state.value.engine.positionMs
-                        scope.launch { DatabaseRepo.WatchHistory.updateProgress(route.videoCode, progress) }
+                        scope.launch {
+                            DatabaseRepo.WatchHistory.updateProgress(
+                                route.videoCode,
+                                progress
+                            )
+                        }
                     }
                 }
 
@@ -423,7 +440,7 @@ fun VideoRouteHostScreen(
                         } else {
                             val history = DatabaseRepo.WatchHistory.findBy(route.videoCode)
                             showResumeButton = SettingsRepository.allowResumePlayback &&
-                                (history?.progress ?: 0L) > 5_000L
+                                    (history?.progress ?: 0L) > 5_000L
                             val request = PendingPlayback(
                                 title = info.title,
                                 qualities = qualities,
@@ -544,7 +561,10 @@ fun VideoRouteHostScreen(
         title = videoTitle,
         currentTime = formatPlaybackTime(playbackState.engine.positionMs),
         totalTime = formatPlaybackTime(playbackState.engine.durationMs),
-        progress = playbackProgress(playbackState.engine.positionMs, playbackState.engine.durationMs),
+        progress = playbackProgress(
+            playbackState.engine.positionMs,
+            playbackState.engine.durationMs
+        ),
         bufferedProgress = playbackProgress(
             playbackState.engine.bufferedPositionMs,
             playbackState.engine.durationMs,
@@ -556,7 +576,7 @@ fun VideoRouteHostScreen(
         showPoster = !playbackState.engine.hasRenderedFirstFrame,
         showLoading =
             videoState is VideoLoadingState.Loading ||
-                playbackState.engine.phase == PlaybackPhase.Preparing,
+                    playbackState.engine.phase == PlaybackPhase.Preparing,
         showRetry = playbackState.engine.phase == PlaybackPhase.Error,
         showResumeButton = showResumeButton,
         onPlayClick = playbackController::togglePlayPause,
@@ -574,7 +594,8 @@ fun VideoRouteHostScreen(
         },
         onRetry = {
             video?.let { info ->
-                val qualities = info.videoUrls.map { (label, link) -> PlaybackQuality(label, link.link) }
+                val qualities =
+                    info.videoUrls.map { (label, link) -> PlaybackQuality(label, link.link) }
                 playbackController.load(info.title, qualities, SettingsRepository.videoQuality)
             }
         },
@@ -798,21 +819,55 @@ fun VideoRouteHostScreen(
         onDismiss = { pendingPlayback = null },
     )
 
-    if (!BuildConfig.DEBUG) {
-        LaunchedEffect(Unit) {
-            if (!svc()) {
-                SonnerToast.error(
+    if (showDialog) {
+        Base64Dialog(onDismiss = { showDialog = false })
+    }
+
+    LaunchedEffect(Unit) {
+        if (!isX86_64Device) {
+            val isFailed = getString() == String(
+                Base64.decode("ZmFpbGVk", Base64.DEFAULT),
+                Charsets.UTF_8
+            )
+
+            when {
+                isFailed -> SonnerToast.error(
                     String(
-                        Base64.decode(
-                            "562+5ZCN5qCh6aqM5bSp5rqD77yM5peg5rOV6aqM6K+B5piv5ZCm6KKr56+h5pS577yM6K+36IGU57O75byA5Y+R6ICF",
-                            Base64.DEFAULT,
-                        ),
-                        Charsets.UTF_8,
+                        Base64.decode("5qCh6aqM5bSp5rqD77yM6K+35ZCR5byA5Y+R6ICF5Y+N6aaI", Base64.DEFAULT),
+                        Charsets.UTF_8
                     )
                 )
+                else -> showDialog = !BuildConfig.DEBUG && !svc()
             }
         }
     }
+}
+
+@Composable
+fun Base64Dialog(
+    onDismiss: () -> Unit
+) {
+    val decodedTitle = remember {
+        String(Base64.decode("562+5ZCN5qCh6aqM5aSx6LSl", Base64.DEFAULT), Charsets.UTF_8)
+    }
+    val decodedContent = remember {
+        String(
+            Base64.decode(
+                "5L2g5LiL6L295Yiw5LqG6KKr56+h5pS555qE5bqU55So44CC5pys5bqU55So5byA5rqQ5YWN6LS55peg5bm/5ZGK77yM5Lil56aB5aKZ5YaF5byV5rWB44CB5pCs6L+Q44CB5YCS5Y2W44CC5aaC5p6c5L2g6K6k5Li66L+Z5piv6K+v5oql77yM6K+35ZCR5byA5Y+R6ICF5Y+N6aaI44CC",
+                Base64.DEFAULT
+            ), Charsets.UTF_8
+        )
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = decodedTitle) },
+        text = { Text(text = decodedContent) },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(android.R.string.ok))
+            }
+        }
+    )
 }
 
 private fun playbackProgress(positionMs: Long, durationMs: Long): Float =
@@ -842,6 +897,7 @@ private fun formatPlaybackTime(positionMs: Long): String {
 }
 
 private external fun svc(): Boolean
+private external fun getString(): String
 
 private data class PendingPlayback(
     val title: String,
