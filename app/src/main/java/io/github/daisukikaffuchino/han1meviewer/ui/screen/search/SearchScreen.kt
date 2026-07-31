@@ -74,7 +74,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.SearchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
@@ -135,7 +135,7 @@ fun SearchScreen(
     val focusMgr = LocalFocusManager.current
     val kb = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
-    val showPlayedIndicator = Preferences.showPlayedIndicator
+    val showPlayedIndicator = SettingsRepository.showPlayedIndicator
 
     // 搜索执行
     fun executeSearch() {
@@ -621,8 +621,8 @@ fun SearchResultsGrid(
         val density = LocalDensity.current
         val screenWidthDp =
             with(density) { LocalWindowInfo.current.containerSize.width.toDp().value.toInt() }
-        val columns = if (Preferences.tabletMode) {
-            GridCells.Fixed(Preferences.searchGridColumnsConfig.columnsForWidthDp(screenWidthDp))
+        val columns = if (SettingsRepository.tabletMode) {
+            GridCells.Fixed(SettingsRepository.searchGridColumnsConfig.columnsForWidthDp(screenWidthDp))
         } else {
             GridCells.Adaptive(
                 minSize = if (useNormalGrid) normalCardWidth else simplifiedCardWidth,

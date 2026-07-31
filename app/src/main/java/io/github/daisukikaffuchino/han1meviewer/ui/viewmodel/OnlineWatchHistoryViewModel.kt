@@ -2,7 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.NotLoggedInException
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
@@ -46,7 +46,7 @@ class OnlineWatchHistoryViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            Preferences.loginStateFlow.drop(1).collect { isLoggedIn ->
+            SettingsRepository.loginStateFlow.drop(1).collect { isLoggedIn ->
                 if (!isLoggedIn) {
                     clearLoggedOutState()
                 }
@@ -76,8 +76,8 @@ class OnlineWatchHistoryViewModel : ViewModel() {
     }
 
     private fun loadPage(page: Int) {
-        val userId = Preferences.savedUserId
-        if (!Preferences.isAlreadyLogin || userId.isBlank()) {
+        val userId = SettingsRepository.savedUserId
+        if (!SettingsRepository.isAlreadyLogin || userId.isBlank()) {
             clearLoggedOutState()
             return
         }
@@ -131,7 +131,7 @@ class OnlineWatchHistoryViewModel : ViewModel() {
     }
 
     fun deleteItem(item: HanimeInfo) {
-        if (!Preferences.isAlreadyLogin || Preferences.savedUserId.isBlank()) {
+        if (!SettingsRepository.isAlreadyLogin || SettingsRepository.savedUserId.isBlank()) {
             clearLoggedOutState()
             return
         }

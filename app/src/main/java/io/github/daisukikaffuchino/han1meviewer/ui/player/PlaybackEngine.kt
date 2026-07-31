@@ -3,16 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.player
 import android.view.Surface
 import kotlinx.coroutines.flow.StateFlow
 
-enum class PlayerKernel {
-    MediaPlayer,
-    ExoPlayer,
-    MpvPlayer;
-
-    companion object {
-        fun fromPreference(value: String): PlayerKernel =
-            entries.firstOrNull { it.name == value } ?: ExoPlayer
-    }
-}
+typealias PlayerKernel = io.github.daisukikaffuchino.han1meviewer.logic.model.PlayerKernel
 
 object PlayerDefaults {
     const val DEFAULT_SPEED = 1f

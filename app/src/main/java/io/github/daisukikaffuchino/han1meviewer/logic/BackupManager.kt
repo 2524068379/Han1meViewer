@@ -2,10 +2,13 @@ package io.github.daisukikaffuchino.han1meviewer.logic
 
 import android.content.Context
 import android.net.Uri
-import androidx.core.content.edit
 import androidx.glance.appwidget.updateAll
 import io.github.daisukikaffuchino.han1meviewer.BuildConfig
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.HanimeApplication
+import io.github.daisukikaffuchino.han1meviewer.logic.datastore.DataStoreManager
+import io.github.daisukikaffuchino.han1meviewer.logic.network.HanimeNetwork
+import io.github.daisukikaffuchino.han1meviewer.logic.network.HProxySelector
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.CheckInRecordDatabase
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.DownloadDatabase
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.HistoryDatabase
@@ -18,6 +21,8 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.DownloadGr
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeCategoryCrossRef
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeDownloadEntity
 import io.github.daisukikaffuchino.han1meviewer.ui.widget.CheckInWidget
+import io.github.daisukikaffuchino.han1meviewer.util.AppLanguageManager
+import io.github.daisukikaffuchino.han1meviewer.worker.HanimeDownloadManager
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.OutputStream
@@ -134,18 +139,15 @@ object BackupManager {
         }
 
         backup.settings?.let { settings ->
-            Preferences.preferenceSp.edit {
-                settings.forEach { (key, value) ->
-                    when (value) {
-                        is PreferenceValue.BooleanValue -> putBoolean(key, value.value)
-                        is PreferenceValue.FloatValue -> putFloat(key, value.value)
-                        is PreferenceValue.IntValue -> putInt(key, value.value)
-                        is PreferenceValue.LongValue -> putLong(key, value.value)
-                        is PreferenceValue.StringSetValue -> putStringSet(key, value.value)
-                        is PreferenceValue.StringValue -> putString(key, value.value)
-                    }
-                }
-            }
+            DataStoreManager.restoreBackup(settings.mapValues { (_, value) -> value.rawValue })
+            AppLanguageManager.setAppLanguage(SettingsRepository.current.appLanguage)
+            HProxySelector.rebuildNetwork()
+            HanimeNetwork.rebuildNetwork()
+            HanimeDownloadManager.maxConcurrentDownloadCount =
+                SettingsRepository.current.downloadCountLimit
+            (context.applicationContext as? HanimeApplication)?.switchLauncher(
+                SettingsRepository.current.fakeLauncherIcon
+            )
         }
 
         runCatching { CheckInWidget().updateAll(context) }
@@ -153,7 +155,7 @@ object BackupManager {
 
     private suspend fun exportTo(context: Context, outputStream: OutputStream) {
         val backup = BackupData(
-            settings = Preferences.preferenceSp.all.mapValuesNotNull { (_, value) ->
+            settings = DataStoreManager.exportBackup().mapValuesNotNull { (_, value) ->
                 value.toPreferenceValue()
             },
             hKeyframes = MiscellanyDatabase.instance.hKeyframeDao.getAll(),
@@ -187,5 +189,15 @@ object BackupManager {
             else -> null
         }
     }
+
+    private val PreferenceValue.rawValue: Any
+        get() = when (this) {
+            is PreferenceValue.BooleanValue -> value
+            is PreferenceValue.FloatValue -> value
+            is PreferenceValue.IntValue -> value
+            is PreferenceValue.LongValue -> value
+            is PreferenceValue.StringSetValue -> value
+            is PreferenceValue.StringValue -> value
+        }
 
 }

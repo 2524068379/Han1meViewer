@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeTheme
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.utils.SonnerToast
 
 abstract class BaseActivity : AppCompatActivity() {
@@ -25,7 +25,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        setSecureMode(Preferences.secureMode)
+        setSecureMode(SettingsRepository.secureMode)
     }
 
     fun setSecureMode(enabled: Boolean) {

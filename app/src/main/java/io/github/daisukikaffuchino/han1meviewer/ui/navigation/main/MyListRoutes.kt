@@ -3,7 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.navigation.main
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.VideoGridScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MyListViewModel
@@ -38,12 +38,12 @@ fun FavVideoRouteScreen(
         onRefresh = {
             fav.favVideoPage = 1
             fav.clearMyListItems()
-            fav.getMyFavVideoItems(Preferences.savedUserId, 1)
+            fav.getMyFavVideoItems(SettingsRepository.savedUserId, 1)
             fav.favVideoPage = 2
         },
         onLoadMore = {
             val page = fav.favVideoPage
-            fav.getMyFavVideoItems(Preferences.savedUserId, page)
+            fav.getMyFavVideoItems(SettingsRepository.savedUserId, page)
             fav.favVideoPage = page + 1
         },
     )

@@ -35,7 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
 import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateState
@@ -94,7 +94,7 @@ fun HomePageScreen(
     val contentTopPadding = with(density) {
         WindowInsets.statusBars.getTop(this).toDp() + 72.dp
     }
-    val isAVSite = Preferences.baseUrl == HanimeConstants.HANIME_URL[3]
+    val isAVSite = SettingsRepository.baseUrl == HanimeConstants.HANIME_URL[3]
     LaunchedEffect(Unit) {
         viewModel.initializeHomePage()
     }

@@ -122,6 +122,7 @@ dependencies {
     implementation(libs.androidx.documentfile)
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.startup.runtime)
+    implementation(libs.datastore.preferences)
 
     implementation(libs.bundles.android.base)
     implementation(libs.bundles.android.jetpack)
@@ -158,8 +159,6 @@ dependencies {
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.exoplayer.hls)
     implementation(libs.mpv.lib)
-
-    implementation(libs.spannable.x)
 
     ksp(libs.room.compiler)
 

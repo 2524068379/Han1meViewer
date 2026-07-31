@@ -21,7 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
 import io.github.daisukikaffuchino.han1meviewer.HANIME_LOGIN_URL
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.USER_AGENT
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
@@ -53,8 +53,10 @@ fun LoginRouteScreen(
     val scope = rememberCoroutineScope()
 
     fun finishLogin(cookies: String) {
-        login(cookies)
-        onLoginSucceeded()
+        scope.launch {
+            login(cookies)
+            onLoginSucceeded()
+        }
     }
 
     fun navigateBack() {
@@ -139,11 +141,14 @@ fun ManualCookiesRouteScreen(
     onBack: () -> Unit,
     onLoginSucceeded: () -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
     ManualInputCookiesScreen(
         onBack = onBack,
         onCookieScanned = { cookie ->
-            login(cookie)
-            onLoginSucceeded()
+            scope.launch {
+                login(cookie)
+                onLoginSucceeded()
+            }
         },
     )
 }
@@ -154,6 +159,7 @@ fun CloudflareRouteScreen(
     route: CloudflareRoute,
     onBack: () -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
     var progress by remember(route.host) { mutableIntStateOf(0) }
     var tipText by remember(route.host) {
         mutableStateOf(activity.getString(R.string.complete_cloudflare_verification_with_warning))
@@ -180,8 +186,10 @@ fun CloudflareRouteScreen(
                 onProgressChanged = { progress = it },
                 onUserAgent = { tipText = buildWebViewVersionTip(activity, it) },
                 onVerificationReady = { completedUrl, cookieManager ->
-                    if (persistCloudflareCookies(completedUrl, route.host, cookieManager)) {
-                        finishVerification(true)
+                    scope.launch {
+                        if (persistCloudflareCookies(completedUrl, route.host, cookieManager)) {
+                            finishVerification(true)
+                        }
                     }
                 },
             )
@@ -294,7 +302,7 @@ private fun createCloudflareWebView(
     loadUrl(url)
 }
 
-private fun persistCloudflareCookies(
+private suspend fun persistCloudflareCookies(
     completedUrl: String,
     fallbackHost: String,
     cookieManager: CookieManager,
@@ -302,8 +310,7 @@ private fun persistCloudflareCookies(
     val cookies = cookieManager.getCookie(completedUrl).orEmpty()
     if (!cookies.containsCookie("cf_clearance")) return false
     val cookieHost = completedUrl.toUri().host?.lowercase() ?: fallbackHost
-    Preferences.cloudFlareCookie = CookieString(cookies)
-    Preferences.cloudFlareCookieHost = cookieHost
+    SettingsRepository.setCloudFlareCookie(cookies, cookieHost)
     cookieManager.flush()
     return true
 }

@@ -12,8 +12,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.daisukikaffuchino.han1meviewer.Preferences
-import io.github.daisukikaffuchino.han1meviewer.Preferences.isAlreadyLogin
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository.isAlreadyLogin
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.VIDEO_COMMENT_PREFIX
 import io.github.daisukikaffuchino.han1meviewer.getHanimeShareText
@@ -57,7 +57,7 @@ fun RenderVideoIntroductionContent(
 ) {
     val videoState = viewModel.hanimeVideoStateFlow.collectAsStateWithLifecycle().value
     val video = viewModel.hanimeVideoFlow.collectAsStateWithLifecycle().value
-    val checkInEnabled by Preferences.checkInEnabledFlow.collectAsStateWithLifecycle()
+    val checkInEnabled by SettingsRepository.checkInEnabledFlow.collectAsStateWithLifecycle()
     val videoShareText = video?.title?.let { title ->
         getHanimeShareText(title, videoCode)
     }.orEmpty()
@@ -207,7 +207,7 @@ fun RenderVideoCommentContent(
                         viewModel.reportComment(
                             reason.reasonKey ?: reason.value,
                             viewModel.currentUserId,
-                            "${Preferences.baseUrl}watch?v=${videoCode}",
+                            "${SettingsRepository.baseUrl}watch?v=${videoCode}",
                             comment.reportableType,
                             comment.reportableId,
                         )
@@ -263,7 +263,7 @@ fun RenderVideoCommentContent(
                 viewModel.reportComment(
                     reason.reasonKey ?: reason.value,
                     viewModel.currentUserId,
-                    "${Preferences.baseUrl}watch?v=${videoCode}",
+                    "${SettingsRepository.baseUrl}watch?v=${videoCode}",
                     comment.reportableType,
                     comment.reportableId,
                 )

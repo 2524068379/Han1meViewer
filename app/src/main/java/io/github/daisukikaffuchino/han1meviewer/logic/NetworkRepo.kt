@@ -2,8 +2,8 @@ package io.github.daisukikaffuchino.han1meviewer.logic
 
 import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
-import io.github.daisukikaffuchino.han1meviewer.Preferences
-import io.github.daisukikaffuchino.han1meviewer.Preferences.isAlreadyLogin
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository.isAlreadyLogin
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.CloudflareBlockedException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.HanimeNotFoundException
@@ -45,7 +45,7 @@ object NetworkRepo {
     //<editor-fold desc="Hanime">
 
     fun getHomePage() = websiteIOFlow(
-        request = { HanimeNetwork.hanimeService.getHomePage(Preferences.homeUrl) },
+        request = { HanimeNetwork.hanimeService.getHomePage(SettingsRepository.homeUrl) },
         action = Parser::homePageVer2
     )
 

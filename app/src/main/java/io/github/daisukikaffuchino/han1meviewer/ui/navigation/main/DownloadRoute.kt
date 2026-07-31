@@ -10,7 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.DownloadDatabase
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeDownloadEntity
@@ -59,8 +59,8 @@ fun DownloadRouteScreen(
             is DownloadEvent.OnDeleteDownloadingItem -> HanimeDownloadManager.deleteTask(event.item)
 
             is DownloadEvent.OnImportDownloaded -> {
-                if (!Preferences.safDownloadPath.isNullOrBlank() &&
-                    !Preferences.isUsePrivateStorage && !isImportingDownloaded
+                if (!SettingsRepository.safDownloadPath.isNullOrBlank() &&
+                    !SettingsRepository.isUsePrivateStorage && !isImportingDownloaded
                 ) {
                     showImportDownloadedConfirm = true
                 } else {
@@ -132,7 +132,7 @@ fun DownloadRouteScreen(
         downloadingFlow = viewModel.loadAllDownloadingHanime(),
         downloadedFlow = viewModel.downloaded,
         downloadedGroupsFlow = viewModel.downloadedGroups,
-        collapseDownloadedGroup = Preferences.collapseDownloadedGroup,
+        collapseDownloadedGroup = SettingsRepository.collapseDownloadedGroup,
         onBack = onBack,
         onLoadDownloaded = {
             viewModel.loadAllDownloadedHanime(

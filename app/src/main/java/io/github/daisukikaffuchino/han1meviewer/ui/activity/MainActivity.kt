@@ -19,13 +19,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
-import androidx.core.content.edit
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.ANIME_URL
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
 import io.github.daisukikaffuchino.han1meviewer.BuildConfig
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logout
 import io.github.daisukikaffuchino.han1meviewer.ui.bridge.VideoPageHost
@@ -34,13 +34,13 @@ import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HanimeScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.LoginRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.TopLevelBackStack
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.VideoRoute
-import io.github.daisukikaffuchino.han1meviewer.util.defaultSharedPreferences
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsPreferenceKeys
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.main.MainActivityContent
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomePageViewModel
 import io.github.daisukikaffuchino.utils.ActivityManager
 import io.github.daisukikaffuchino.utils.isX86_64Device
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity() {
 
@@ -105,8 +105,7 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        val prefs = defaultSharedPreferences
-        val useLock = prefs.getBoolean("use_lock_screen", false)
+        val useLock = SettingsRepository.current.useLockScreen
 
         if (useLock && isDeviceSecureCompat(this)) {
             authenticate(
@@ -212,23 +211,17 @@ class MainActivity : BaseActivity() {
 
     private fun confirmSiteSwitch() {
         showSiteSwitchConfirm = false
-        val currentSite = Preferences.baseUrl
+        val currentSite = SettingsRepository.baseUrl
         val avSite = HANIME_URL[3]
-        val selectedBaseUrl = Preferences.selectedBaseUrl
-        if (currentSite in ANIME_URL) {
-            Preferences.preferenceSp.edit(true) {
-                putString(SettingsPreferenceKeys.SELECTED_BASE_URL, currentSite)
-                putString(SettingsPreferenceKeys.DOMAIN_NAME, avSite)
+        val selectedBaseUrl = SettingsRepository.selectedBaseUrl
+        lifecycleScope.launch {
+            SettingsRepository.update {
+                if (currentSite in ANIME_URL) it.copy(selectedBaseUrl = currentSite, domainName = avSite)
+                else it.copy(selectedBaseUrl = selectedBaseUrl, domainName = selectedBaseUrl)
             }
-        } else {
-            Preferences.preferenceSp.edit(true) {
-                putString(SettingsPreferenceKeys.SELECTED_BASE_URL, selectedBaseUrl)
-                putString(SettingsPreferenceKeys.DOMAIN_NAME, selectedBaseUrl)
-            }
-        }
-        Handler(Looper.getMainLooper()).postDelayed({
+            delay(500)
             ActivityManager.restart(killProcess = true)
-        }, 500)
+        }
     }
 
     fun openLogin() {
@@ -249,8 +242,10 @@ class MainActivity : BaseActivity() {
     }
 
     fun logoutWithRefresh() {
-        logout()
-        viewModel.getHomePage()
+        lifecycleScope.launch {
+            logout()
+            viewModel.getHomePage()
+        }
     }
 
     fun showVideoDetailFragment(videoCode: String, fileUri: String? = null) {
@@ -265,8 +260,7 @@ class MainActivity : BaseActivity() {
         super.onUserLeaveHint()
         val currentFragment = currentVideoHost
 
-        val prefs = defaultSharedPreferences
-        val allowPip = prefs.getBoolean("allow_pip_mode", true)
+        val allowPip = SettingsRepository.current.allowPipMode
 
         LogUtil.i("pipmode", "enter pip mode?\n$currentFragment\nallowpip:$allowPip\n")
 

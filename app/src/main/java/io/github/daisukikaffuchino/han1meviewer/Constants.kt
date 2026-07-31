@@ -3,6 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 
 /**
  * 我觉得空字符串写出来太逆天了，所以搞了个常量
@@ -49,8 +50,8 @@ const val PREVIEW_COMMENT_PREFIX = "preview"
 
 // base url
 
-@JvmField
-val HANIME_BASE_URL = Preferences.baseUrl
+val HANIME_BASE_URL: String
+    get() = SettingsRepository.baseUrl
 
 /**
  * 如果添加备选网址别忘了确认[String.toVideoCode]的videoUrlRegex
@@ -61,8 +62,8 @@ object HanimeConstants {
     val ANIME_URL = arrayOf("https://hanime1.me/","https://hanime1.com/","https://hanimeone.me/")
 }
 
-@JvmField
-val HANIME_LOGIN_URL = HANIME_BASE_URL + "login"
+val HANIME_LOGIN_URL: String
+    get() = HANIME_BASE_URL + "login"
 
 // github url
 

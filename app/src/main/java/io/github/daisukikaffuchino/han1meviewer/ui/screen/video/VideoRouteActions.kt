@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.glance.appwidget.updateAll
 import io.github.daisukikaffuchino.han1meviewer.HAdvancedSearch
 import io.github.daisukikaffuchino.han1meviewer.HCacheManager
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.getHanimeVideoDownloadLink
 import io.github.daisukikaffuchino.han1meviewer.getHanimeVideoLink
@@ -49,7 +49,7 @@ class VideoRouteActions(
         }?.searchKey ?: ""
         val map = buildMap<HAdvancedSearch, Serializable> {
             put(HAdvancedSearch.QUERY, artist.name)
-            if (searchKey.isNotEmpty() && !Preferences.searchArtistIgnoreVideoType) {
+            if (searchKey.isNotEmpty() && !SettingsRepository.searchArtistIgnoreVideoType) {
                 put(HAdvancedSearch.GENRE, searchKey)
             }
         }
@@ -68,7 +68,7 @@ class VideoRouteActions(
 
     fun toggleArtistSubscription(artist: HanimeVideo.Artist) {
         val post = artist.post ?: return
-        if (!Preferences.isAlreadyLogin) {
+        if (!SettingsRepository.isAlreadyLogin) {
             SonnerToast.warning(R.string.login_first)
             return
         }
@@ -85,7 +85,7 @@ class VideoRouteActions(
     }
 
     fun toggleFavorite(video: HanimeVideo) {
-        if (!Preferences.isAlreadyLogin) {
+        if (!SettingsRepository.isAlreadyLogin) {
             SonnerToast.warning(R.string.login_first)
             return
         }
@@ -97,7 +97,7 @@ class VideoRouteActions(
     }
 
     fun rateVideo(video: HanimeVideo, isPositive: Boolean) {
-        if (!Preferences.isAlreadyLogin) {
+        if (!SettingsRepository.isAlreadyLogin) {
             SonnerToast.warning(R.string.login_first)
             return
         }
@@ -108,7 +108,7 @@ class VideoRouteActions(
         myList: HanimeVideo.MyList?,
         selectedStates: List<Boolean>,
     ) {
-        if (!Preferences.isAlreadyLogin || myList == null || myList.myListInfo.isEmpty()) {
+        if (!SettingsRepository.isAlreadyLogin || myList == null || myList.myListInfo.isEmpty()) {
             SonnerToast.warning(R.string.login_first)
             return
         }

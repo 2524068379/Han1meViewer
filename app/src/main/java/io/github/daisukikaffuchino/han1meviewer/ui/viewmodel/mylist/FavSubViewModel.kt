@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.mylist
 
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
@@ -34,7 +34,7 @@ class FavSubViewModel(scope: CoroutineScope) : MyListSubViewModel(scope) {
                 NetworkRepo.addToMyFavVideo(
                     videoCode = videoCode,
                     likeStatus = true,
-                    currentUserId = Preferences.savedUserId,
+                    currentUserId = SettingsRepository.savedUserId,
                     token = csrfToken,
                 )
             },

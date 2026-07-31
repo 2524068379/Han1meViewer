@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.network
 
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.network.interceptor.CloudflareInterceptor
 import io.github.daisukikaffuchino.han1meviewer.logic.network.interceptor.GetchuInterceptor
 import io.github.daisukikaffuchino.han1meviewer.logic.network.interceptor.SpeedLimitInterceptor
@@ -29,7 +29,7 @@ object ServiceCreator {
     )
 
     private val downloadSpeedLimitInterceptor by unsafeLazy {
-        SpeedLimitInterceptor(maxSpeed = Preferences.downloadSpeedLimit)
+        SpeedLimitInterceptor(maxSpeed = SettingsRepository.downloadSpeedLimit)
     }
 
     private val dns = HDns()

@@ -2,7 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.NotLoggedInException
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccount
@@ -30,7 +30,7 @@ class UserAccountViewModel : ViewModel() {
 
     fun loadAccount(forceReload: Boolean = false) {
         if (!forceReload && _accountState.value is WebsiteState.Success) return
-        val userId = Preferences.savedUserId
+        val userId = SettingsRepository.savedUserId
         if (userId.isBlank()) {
             _accountState.value = WebsiteState.Error(
                 NotLoggedInException()

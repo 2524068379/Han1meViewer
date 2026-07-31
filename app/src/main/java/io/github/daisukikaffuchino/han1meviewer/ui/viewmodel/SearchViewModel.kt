@@ -7,7 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo.HanimeAdvancedSearchRepo.toSearchOptionSet
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
@@ -87,7 +87,7 @@ class SearchViewModel(
     var brandMap = SparseArray<Set<SearchOption>>()
 
     val genres by unsafeLazy {
-        loadAssetAs<List<SearchOption>>(if (Preferences.baseUrl == HANIME_URL[3]) "search_options/genre_av.json" else "search_options/genre.json").orEmpty()
+        loadAssetAs<List<SearchOption>>(if (SettingsRepository.baseUrl == HANIME_URL[3]) "search_options/genre_av.json" else "search_options/genre.json").orEmpty()
     }
 
     val tags by unsafeLazy {
@@ -159,7 +159,7 @@ class SearchViewModel(
 //                        is PageLoadingState.Success -> prevList + state.info
                         is PageLoadingState.Success -> {
                             val list = state.info
-                            val updatedList = if (Preferences.showPlayedIndicator) {
+                            val updatedList = if (SettingsRepository.showPlayedIndicator) {
                                 val codes = list.map { it.videoCode }
                                 val watchedCodes = withContext(Dispatchers.IO) {
                                     DatabaseRepo.WatchHistory.getWatched(codes).toSet()

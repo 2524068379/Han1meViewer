@@ -8,11 +8,11 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
 import io.github.daisukikaffuchino.han1meviewer.ui.bridge.VideoPageHost
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.CommentViewModel
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.VideoViewModel
-import io.github.daisukikaffuchino.han1meviewer.util.defaultSharedPreferences
 import io.github.daisukikaffuchino.utils.application
 
 @Composable
@@ -45,10 +45,8 @@ fun VideoRouteContent(
     pageHost: VideoPageHost,
 ) {
     val hostUiState by videoViewModel.videoHostUiStateFlow.collectAsStateWithLifecycle()
-    val disableComments = remember {
-        application.defaultSharedPreferences
-            .getBoolean("disable_comments", false)
-    }
+    val settings by SettingsRepository.settings.collectAsStateWithLifecycle()
+    val disableComments = settings.disableComments
     val tabs = remember(disableComments, hostUiState.commentBadgeCount, fromDownload) {
         buildList {
             add(VideoTabItem(R.string.introduction))

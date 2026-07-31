@@ -12,29 +12,15 @@ import android.os.Process
 import android.provider.Settings
 import androidx.annotation.IntRange
 import androidx.annotation.RequiresApi
-import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.text.parseAsHtml
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_HOSTNAME
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
-import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.player.PlayerDefaults
 import io.github.daisukikaffuchino.utils.formatBytesPerSecond
 import io.github.daisukikaffuchino.utils.formatFileSize
 import io.github.daisukikaffuchino.utils.SonnerToast
-
-internal fun saveBoolean(key: String, value: Boolean) {
-    Preferences.preferenceSp.edit { putBoolean(key, value) }
-}
-
-internal fun saveString(key: String, value: String) {
-    Preferences.preferenceSp.edit { putString(key, value) }
-}
-
-internal fun saveInt(key: String, value: Int) {
-    Preferences.preferenceSp.edit { putInt(key, value) }
-}
 
 internal fun buildDomainOptions(context: Context): List<Pair<String, String>> = listOf(
     "${HANIME_HOSTNAME[0]} (${context.getString(R.string.default_)})" to HANIME_URL[0],

@@ -6,8 +6,8 @@ import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
 import io.github.daisukikaffuchino.han1meviewer.HanimeResolution
 import io.github.daisukikaffuchino.han1meviewer.LOCAL_DATE_FORMAT
-import io.github.daisukikaffuchino.han1meviewer.Preferences
-import io.github.daisukikaffuchino.han1meviewer.Preferences.isAlreadyLogin
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository.isAlreadyLogin
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.LoginStateExpiredException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.ParseException
@@ -55,7 +55,7 @@ object Parser {
     }
 
     fun homePageVer2(body: String): WebsiteState<HomePage> {
-        val isAVSite = Preferences.baseUrl == HANIME_URL[3]
+        val isAVSite = SettingsRepository.baseUrl == HANIME_URL[3]
         val parseBody = Jsoup.parse(body).body()
         val csrfToken = parseBody.selectFirst("input[name=_token]")?.attr("value") // csrf token
         val homePageParse = parseBody.select("div[id=home-rows-wrapper] > div")

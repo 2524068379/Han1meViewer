@@ -54,6 +54,8 @@ import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.AppPaletteStyle
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.ThemeAccentColor
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.colors
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.label
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.animatedShape
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.expressiveColorScheme
 

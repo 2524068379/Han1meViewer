@@ -2,8 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer.logic
 
 import android.util.Base64
 import io.github.daisukikaffuchino.utils.LogUtil
-import androidx.core.content.edit
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Announcement
 import io.github.daisukikaffuchino.utils.applicationContext
@@ -73,18 +72,13 @@ object AppUpdateChecker {
     }
 
     suspend fun checkForUpdate(): AppUpdateCheckResult = withContext(Dispatchers.IO) {
-        val preferences = Preferences.preferenceSp
-        val cachedJson = preferences.getString(CACHED_JSON_KEY, null)
+        val cachedJson = SettingsRepository.current.cachedUpdateJson
 
         val responseJson = runCatching { requestUpdateJson() }
             .onFailure { LogUtil.e(TAG, "Failed to check for updates", it) }
             .getOrNull()
 
-        preferences.edit {
-            if (responseJson != null) {
-                putString(CACHED_JSON_KEY, responseJson)
-            }
-        }
+        if (responseJson != null) SettingsRepository.setCachedUpdateJson(responseJson)
 
         val jsonToUse = responseJson ?: cachedJson
         if (responseJson == null) {
@@ -93,11 +87,7 @@ object AppUpdateChecker {
         jsonToUse.toUpdateCheckResult()
     }
 
-    fun ignoreUpdate(versionCode: Int) {
-        Preferences.preferenceSp.edit {
-            putInt(IGNORED_VERSION_CODE_KEY, versionCode)
-        }
-    }
+    suspend fun ignoreUpdate(versionCode: Int) = SettingsRepository.setIgnoredVersionCode(versionCode)
 
     private fun requestUpdateJson(): String {
         val request = Request.Builder()
@@ -139,10 +129,7 @@ object AppUpdateChecker {
         }
 
         val currentVersionCode = CURRENT_VERSION_CODE
-        val ignoredVersionCode = Preferences.preferenceSp.getInt(
-            IGNORED_VERSION_CODE_KEY,
-            -1,
-        )
+        val ignoredVersionCode = SettingsRepository.current.ignoredVersionCode
         return AppUpdateInfo(
             versionName = versionName,
             versionCode = versionCode,

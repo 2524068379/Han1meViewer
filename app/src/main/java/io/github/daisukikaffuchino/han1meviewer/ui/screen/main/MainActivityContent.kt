@@ -34,7 +34,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.HCacheManager
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.CloudflareBlockedException
@@ -77,32 +77,32 @@ fun MainActivityContent(
         val scope = rememberCoroutineScope()
         val clipboard = LocalClipboard.current
         val snackbarHostState = remember { SnackbarHostState() }
-        var showUsageNotice by remember { mutableStateOf(!Preferences.usageNoticeAccepted) }
+        var showUsageNotice by remember { mutableStateOf(!SettingsRepository.usageNoticeAccepted) }
         var showSourceDialog by remember {
             mutableStateOf(
-                Preferences.usageNoticeAccepted &&
-                    !Preferences.usageSourceVerified &&
-                    !Preferences.usageSourcePending,
+                SettingsRepository.usageNoticeAccepted &&
+                    !SettingsRepository.usageSourceVerified &&
+                    !SettingsRepository.usageSourcePending,
             )
         }
         var showSourceWarning by rememberSaveable {
             mutableStateOf(
-                Preferences.usageNoticeAccepted &&
-                    !Preferences.usageSourceVerified &&
-                    Preferences.usageSourcePending,
+                SettingsRepository.usageNoticeAccepted &&
+                    !SettingsRepository.usageSourceVerified &&
+                    SettingsRepository.usageSourcePending,
             )
         }
         var sourceLink by rememberSaveable { mutableStateOf("") }
         var appAccessGranted by remember {
-            mutableStateOf(Preferences.usageNoticeAccepted && Preferences.usageSourceVerified)
+            mutableStateOf(SettingsRepository.usageNoticeAccepted && SettingsRepository.usageSourceVerified)
         }
         val isDrawerOpen =
             drawerState.currentValue == DrawerValue.Open || drawerState.targetValue == DrawerValue.Open
 
         val homeState by viewModel.homePageFlow.collectAsStateWithLifecycle()
         val showStorageSwitchNotice by HCacheManager.storageSwitchNotice.collectAsStateWithLifecycle()
-        val isLoggedIn by Preferences.loginStateFlow.collectAsStateWithLifecycle()
-        val checkInEnabled by Preferences.checkInEnabledFlow.collectAsStateWithLifecycle()
+        val isLoggedIn by SettingsRepository.loginStateFlow.collectAsStateWithLifecycle()
+        val checkInEnabled by SettingsRepository.checkInEnabledFlow.collectAsStateWithLifecycle()
         val headerAvatarUrl = if (isLoggedIn) {
             (homeState as? PageState.Success)?.info?.page?.avatarUrl
         } else {
@@ -161,7 +161,7 @@ fun MainActivityContent(
             username = headerUsername,
             isLoggedIn = isLoggedIn,
             isLoading = headerIsLoading,
-            currentSite = Preferences.baseUrl,
+            currentSite = SettingsRepository.baseUrl,
             checkInEnabled = checkInEnabled,
             onAvatarClick = {
                 if (isLoggedIn) {
@@ -213,14 +213,13 @@ fun MainActivityContent(
                 UsageNoticeDialog(
                     visible = showUsageNotice,
                     onAccepted = {
-                        Preferences.usageNoticeAccepted = true
-                        showUsageNotice = false
-                        if (Preferences.usageSourceVerified) {
-                            appAccessGranted = true
-                            viewModel.initializeHomePage()
-                        }
-                        if (!Preferences.usageSourceVerified) {
-                            if (Preferences.usageSourcePending) {
+                        scope.launch {
+                            SettingsRepository.setUsageNoticeAccepted(true)
+                            showUsageNotice = false
+                            if (SettingsRepository.usageSourceVerified) {
+                                appAccessGranted = true
+                                viewModel.initializeHomePage()
+                            } else if (SettingsRepository.usageSourcePending) {
                                 showSourceWarning = true
                             } else {
                                 showSourceDialog = true
@@ -233,16 +232,19 @@ fun MainActivityContent(
                     visible = showSourceDialog,
                     onSelect = { source ->
                         if (source.equals("github", ignoreCase = true)) {
-                            Preferences.usageSourceVerified = true
-                            Preferences.usageSourcePending = false
-                            showSourceDialog = false
-                            appAccessGranted = true
-                            viewModel.initializeHomePage()
+                            scope.launch {
+                                SettingsRepository.update { it.copy(usageSourceVerified = true, usageSourcePending = false) }
+                                showSourceDialog = false
+                                appAccessGranted = true
+                                viewModel.initializeHomePage()
+                            }
                         } else {
-                            Preferences.usageSourcePending = true
-                            showSourceDialog = false
-                            sourceLink = ""
-                            showSourceWarning = true
+                            scope.launch {
+                                SettingsRepository.setUsageSourcePending(true)
+                                showSourceDialog = false
+                                sourceLink = ""
+                                showSourceWarning = true
+                            }
                         }
                     },
                 )
@@ -267,11 +269,12 @@ fun MainActivityContent(
                             TextButton(
                                 enabled = linkValid,
                                 onClick = {
-                                    Preferences.usageSourceVerified = true
-                                    Preferences.usageSourcePending = false
-                                    showSourceWarning = false
-                                    appAccessGranted = true
-                                    viewModel.initializeHomePage()
+                                    scope.launch {
+                                        SettingsRepository.update { it.copy(usageSourceVerified = true, usageSourcePending = false) }
+                                        showSourceWarning = false
+                                        appAccessGranted = true
+                                        viewModel.initializeHomePage()
+                                    }
                                 },
                             ) { Text(stringResource(R.string.app_source_verify)) }
                         },

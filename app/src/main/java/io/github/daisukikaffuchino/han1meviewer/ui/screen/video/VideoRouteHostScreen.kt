@@ -44,7 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.daisukikaffuchino.han1meviewer.BuildConfig
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.getHanimeVideoLink
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
@@ -89,7 +89,7 @@ fun VideoRouteHostScreen(
     val shareText = rememberShareText()
     val viewModel: VideoViewModel = viewModel()
     val commentViewModel: CommentViewModel = viewModel()
-    val kernel = remember { PlayerKernel.fromPreference(Preferences.switchPlayerKernel) }
+    val kernel = remember { PlayerKernel.fromPreference(SettingsRepository.switchPlayerKernel) }
     val playbackEngine = remember(route.videoCode, route.localUri, kernel) {
         PlaybackEngineFactory.create(activity, kernel)
     }
@@ -99,21 +99,21 @@ fun VideoRouteHostScreen(
     val videoState by viewModel.hanimeVideoStateFlow.collectAsStateWithLifecycle()
     val video = viewModel.hanimeVideoFlow.collectAsStateWithLifecycle().value
     val relatedItems = video?.relatedHanimes.orEmpty()
-    val restoreLightSystemBars = when (Preferences.useDarkMode) {
+    val restoreLightSystemBars = when (SettingsRepository.useDarkMode) {
         "always_on" -> false
         "always_off" -> true
         else -> !isSystemInDarkTheme()
     }
 
     LaunchedEffect(playbackController) {
-        playbackController.setPlaybackSpeed(Preferences.playerSpeed)
+        playbackController.setPlaybackSpeed(SettingsRepository.playerSpeed)
     }
     val stringLongPressShare = remember(activity) {
         activity.getString(R.string.long_press_share_to_copy)
     }
-    val genres = remember(Preferences.baseUrl) {
+    val genres = remember(SettingsRepository.baseUrl) {
         loadAssetAs<List<SearchOption>>(
-            if (Preferences.baseUrl == io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL[3]) {
+            if (SettingsRepository.baseUrl == io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL[3]) {
                 "search_options/genre_av.json"
             } else {
                 "search_options/genre.json"
@@ -309,7 +309,7 @@ fun VideoRouteHostScreen(
                 if (isInPip) {
                     viewModel.setPlayerHeightDp(null)
                 } else {
-                    viewModel.setPlayerHeightDp(if (Preferences.tabletMode) 350.dp else 250.dp)
+                    viewModel.setPlayerHeightDp(if (SettingsRepository.tabletMode) 350.dp else 250.dp)
                 }
                 updatePipAction()
             }
@@ -355,7 +355,7 @@ fun VideoRouteHostScreen(
             val engineState = playbackController.state.value.engine
             val isPortraitVideo = engineState.videoWidth > 0 &&
                 engineState.videoHeight > engineState.videoWidth
-            if (!Preferences.tabletMode && !isPortraitVideo && engineState.phase == PlaybackPhase.Ready) {
+            if (!SettingsRepository.tabletMode && !isPortraitVideo && engineState.phase == PlaybackPhase.Ready) {
                 if (orientation.isLandscape && !isFullscreen) enterFullscreen()
                 if (orientation == OrientationManager.ScreenOrientation.PORTRAIT && isFullscreen) {
                     exitFullscreen()
@@ -422,16 +422,16 @@ fun VideoRouteHostScreen(
                             uriHandler.openUri(getHanimeVideoLink(route.videoCode))
                         } else {
                             val history = DatabaseRepo.WatchHistory.findBy(route.videoCode)
-                            showResumeButton = Preferences.allowResumePlayback &&
+                            showResumeButton = SettingsRepository.allowResumePlayback &&
                                 (history?.progress ?: 0L) > 5_000L
                             val request = PendingPlayback(
                                 title = info.title,
                                 qualities = qualities,
-                                preferredQuality = Preferences.videoQuality,
+                                preferredQuality = SettingsRepository.videoQuality,
                                 startPositionMs = history?.progress ?: 0L,
                             )
                             if (!viewModel.fromDownload &&
-                                !Preferences.disableMobileDataWarning &&
+                                !SettingsRepository.disableMobileDataWarning &&
                                 !mobilePlaybackConfirmed &&
                                 isActiveNetworkMetered(activity)
                             ) {
@@ -500,19 +500,19 @@ fun VideoRouteHostScreen(
     }
 
     val countdownLabel = remember(playbackState.engine.positionMs, hKeyframes, isFullscreen) {
-        if (!isFullscreen || !Preferences.hKeyframesEnable) {
+        if (!isFullscreen || !SettingsRepository.hKeyframesEnable) {
             null
         } else {
             hKeyframes?.keyframes.orEmpty().mapIndexedNotNull { index, keyframe ->
                 val remaining = keyframe.position - playbackState.engine.positionMs
-                if (remaining in 0L until Preferences.whenCountdownRemind) {
+                if (remaining in 0L until SettingsRepository.whenCountdownRemind) {
                     val seconds = remaining / 1000L
                     val time = if (seconds >= 1L) {
                         (seconds + 1L).toString()
                     } else {
                         "%.1f".format(remaining / 1000f)
                     }
-                    if (Preferences.showCommentWhenCountdown && !keyframe.prompt.isNullOrBlank()) {
+                    if (SettingsRepository.showCommentWhenCountdown && !keyframe.prompt.isNullOrBlank()) {
                         "#${index + 1} ${keyframe.prompt}\n$time"
                     } else {
                         time
@@ -526,7 +526,7 @@ fun VideoRouteHostScreen(
 
     LaunchedEffect(hostUiState.isInPipMode, isSideRelatedCollapsed) {
         if (hostUiState.isInPipMode) return@LaunchedEffect
-        val height = if (Preferences.tabletMode) {
+        val height = if (SettingsRepository.tabletMode) {
             if (isSideRelatedCollapsed) 500.dp else 400.dp
         } else {
             250.dp
@@ -535,7 +535,7 @@ fun VideoRouteHostScreen(
     }
 
     VideoShellContent(
-        isTabletMode = Preferences.tabletMode,
+        isTabletMode = SettingsRepository.tabletMode,
         isInPipMode = hostUiState.isInPipMode,
         isFullscreen = isFullscreen,
         playerHeightDp = hostUiState.playerHeightDp,
@@ -575,7 +575,7 @@ fun VideoRouteHostScreen(
         onRetry = {
             video?.let { info ->
                 val qualities = info.videoUrls.map { (label, link) -> PlaybackQuality(label, link.link) }
-                playbackController.load(info.title, qualities, Preferences.videoQuality)
+                playbackController.load(info.title, qualities, SettingsRepository.videoQuality)
             }
         },
         onResumeClick = {
@@ -606,7 +606,7 @@ fun VideoRouteHostScreen(
                 ?.setSuperResolution(index)
         },
         hKeyframeLabel = stringResource(R.string.player_h_keyframe),
-        isHKeyframesEnabled = Preferences.hKeyframesEnable,
+        isHKeyframesEnabled = SettingsRepository.hKeyframesEnable,
         hKeyframeOptions = hKeyframes?.keyframes.orEmpty().mapIndexed { index, keyframe ->
             stringResource(
                 R.string.player_keyframe_option,
@@ -639,7 +639,7 @@ fun VideoRouteHostScreen(
                 val currentSpeed = playbackState.engine.playbackSpeed
                 speedBeforeLongPress = currentSpeed
                 playbackController.setPlaybackSpeed(
-                    (currentSpeed * Preferences.longPressSpeedTime).coerceAtMost(5f)
+                    (currentSpeed * SettingsRepository.longPressSpeedTime).coerceAtMost(5f)
                 )
             }
         },
@@ -664,7 +664,7 @@ fun VideoRouteHostScreen(
             val duration = playbackState.engine.durationMs
             if (duration > 0L) playbackController.seekTo((duration * value).toLong())
         },
-        progressGestureSensitivity = realProgressSensitivity(Preferences.slideSensitivity),
+        progressGestureSensitivity = realProgressSensitivity(SettingsRepository.slideSensitivity),
         countdownLabel = countdownLabel,
         videoAspectRatio = if (
             playbackState.engine.videoWidth > 0 &&

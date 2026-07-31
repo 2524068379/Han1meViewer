@@ -6,7 +6,7 @@ import android.os.ParcelFileDescriptor
 import android.view.Surface
 import androidx.core.net.toUri
 import io.github.daisukikaffuchino.han1meviewer.BuildConfig
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.USER_AGENT
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HProxySelector
 import io.github.daisukikaffuchino.han1meviewer.util.AnimeShaders
@@ -262,8 +262,8 @@ class MpvPlaybackEngine(
 
     private fun mpvOptions(): Map<String, String> = buildMap {
         put("vo", videoOutput)
-        put("profile", Preferences.mpvProfile.takeIf { it == "gpu-hq" || it == "fast" } ?: "default")
-        put("hwdec", when (Preferences.mpvHwdec) {
+        put("profile", SettingsRepository.mpvProfile.takeIf { it == "gpu-hq" || it == "fast" } ?: "default")
+        put("hwdec", when (SettingsRepository.mpvHwdec) {
             "HW" -> "mediacodec-copy"
             "HW+" -> "mediacodec"
             "Vulkan" -> "vulkan-copy"
@@ -273,21 +273,21 @@ class MpvPlaybackEngine(
         })
         put("msg-level", "all=" + if (BuildConfig.DEBUG) "debug" else "warn")
         put("cache", "yes")
-        put("cache-secs", Preferences.mpvCacheSecs.toString())
+        put("cache-secs", SettingsRepository.mpvCacheSecs.toString())
         put("vd-lavc-threads", Runtime.getRuntime().availableProcessors().toString())
-        put("framedrop", if (Preferences.mpvFramedrop) "vo" else "no")
-        put("deband", if (Preferences.mpvDeband) "yes" else "no")
+        put("framedrop", if (SettingsRepository.mpvFramedrop) "vo" else "no")
+        put("deband", if (SettingsRepository.mpvDeband) "yes" else "no")
         put("cache-pause", "no")
-        put("network-timeout", Preferences.mpvNetworkTimeout.toString())
+        put("network-timeout", SettingsRepository.mpvNetworkTimeout.toString())
         put("tls-ca-file", getCert(context))
-        put("tls-verify", if (Preferences.mpvTlsVerify) "no" else "yes")
+        put("tls-verify", if (SettingsRepository.mpvTlsVerify) "no" else "yes")
         put("user-agent", USER_AGENT)
-        Preferences.proxyIp.takeIf { it.isNotBlank() && Preferences.proxyPort != -1 }?.let { ip ->
-            if (Preferences.proxyType == HProxySelector.TYPE_HTTP) {
-                put("http-proxy", "http://$ip:${Preferences.proxyPort}")
+        SettingsRepository.proxyIp.takeIf { it.isNotBlank() && SettingsRepository.proxyPort != -1 }?.let { ip ->
+            if (SettingsRepository.proxyType == HProxySelector.TYPE_HTTP) {
+                put("http-proxy", "http://$ip:${SettingsRepository.proxyPort}")
             }
         }
-        if (Preferences.mpvInterpolation) {
+        if (SettingsRepository.mpvInterpolation) {
             put("interpolation", "yes")
             put("tscale", "oversample")
             put("video-sync", "display-resample")
@@ -295,7 +295,7 @@ class MpvPlaybackEngine(
     }
 
     private fun parseCustomMpvParams(): Map<String, String> = buildMap {
-        Preferences.customMpvParams.split(';').forEach { entry ->
+        SettingsRepository.customMpvParams.split(';').forEach { entry ->
             val parts = entry.trim().split(',', limit = 2)
             if (parts.size == 2 && parts[0].isNotBlank() && parts[1].isNotBlank()) {
                 put(parts[0].trim(), parts[1].trim())
@@ -304,5 +304,5 @@ class MpvPlaybackEngine(
     }
 
     private val videoOutput: String
-        get() = if (Preferences.enableGPUNextRenderer) "gpu-next" else "gpu"
+        get() = if (SettingsRepository.enableGPUNextRenderer) "gpu-next" else "gpu"
 }
