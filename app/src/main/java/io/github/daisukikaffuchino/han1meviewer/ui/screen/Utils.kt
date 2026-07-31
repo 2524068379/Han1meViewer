@@ -14,13 +14,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.SpacingLarge
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.SpacingNormal
@@ -83,7 +84,7 @@ fun rememberCardResponsiveWidth(
 
     val isPreview = LocalInspectionMode.current
     val itemsToShow = if (!isPreview) {
-        Preferences.horizontalCardCountConfig.countForWidthDp(currentWidthDp.value.toInt())
+        SettingsRepository.horizontalCardCountConfig.countForWidthDp(currentWidthDp.value.toInt())
     } else {
         val estimatedCardWidth = 160.dp
         maxOf(1f, ((currentWidthDp - (horizontalPadding * 2)) / (estimatedCardWidth + itemSpacing)))
@@ -104,8 +105,8 @@ fun rememberVideoGridColumns(): Int {
 
     val isPreview = LocalInspectionMode.current
 
-    return if (!isPreview && Preferences.tabletMode) {
-        Preferences.searchGridColumnsConfig.columnsForWidthDp(screenWidthDp.value.toInt())
+    return if (!isPreview && SettingsRepository.tabletMode) {
+        SettingsRepository.searchGridColumnsConfig.columnsForWidthDp(screenWidthDp.value.toInt())
     } else {
         maxOf(2, ((screenWidthDp + SpacingNormal) / (VideoNormalCardMinWidth + SpacingNormal)).toInt())
     }
@@ -113,5 +114,9 @@ fun rememberVideoGridColumns(): Int {
 
 @Composable
 fun rememberRandomLoadingHint(): String {
-    return stringResource(R.string.loading)
+    val defaultHint = stringResource(R.string.loading)
+    if (!SettingsRepository.funLoadingHints) return defaultHint
+
+    val placeholders = stringArrayResource(R.array.loading_hints)
+    return remember(placeholders) { placeholders.random() }
 }

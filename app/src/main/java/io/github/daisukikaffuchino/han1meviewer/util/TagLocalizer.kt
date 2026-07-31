@@ -2,6 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer.util
 
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
 import io.github.daisukikaffuchino.utils.LanguageHelper
+import io.github.daisukikaffuchino.utils.loadAssetAs
 
 object TagLocalizer {
 

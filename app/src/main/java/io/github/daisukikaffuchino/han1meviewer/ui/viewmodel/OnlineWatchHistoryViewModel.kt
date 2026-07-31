@@ -1,17 +1,16 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
-import android.app.Application
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.daisukikaffuchino.han1meviewer.Preferences
-import io.github.daisukikaffuchino.han1meviewer.R
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.exception.NotLoggedInException
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.OnlineWatchHistorySort
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
-import io.github.daisukikaffuchino.utils.ApplicationViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +20,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class OnlineWatchHistoryViewModel(application: Application) : ApplicationViewModel(application) {
+class OnlineWatchHistoryViewModel : ViewModel() {
 
     private val _state = MutableStateFlow<PageLoadingState<MyListItems<HanimeInfo>>>(PageLoadingState.Loading)
     val state = _state.asStateFlow()
@@ -47,7 +46,7 @@ class OnlineWatchHistoryViewModel(application: Application) : ApplicationViewMod
 
     init {
         viewModelScope.launch {
-            Preferences.loginStateFlow.drop(1).collect { isLoggedIn ->
+            SettingsRepository.loginStateFlow.drop(1).collect { isLoggedIn ->
                 if (!isLoggedIn) {
                     clearLoggedOutState()
                 }
@@ -77,8 +76,8 @@ class OnlineWatchHistoryViewModel(application: Application) : ApplicationViewMod
     }
 
     private fun loadPage(page: Int) {
-        val userId = Preferences.savedUserId
-        if (!Preferences.isAlreadyLogin || userId.isBlank()) {
+        val userId = SettingsRepository.savedUserId
+        if (!SettingsRepository.isAlreadyLogin || userId.isBlank()) {
             clearLoggedOutState()
             return
         }
@@ -127,12 +126,12 @@ class OnlineWatchHistoryViewModel(application: Application) : ApplicationViewMod
         _loadedPageCount.value = 0
         _isLoadingMore.value = false
         _state.value = PageLoadingState.Error(
-            IllegalStateException(application.getString(R.string.not_logged_in_currently))
+            NotLoggedInException()
         )
     }
 
     fun deleteItem(item: HanimeInfo) {
-        if (!Preferences.isAlreadyLogin || Preferences.savedUserId.isBlank()) {
+        if (!SettingsRepository.isAlreadyLogin || SettingsRepository.savedUserId.isBlank()) {
             clearLoggedOutState()
             return
         }

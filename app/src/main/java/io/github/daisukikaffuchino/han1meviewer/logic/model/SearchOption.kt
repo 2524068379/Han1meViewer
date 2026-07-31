@@ -43,16 +43,6 @@ data class SearchOption(
             }
         }
 
-        fun toScopeKey(raw: String): Int = when (raw) {
-            "video_attributes" -> R.string.video_attr
-            "character_relationships" -> R.string.relationship
-            "characteristics" -> R.string.characteristics
-            "appearance_and_figure" -> R.string.appearance_and_figure
-            "story_plot" -> R.string.story_plot
-            "story_location" -> R.string.story_location
-            "sex_positions" -> R.string.sex_position
-            else -> error("Unknown scope name: $raw")
-        }
     }
 
     @Serializable

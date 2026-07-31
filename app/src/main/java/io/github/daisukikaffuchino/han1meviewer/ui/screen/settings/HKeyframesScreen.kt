@@ -30,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import cn.jzvd.JZUtils
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
@@ -38,6 +37,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyConten
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
+import io.github.daisukikaffuchino.han1meviewer.ui.player.formatPlaybackTime
 import io.github.daisukikaffuchino.utils.VibrationUtil
 
 private enum class HKeyframeDialog {
@@ -132,7 +132,7 @@ fun HKeyframesScreen(
             ConfirmDialog(
                 visible = true,
                 title = stringResource(R.string.sure_to_delete),
-                message = JZUtils.stringForTime(keyframe.position),
+                message = formatPlaybackTime(keyframe.position),
                 confirmText = stringResource(R.string.confirm),
                 dismissText = stringResource(R.string.cancel),
                 onDismiss = {
@@ -264,7 +264,7 @@ private fun HKeyframeRow(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = JZUtils.stringForTime(keyframe.position),
+                text = formatPlaybackTime(keyframe.position),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
             )

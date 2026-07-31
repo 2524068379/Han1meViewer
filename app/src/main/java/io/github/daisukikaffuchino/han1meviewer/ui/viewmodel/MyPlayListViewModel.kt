@@ -4,7 +4,7 @@ import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ModifiedPlaylistArgs
@@ -120,7 +120,7 @@ class MyPlayListViewModel : ViewModel() {
         if (page > 1) {
             _isLoadingMorePlaylists.value = true
         }
-        val userId = Preferences.savedUserId
+        val userId = SettingsRepository.savedUserId
         viewModelScope.launch {
             NetworkRepo.getPlaylists(page, userId).collect { state ->
                 when (state) {

@@ -1,11 +1,16 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.main
 
 import android.content.Intent
+import android.content.res.Configuration
 import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -15,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -23,20 +29,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Text
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.HCacheManager
-import io.github.daisukikaffuchino.han1meviewer.logic.exception.CloudFlareBlockedException
+import io.github.daisukikaffuchino.han1meviewer.logic.exception.CloudflareBlockedException
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.component.UsageNoticeDialog
+import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainDestinationSpec
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainNavHost
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HomeRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainDrawerDestination
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.TopNavigation
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.handleMainIntent
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.navigateDrawerDestination
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomePageViewModel
@@ -62,22 +73,38 @@ fun MainActivityContent(
     onDismissLogout: () -> Unit,
     onConfirmLogout: () -> Unit,
     onOpenClipboardVideo: (String) -> Unit,
-    onNavigateControllerReady: (NavHostController) -> Unit,
 ) {
-        val composeNavController = rememberNavController()
+        val backStack = viewModel.mainBackStack
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
         val clipboard = LocalClipboard.current
         val snackbarHostState = remember { SnackbarHostState() }
-        var currentMainDestination by remember { mutableStateOf(MainDestinationSpec.Home) }
-        var showUsageNotice by remember { mutableStateOf(!Preferences.usageNoticeAccepted) }
+        var showUsageNotice by remember { mutableStateOf(!SettingsRepository.usageNoticeAccepted) }
+        var showSourceDialog by remember {
+            mutableStateOf(
+                SettingsRepository.usageNoticeAccepted &&
+                    !SettingsRepository.usageSourceVerified &&
+                    !SettingsRepository.usageSourcePending,
+            )
+        }
+        var showSourceWarning by rememberSaveable {
+            mutableStateOf(
+                SettingsRepository.usageNoticeAccepted &&
+                    !SettingsRepository.usageSourceVerified &&
+                    SettingsRepository.usageSourcePending,
+            )
+        }
+        var sourceLink by rememberSaveable { mutableStateOf("") }
+        var appAccessGranted by remember {
+            mutableStateOf(SettingsRepository.usageNoticeAccepted && SettingsRepository.usageSourceVerified)
+        }
         val isDrawerOpen =
             drawerState.currentValue == DrawerValue.Open || drawerState.targetValue == DrawerValue.Open
 
         val homeState by viewModel.homePageFlow.collectAsStateWithLifecycle()
         val showStorageSwitchNotice by HCacheManager.storageSwitchNotice.collectAsStateWithLifecycle()
-        val isLoggedIn by Preferences.loginStateFlow.collectAsStateWithLifecycle()
-        val checkInEnabled by Preferences.checkInEnabledFlow.collectAsStateWithLifecycle()
+        val isLoggedIn by SettingsRepository.loginStateFlow.collectAsStateWithLifecycle()
+        val checkInEnabled by SettingsRepository.checkInEnabledFlow.collectAsStateWithLifecycle()
         val headerAvatarUrl = if (isLoggedIn) {
             (homeState as? PageState.Success)?.info?.page?.avatarUrl
         } else {
@@ -89,10 +116,13 @@ fun MainActivityContent(
             null
         }
         val headerIsLoading = isLoggedIn && homeState is PageState.Loading
-        val selectedDrawerDestination = currentMainDestination.drawerDestination
-
-        LaunchedEffect(composeNavController) {
-            onNavigateControllerReady(composeNavController)
+        val currentRoute = backStack.currentKey
+        val selectedDrawerDestination = MainDrawerDestination.fromRoute(backStack.topLevelKey)
+        val drawerEnabled = currentRoute == HomeRoute
+        val permanentDrawer = drawerEnabled &&
+            LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+        LaunchedEffect(permanentDrawer) {
+            if (permanentDrawer) drawerState.close()
         }
         LaunchedEffect(Unit) {
             val clipboardText = clipboard.getClipEntry()
@@ -114,7 +144,7 @@ fun MainActivityContent(
         }
         LaunchedEffect(Unit) {
             pendingNavigationRequests.collect { intent ->
-                composeNavController.handleMainIntent(intent)
+                backStack.handleMainIntent(intent)
             }
         }
         LaunchedEffect(viewModel) {
@@ -125,27 +155,31 @@ fun MainActivityContent(
         LaunchedEffect(homeState) {
             if (homeState is PageState.Error) {
                 val throwable = (homeState as PageState.Error).throwable
-                if (throwable is CloudFlareBlockedException) {
+                if (throwable is CloudflareBlockedException) {
                     LogUtil.e("error", "被屏蔽时的处理")
                 }
             }
         }
         MainActivityScaffold(
             drawerState = drawerState,
-            drawerEnabled = currentMainDestination.drawerEnabled,
+            drawerEnabled = drawerEnabled,
+            permanentDrawer = permanentDrawer,
             selectedDestination = selectedDrawerDestination,
             avatarUrl = headerAvatarUrl,
             username = headerUsername,
             isLoggedIn = isLoggedIn,
             isLoading = headerIsLoading,
-            currentSite = Preferences.baseUrl,
+            currentSite = SettingsRepository.baseUrl,
             checkInEnabled = checkInEnabled,
             onAvatarClick = {
                 if (isLoggedIn) {
                     scope.launch { drawerState.close() }
                     onOpenAccount()
                 } else {
-                    onRequireLogin()
+                    scope.launch {
+                        drawerState.close()
+                        onRequireLogin()
+                    }
                 }
             },
             onAvatarLongClick = {
@@ -153,7 +187,7 @@ fun MainActivityContent(
             },
             onSwitchSiteClick = onSwitchSiteClick,
             onDrawerItemSelected = { destination ->
-                val handled = composeNavController.navigateDrawerDestination(
+                val handled = backStack.navigateDrawerDestination(
                     destination = destination,
                     isLoggedIn = isLoggedIn,
                     onRequireLogin = { SonnerToast.warning(R.string.login_first) },
@@ -165,19 +199,19 @@ fun MainActivityContent(
             },
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                MainNavHost(
-                    activity = activity,
-                    navController = composeNavController,
-                    isDrawerOpen = isDrawerOpen,
-                    onOpenDrawer = {
-                        if (currentMainDestination.drawerEnabled) {
-                            scope.launch { drawerState.open() }
-                        }
-                    },
-                    onDestinationChanged = { destination ->
-                        currentMainDestination = destination
-                    },
-                )
+                if (appAccessGranted) {
+                    TopNavigation(
+                        activity = activity,
+                        backStack = backStack,
+                        isDrawerOpen = isDrawerOpen && !permanentDrawer,
+                        showHomeNavigationIcon = !permanentDrawer,
+                        onOpenDrawer = {
+                            if (drawerEnabled) {
+                                scope.launch { drawerState.open() }
+                            }
+                        },
+                    )
+                }
                 if (showAuthGuard) {
                     Box(
                         modifier = Modifier
@@ -188,11 +222,73 @@ fun MainActivityContent(
                 UsageNoticeDialog(
                     visible = showUsageNotice,
                     onAccepted = {
-                        Preferences.usageNoticeAccepted = true
-                        showUsageNotice = false
+                        scope.launch {
+                            SettingsRepository.setUsageNoticeAccepted(true)
+                            showUsageNotice = false
+                            if (SettingsRepository.usageSourceVerified) {
+                                appAccessGranted = true
+                                viewModel.initializeHomePage()
+                            } else if (SettingsRepository.usageSourcePending) {
+                                showSourceWarning = true
+                            } else {
+                                showSourceDialog = true
+                            }
+                        }
                     },
                     onDeclined = { activity.finish() },
                 )
+                AppSourceDialog(
+                    visible = showSourceDialog,
+                    onSelect = { source ->
+                        if (source.equals("github", ignoreCase = true)) {
+                            scope.launch {
+                                SettingsRepository.update { it.copy(usageSourceVerified = true, usageSourcePending = false) }
+                                showSourceDialog = false
+                                appAccessGranted = true
+                                viewModel.initializeHomePage()
+                            }
+                        } else {
+                            scope.launch {
+                                SettingsRepository.setUsageSourcePending(true)
+                                showSourceDialog = false
+                                sourceLink = ""
+                                showSourceWarning = true
+                            }
+                        }
+                    },
+                )
+                if (showSourceWarning) {
+                    val expectedRepository = "https://github.com/daisukiKaffuChino/Han1meViewer"
+                    val linkValid = sourceLink.trim().equals(expectedRepository, ignoreCase = true)
+                    AlertDialog(
+                        onDismissRequest = {},
+                        title = { Text(stringResource(R.string.app_source_illegal_title)) },
+                        text = {
+                            androidx.compose.foundation.layout.Column {
+                                Text(stringResource(R.string.app_source_illegal_message))
+                                OutlinedTextField(
+                                    value = sourceLink,
+                                    onValueChange = { sourceLink = it },
+                                    label = { Text(stringResource(R.string.app_source_repository_link)) },
+                                    singleLine = true,
+                                )
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(
+                                enabled = linkValid,
+                                onClick = {
+                                    scope.launch {
+                                        SettingsRepository.update { it.copy(usageSourceVerified = true, usageSourcePending = false) }
+                                        showSourceWarning = false
+                                        appAccessGranted = true
+                                        viewModel.initializeHomePage()
+                                    }
+                                },
+                            ) { Text(stringResource(R.string.app_source_verify)) }
+                        },
+                    )
+                }
                 SnackbarHost(
                     hostState = snackbarHostState,
                     modifier = Modifier
@@ -228,4 +324,51 @@ fun MainActivityContent(
             onConfirm = HCacheManager::dismissStorageSwitchNotice,
             onDismiss = HCacheManager::dismissStorageSwitchNotice,
         )
+}
+
+@Composable
+private fun AppSourceDialog(
+    visible: Boolean,
+    onSelect: (String) -> Unit,
+) {
+    if (!visible) return
+
+    var selectedSource by rememberSaveable { mutableStateOf<String?>(null) }
+    val options = listOf(
+        stringResource(R.string.app_source_forum) to "forum",
+        stringResource(R.string.app_source_telegram) to "telegram",
+        stringResource(R.string.app_source_github) to "github",
+        stringResource(R.string.app_source_qq_group) to "qq_group",
+        stringResource(R.string.app_source_wechat) to "wechat",
+        stringResource(R.string.app_source_douyin_tiktok) to "douyin_tiktok",
+    )
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text(stringResource(R.string.app_source_title)) },
+        text = {
+            Column {
+                options.forEach { (label, value) ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedSource = value }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = selectedSource == value,
+                            onClick = { selectedSource = value },
+                        )
+                        Text(label)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = selectedSource != null,
+                onClick = { selectedSource?.let(onSelect) },
+            ) { Text(stringResource(R.string.app_source_confirm)) }
+        },
+    )
 }

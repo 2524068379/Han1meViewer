@@ -25,6 +25,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyConten
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
+import io.github.daisukikaffuchino.han1meviewer.ui.player.formatPlaybackTime
 import io.github.daisukikaffuchino.utils.VibrationUtil
 
 @Composable
@@ -98,7 +99,7 @@ private fun SharedEntityCard(
             entity.keyframes.forEach { keyframe ->
                 HorizontalDivider()
                 Text(
-                    text = cn.jzvd.JZUtils.stringForTime(keyframe.position),
+                    text = formatPlaybackTime(keyframe.position),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                 )

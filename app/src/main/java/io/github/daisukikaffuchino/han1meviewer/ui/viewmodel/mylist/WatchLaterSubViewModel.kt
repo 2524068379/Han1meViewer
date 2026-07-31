@@ -1,7 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.mylist
 
-import android.app.Application
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
@@ -13,8 +12,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.CoroutineScope
 
-class WatchLaterSubViewModel(application: Application) : MyListSubViewModel(application) {
+class WatchLaterSubViewModel(scope: CoroutineScope) : MyListSubViewModel(scope) {
 
     var watchLaterPage = 1
 
@@ -22,7 +22,7 @@ class WatchLaterSubViewModel(application: Application) : MyListSubViewModel(appl
     val watchLaterFlow: StateFlow<List<HanimeInfo>> = itemsFlow.asStateFlow()
 
     fun getMyWatchLaterItems(page: Int) {
-        loadItems(MyListType.WATCH_LATER, Preferences.savedUserId, page)
+        loadItems(MyListType.WATCH_LATER, SettingsRepository.savedUserId, page)
     }
 
     private val _deleteMyWatchLaterFlow = MutableSharedFlow<WebsiteState<Boolean>>()

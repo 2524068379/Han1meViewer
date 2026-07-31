@@ -2,6 +2,9 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -9,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Announcement
@@ -34,9 +38,12 @@ fun HomePageContent(
     data: HomeData,
     updateInfo: AppUpdateInfo?,
     updateAnnouncement: Announcement?,
+    isAVSite: Boolean,
     onEvent: (HomeUiEvent) -> Unit,
     onCloseAnnouncement: () -> Unit,
-    modifier: Modifier = Modifier
+    contentTopPadding: Dp,
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState()
 ) {
     val banners = remember(data.page.banner) {
         listOfNotNull(data.page.banner)
@@ -45,10 +52,25 @@ fun HomePageContent(
         data.announcements.filter { it.isActive }
     }
 
-    val categories = remember(data.page) {
-        buildCategoryList(data.page)
+    val categories = remember(data.page, isAVSite) {
+        buildCategoryList(data.page, isAVSite)
     }
-    LazyColumn(modifier = modifier.fillMaxSize()) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        state = listState,
+        contentPadding = PaddingValues(top = contentTopPadding),
+    ) {
+        item(key = "banner") {
+            BannerCarousel(
+                banners = banners,
+                onBannerClick = { videoCode ->
+                    videoCode?.let {
+                        onEvent(HomeUiEvent.OpenVideo(it))
+                    }
+                },
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            )
+        }
         if (updateInfo != null) {
             item(key = "app_update_${updateInfo.versionCode}") {
                 AppUpdateCard(
@@ -74,17 +96,6 @@ fun HomePageContent(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                 )
             }
-        }
-        item(key = "banner") {
-            BannerCarousel(
-                banners = banners,
-                onBannerClick = { videoCode ->
-                    videoCode?.let {
-                        onEvent(HomeUiEvent.OpenVideo(it))
-                    }
-                },
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-            )
         }
         if (announcements.isNotEmpty()) {
             item(key = "announcement") {
@@ -140,8 +151,10 @@ private fun HomePageContentPreview() {
                     forceUpdate = false,
                 ),
                 updateAnnouncement = fakeAnnouncements.first(),
+                isAVSite = false,
                 onEvent = {},
                 onCloseAnnouncement = {},
+                contentTopPadding = 72.dp,
             )
         }
     }

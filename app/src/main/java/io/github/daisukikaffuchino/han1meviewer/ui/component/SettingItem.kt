@@ -11,10 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ButtonShapes
 import androidx.compose.material3.Icon
@@ -33,6 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.animatedShape
@@ -101,7 +98,9 @@ private fun SettingRow(
                 vertical = HanimeDefaults.Spacing.itemVertical,
             )
     } else {
-        Modifier.fillMaxWidth().animateContentSize()
+        Modifier
+            .fillMaxWidth()
+            .animateContentSize()
     }
     Row(
         modifier = rowModifier,
@@ -163,7 +162,9 @@ fun SettingSwitchItem(
                 onCheckedChange = null,
                 thumbContent = {
                     Icon(
-                        imageVector = if (checked) Icons.Filled.Check else Icons.Filled.Close,
+                        painter = if (checked) painterResource(R.drawable.ic_check) else painterResource(
+                            R.drawable.ic_close
+                        ),
                         contentDescription = null,
                         modifier = Modifier.size(SwitchDefaults.IconSize),
                     )
@@ -281,7 +282,7 @@ fun SettingChoiceItem(
         SettingRow(title, summary, iconRes, enabled = true) {
             if (selected) {
                 Icon(
-                    imageVector = Icons.Filled.CheckCircle,
+                    painter = painterResource(R.drawable.ic_check_circle),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier.padding(start = 12.dp),
@@ -303,7 +304,12 @@ private fun SettingSwitchItemPreview() {
 @Composable
 private fun SettingNavigationItemPreview() {
     ComponentPreview {
-        SettingNavigationItem("播放器内核", {}, summary = "当前使用 ExoPlayer", valueText = "ExoPlayer")
+        SettingNavigationItem(
+            "播放器内核",
+            {},
+            summary = "当前使用 ExoPlayer",
+            valueText = "ExoPlayer"
+        )
     }
 }
 

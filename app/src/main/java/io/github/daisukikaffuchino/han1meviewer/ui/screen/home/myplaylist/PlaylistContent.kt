@@ -68,18 +68,18 @@ fun PlaylistContent(
         transitionSpec = {
             fadeIn(tween(300)) togetherWith fadeOut(tween(200))
         }
-    ) {
+    ) { state ->
         PageContent(
-            isLoading = rawState is WebsiteState.Loading,
-            isError = rawState is WebsiteState.Error,
-            isEmpty = rawState is WebsiteState.Success &&
-                rawState.info.playlists.isEmpty() && uiState.playlists.isEmpty(),
+            isLoading = state is WebsiteState.Loading,
+            isError = state is WebsiteState.Error,
+            isEmpty = state is WebsiteState.Success &&
+                state.info.playlists.isEmpty() && uiState.playlists.isEmpty(),
             onRetry = { onEvent(PlaylistEvent.OnRefresh) },
             error = {
                 ErrorContent(
                     message = stringResource(
                         R.string.load_failed_with_reason,
-                        (rawState as WebsiteState.Error).throwable.message.orEmpty(),
+                        (state as WebsiteState.Error).throwable.message.orEmpty(),
                     ),
                     onRetry = { onEvent(PlaylistEvent.OnRefresh) },
                 )

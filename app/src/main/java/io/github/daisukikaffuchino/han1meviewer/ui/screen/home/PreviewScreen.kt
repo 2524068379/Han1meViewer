@@ -14,12 +14,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.SingletonImageLoader
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import io.github.daisukikaffuchino.han1meviewer.PREVIEW_COMMENT_PREFIX
+import io.github.daisukikaffuchino.han1meviewer.HANIME_BASE_URL
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimePreview
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
@@ -65,6 +67,7 @@ fun PreviewScreen(
     commentViewModel: CommentViewModel,
 ) {
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     val imageLoader = remember(context) { SingletonImageLoader.get(context) }
     val previewState = previewViewModel.previewFlow.collectAsStateWithLifecycle().value
     val commentCount = PreviewCommentPrefetcher.here(commentViewModel)
@@ -206,6 +209,9 @@ fun PreviewScreen(
             PreviewEvent.OnDismissImageViewer -> { imageViewerState = null }
             is PreviewEvent.OnOpenVideo -> event.videoCode?.let(onNavigateToVideo)
             PreviewEvent.OnOpenGetchuPreview -> onNavigateToGetchuPreview()
+            PreviewEvent.OnOpenWebPreview -> uriHandler.openUri(
+                "https://www.getchu.com/"
+            )
             is PreviewEvent.OnOpenComment -> onNavigateToPreviewComment(event.label, event.dateCode)
             PreviewEvent.OnRetryLoad -> {
                 val code = uiState.routeState.currentDateCode

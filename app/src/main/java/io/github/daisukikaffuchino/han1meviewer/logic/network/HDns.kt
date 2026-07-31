@@ -2,7 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer.logic.network
 
 import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_HOSTNAME
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import okhttp3.Dns
 import okhttp3.dnsoverhttps.DnsOverHttps
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -96,7 +96,7 @@ class HDns : Dns {
             }
         }
 
-        if (Preferences.useBuiltInHosts && HANIME_HOSTNAME.contains(hostname)) {
+        if (SettingsRepository.useBuiltInHosts && HANIME_HOSTNAME.contains(hostname)) {
             val customIps = resolveCustomIps()
             if (!customIps.isNullOrEmpty()) {
                 return customIps.map {
@@ -175,7 +175,7 @@ class HDns : Dns {
             return getchuIps.distinct()
         }
 
-        if (Preferences.useBuiltInHosts && HANIME_HOSTNAME.contains(host)) {
+        if (SettingsRepository.useBuiltInHosts && HANIME_HOSTNAME.contains(host)) {
             val customIps = resolveCustomIps()
             if (!customIps.isNullOrEmpty()) {
                 return customIps.distinct()
@@ -198,7 +198,7 @@ class HDns : Dns {
     private var cachedCustomIpsRaw: String? = null
 
     private fun resolveCustomIps(): List<String>? {
-        val raw = Preferences.customHostsData
+        val raw = SettingsRepository.customHostsData
         if (raw.isBlank()) return null
         if (raw == cachedCustomIpsRaw && cachedCustomIps != null) {
             return cachedCustomIps

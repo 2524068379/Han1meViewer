@@ -25,8 +25,6 @@
 -keepnames class * extends android.app.Activity
 -keepnames class * extends androidx.fragment.app.Fragment
 
--keep class * extends cn.jzvd.** { *; }
-
 -keep class androidx.appcompat.view.** { *; }
 -keep class androidx.window.extensions.embedding.** { *; }
 -keep class is.xyz.mpv.** { *; }

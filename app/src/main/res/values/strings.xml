@@ -39,7 +39,9 @@
     <string name="comment_not_found">Comments Not Found</string>
     <string name="hanime_list">New Anime List</string>
     <string name="latest_hanime_list_monthly">%s New Anime List</string>
-    <string name="preview_page_updating_getchu_hint">The preview page is being updated by the site. You can check the Getchu preview first. Getchu may require a VPN to access normally.</string>
+    <string name="preview_discontinued_notice">Since May 2026, Hanime1 has stopped updating new anime previews. You can view Getchu previews instead; a VPN may be required for normal access.</string>
+    <string name="preview_month_not_updated">The site has not updated the preview for this month.</string>
+    <string name="visit_web_version">Visit website</string>
     <string name="latest_hanime_comment">%s Anime Comments</string>
     <string name="view_getchu_preview">View Getchu Preview</string>
     <string name="getchu_preview">Getchu Preview</string>
@@ -215,7 +217,7 @@ Some mirrors may not support login, may not share cookies, may fail verification
     <string name="sure_to_add_to_h_keyframe">Are you sure you want to add the current time to the H Keyframe?</string>
     <string name="current_position_d_ms">Current Time: %dms</string>
     <string name="pause_then_long_press">Pause first, then long press</string>
-    <string name="long_press_to_add_h_keyframe">Long press 🥵 to add H Keyframe</string>
+    <string name="long_press_to_add_h_keyframe">Long press button to add H Keyframe</string>
     <string name="video_deleted_sure_to_delete_item">Video has been deleted or moved, delete this entry?</string>
     <string name="delete_failed">Deletion Failed</string>
     <string name="delete_fav">Delete Favorite</string>
@@ -280,6 +282,8 @@ Some mirrors may not support login, may not share cookies, may fail verification
     <string name="low">Low</string>
     <string name="very_low">Very Low</string>
     <string name="extremely_low">Extremely Low</string>
+    <string name="slightly_high">Slightly High</string>
+    <string name="extremely_high">Extremely High</string>
     <string name="shared_h_keyframe_detected_msg">Note: If you also have H Keyframes with the same code as the other party, yours will be overwritten\n\nTitle: %1$s\nCode: %2$s\n%3$d moment(s) available</string>
     <string name="domain_change_tips">Changing the domain name requires restarting the program, otherwise it will not take effect!\n
 Different domains do not share the same cookies, so after changing the domain name, you need to log in again.\n
@@ -289,7 +293,6 @@ Recommendations are as follows:\n
 · Non-VPN users, use hanime1.me and enable built-in Hosts\n
 · Japanese users, use hanime1.com\n
 · Users from other regions, use hanime1.me and disable built-in Hosts</string>
-    <string name="website_blocked_msg">Seeing this message means their website has been reinforced. Whether it can be restored depends on fate…</string>
     <string name="not_logged_in_currently">Currently not logged in</string>
     <string name="login_state_expired">Your login session has expired. You have been logged out automatically. Please sign in again.</string>
     <string name="parse_error_msg">Maybe this URL is parsed differently…</string>
@@ -318,6 +321,10 @@ Recommendations are as follows:\n
     <string name="long_press_speed_summary">Uses %1$s the current playback speed</string>
     <string name="haptic_feedback">Haptic Feedback</string>
     <string name="haptic_feedback_summary">Provide vibration feedback for certain actions</string>
+    <string name="secure_mode">Security mode</string>
+    <string name="secure_mode_summary">Block screenshots and protect recent-app previews</string>
+    <string name="fun_loading_hints">More playful loading messages</string>
+    <string name="fun_loading_hints_summary">You are as cute as ever today~</string>
     <string name="slide_sensitivity">Slide Sensitivity for Progress Adjustment</string>
     <string name="apply_deep_links">Apply Deep Links</string>
     <string name="apply_deep_links_summary">After application, quickly jump to this app when opening relevant web pages</string>
@@ -333,8 +340,6 @@ Recommendations are as follows:\n
     <string name="sure_to_redownload">Are you sure you want to redownload?</string>
     <string name="privacy">Privacy</string>
     <string name="refresh_page_or_login_expired">Try refreshing the page\nor your login may have expired</string>
-    <string name="website_blocked_msg_2">The website is blocked, changing to another domain name might work!</string>
-    <string name="website_blocked_msg_3">You can notify the developer, but don\'t rush them, the website being blocked is not their fault~</string>
     <string name="action_not_support">This device does not support this action</string>
     <string name="download_settings">Download Settings</string>
     <string name="download_count_limit">Download Count Limit</string>
@@ -354,6 +359,18 @@ Recommendations are as follows:\n
     <string name="usage_notice_accept">I have read and agree</string>
     <string name="usage_notice_accept_countdown">Please read for %1$d s</string>
     <string name="usage_notice_decline">Disagree and exit</string>
+    <string name="app_source_title">Where did you download this app?</string>
+    <string name="app_source_forum">Forum</string>
+    <string name="app_source_telegram">Telegram</string>
+    <string name="app_source_github">GitHub</string>
+    <string name="app_source_qq_group">QQ group</string>
+    <string name="app_source_wechat">WeChat Official Account</string>
+    <string name="app_source_douyin_tiktok">Douyin/TikTok</string>
+    <string name="app_source_confirm">Continue</string>
+    <string name="app_source_illegal_title">Your app source is unauthorized</string>
+    <string name="app_source_illegal_message">This app must not be promoted on public platforms. Redistribution, traffic diversion, reselling, and claiming to be official are prohibited. Enter the complete repository link below to continue. The comparison is case-insensitive.</string>
+    <string name="app_source_repository_link">Complete repository link</string>
+    <string name="app_source_verify">Verify and enter</string>
     <string name="app_lang">Language</string>
     <string name="app_lang_sum">Select the application language</string>
     <string name="auth_request">Verify Your Identity</string>
@@ -535,6 +552,7 @@ Recommendations are as follows:\n
     <string name="create_group_success">Created successfully! %s</string>
     <string name="disable_mobile_data_warning">Disable Mobile Data Warning</string>
     <string name="disable_mobile_data_warning_summary">When enabled, no warning will be shown when playing with mobile data</string>
+    <string name="mobile_data_playback_warning">You are using a metered network. Continue playing the video?</string>
     <string name="mpv_socks5_warning">Note: MPV playback engine does not support SOCKS proxy, playback may fail</string>
     <string name="warning">Warning</string>
     <string name="collapse_downloaded_groups">Collapse Downloaded Groups by Default</string>
@@ -657,6 +675,13 @@ Recommendations are as follows:\n
     <string name="settings_data_privacy">Data and privacy</string>
     <string name="settings_data_privacy_summary">Privacy protection, backup, restore and cached data</string>
     <string name="settings_about_summary">Version, open source licenses and project links</string>
+    <string name="developer_options">Developer options</string>
+    <string name="developer_options_summary">Debug-only tools and interface simulation</string>
+    <string name="always_show_update_card">Always show update card</string>
+    <string name="simulated_update_data">Simulated update data</string>
+    <string name="application_dpi">App DPI adjustment</string>
+    <string name="display_density">Display density</string>
+    <string name="simulated_update_description">This update card contains simulated data for debugging the home screen.</string>
     <string name="accent_color">Accent color</string>
     <string name="display">Display</string>
     <string name="preset_color_scheme">Preset color scheme</string>
@@ -675,4 +700,34 @@ Recommendations are as follows:\n
     <string name="no_license_items">No items to display</string>
     <string name="no_licenses_found">No items found</string>
     <string name="global_search">Global Search</string>
+    <string name="player_anime4k_label" translatable="false">Anime4K</string>
+    <string name="player_h_keyframe">H Keyframe</string>
+    <string name="h_keyframes_not_enabled">H Keyframes are not enabled</string>
+    <string name="player_auto_quality">Auto</string>
+    <string name="player_time_format">%1$s / %2$s</string>
+    <string name="player_speed_format">%1$sx</string>
+    <string name="player_keyframe_index">#%1$d</string>
+    <string name="player_keyframe_option">#%1$d %2$s</string>
+    <string name="player_progress_percent">%1$d%%</string>
+    <string name="player_gesture_brightness">Brightness</string>
+    <string name="player_gesture_volume">Volume</string>
+    <string name="player_gesture_progress">Progress</string>
+    <string name="player_play_from_beginning">Play from beginning</string>
+    <string name="player_untitled_video">Untitled</string>
+    <string name="perception">Sensing</string>
+    <string-array name="loading_hints">
+        <item>Hmph! I-it\'s not like I kept you waiting! The router just sneezed…</item>
+        <item>Idiot! Staring at it won\'t make it go faster! …Okay, just give me three more seconds!</item>
+        <item>(Hurriedly hides the chip bag) O-oh, you caught me! Lemme just swallow this bite and I\'m on it!</item>
+        <item>Whoa! The data cables seem to have eloped and tangled together! Untangling them now!</item>
+        <item>Packing happiness into a ZIP file for you… Estimated extraction time: Right now!</item>
+        <item>The progress bar is sneaking bites of tiramisu—current status: bottom cookie crumbs are gone!</item>
+        <item>Progress bar of dark powers, reveal thy true speed before me— (strikethrough) …Actually, let\'s stick with this speed!</item>
+        <item>Hunting for interdimensional signals… Beep beep— Signal strength at max, but a cat bit the wire. Hold on!</item>
+        <item>I know you\'re in a hurry, but chill~! Blink your eyes and turn your neck left three times… Yep, just like that!</item>
+        <item>Activating spell card: Pot of Greed! …Oops, I drew even more loading time. Sorry~!</item>
+        <item>Your loading request has been priority-queue-jumped by the hero squad! Current rank: #0 (VIP lane)!</item>
+        <item>Rubbing my hands in excitement till they\'re smoking…</item>
+        <item>◝(⑅•ᴗ•⑅)◜..°♡ Transmitting a bundle of cuteness your way—please sign for it~</item>
+    </string-array>
 </resources>

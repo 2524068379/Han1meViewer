@@ -9,6 +9,8 @@ import android.os.Bundle
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HProxySelector
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
+import io.github.daisukikaffuchino.han1meviewer.logic.datastore.DataStoreManager
 import io.github.daisukikaffuchino.han1meviewer.util.AnimeShaders
 import io.github.daisukikaffuchino.han1meviewer.util.AppLanguageManager
 import io.github.daisukikaffuchino.utils.ActivityManager
@@ -32,6 +34,8 @@ class HanimeApplication : Application(), Application.ActivityLifecycleCallbacks 
      */
     override fun onCreate() {
         super.onCreate()
+        DataStoreManager.initialize(this)
+        SettingsRepository.install(DataStoreManager)
         AppLanguageManager.applyStoredLanguage(this)
         //applicationContext = this
         registerActivityLifecycleCallbacks(this)
@@ -47,7 +51,7 @@ class HanimeApplication : Application(), Application.ActivityLifecycleCallbacks 
         if (AnimeShaders.copyCertAssets(applicationContext) <= 0) {
             LogUtil.w(TAG, "cert 复制失败")
         }
-        val selected = Preferences.fakeLauncherIcon
+        val selected = SettingsRepository.fakeLauncherIcon
         switchLauncher(selected)
     }
 

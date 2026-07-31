@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.network
 
 import io.github.daisukikaffuchino.utils.LogUtil
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.util.CookieString
 import io.github.daisukikaffuchino.han1meviewer.util.toLoginCookieList
 import okhttp3.Cookie
@@ -30,9 +30,9 @@ class HCookieJar : CookieJar {
         val cookies = mutableListOf<Cookie>()
         cookieMap[host]?.let { cookies.addAll(it) }
 
-        cookies.addAll(Preferences.loginCookieStateFlow.value.toLoginCookieList(host))
-        if (Preferences.cloudFlareCookieHost == host) {
-            cookies.addAll(Preferences.cloudFlareCookieStateFlow.value.toLoginCookieList(host))
+        cookies.addAll(CookieString(SettingsRepository.current.loginCookie).toLoginCookieList(host))
+        if (SettingsRepository.cloudFlareCookieHost == host) {
+            cookies.addAll(CookieString(SettingsRepository.current.cloudFlareCookie).toLoginCookieList(host))
         }
 
         LogUtil.d("HCookieJar", "loadForRequest for $host: $cookies")
@@ -42,7 +42,7 @@ class HCookieJar : CookieJar {
 
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
         cookieMap[url.host] = cookies.toMutableList().also {
-            it += Preferences.loginCookieStateFlow.value.toLoginCookieList(url.host)
+            it += CookieString(SettingsRepository.current.loginCookie).toLoginCookieList(url.host)
         }
     }
 }

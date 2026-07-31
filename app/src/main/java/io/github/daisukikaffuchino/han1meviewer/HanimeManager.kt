@@ -1,10 +1,8 @@
 package io.github.daisukikaffuchino.han1meviewer
 
 import android.webkit.CookieManager
-import androidx.core.content.edit
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import androidx.core.text.parseAsHtml
-import io.github.daisukikaffuchino.han1meviewer.Preferences.isAlreadyLogin
-import io.github.daisukikaffuchino.han1meviewer.Preferences.loginCookie
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HCookieJar
 import io.github.daisukikaffuchino.han1meviewer.util.CookieString
 import kotlinx.serialization.json.Json
@@ -69,20 +67,16 @@ fun String.toVideoCode() = videoUrlRegex.find(this)?.groupValues?.get(1)
 
 // log in and log out
 
-fun logout() {
-    isAlreadyLogin = false
-    loginCookie = CookieString(EMPTY_STRING)
-    Preferences.preferenceSp.edit { remove(SAVED_USER_ID) }
+suspend fun logout() {
+    SettingsRepository.update { it.copy(isAlreadyLogin = false, loginCookie = EMPTY_STRING, savedUserId = EMPTY_STRING) }
     HCookieJar.cookieMap.clear()
     CookieManager.getInstance().removeAllCookies(null)
 }
 
-fun login(cookies: String) {
-    isAlreadyLogin = true
-    loginCookie = CookieString(cookies)
-}
+suspend fun login(cookies: String) =
+    SettingsRepository.update { it.copy(isAlreadyLogin = true, loginCookie = cookies) }
 
-fun login(cookies: List<String>) {
+suspend fun login(cookies: List<String>) {
     login(cookies.joinToString(";") {
         it.substringBefore(';')
     })

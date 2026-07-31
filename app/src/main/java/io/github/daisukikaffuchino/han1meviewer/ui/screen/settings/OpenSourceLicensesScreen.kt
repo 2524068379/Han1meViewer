@@ -34,9 +34,6 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Clear
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -133,7 +130,6 @@ private val MOMO_QR_LIBRARY = Library(
 @Composable
 fun OpenSourceLicensesScreen(
     searchMode: Boolean,
-    onSearchModeChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val libraries by produceLibraries(R.raw.aboutlibraries)
@@ -206,8 +202,6 @@ fun OpenSourceLicensesScreen(
             ),
         ) {
             LicenseSearchTextField(
-                searchMode = searchMode,
-                onSearchModeChange = onSearchModeChange,
                 textFieldState = searchFieldState,
             )
         }
@@ -287,11 +281,8 @@ fun OpenSourceLicensesScreen(
 
 @Composable
 private fun LicenseSearchTextField(
-    searchMode: Boolean,
-    onSearchModeChange: (Boolean) -> Unit,
     textFieldState: androidx.compose.foundation.text.input.TextFieldState,
 ) {
-    val view = LocalView.current
     TextField(
         modifier = Modifier.fillMaxWidth(),
         state = textFieldState,
@@ -305,7 +296,7 @@ private fun LicenseSearchTextField(
         ),
         leadingIcon = {
             Icon(
-                imageVector = Icons.Outlined.Search,
+                painter = painterResource(R.drawable.ic_search),
                 contentDescription = null
             )
         },
@@ -317,7 +308,7 @@ private fun LicenseSearchTextField(
             ) {
                 IconButton(onClick = { textFieldState.setTextAndPlaceCursorAtEnd("") }) {
                     Icon(
-                        imageVector = Icons.Outlined.Clear,
+                        painter = painterResource(R.drawable.ic_close),
                         contentDescription = stringResource(R.string.clear),
                     )
                 }

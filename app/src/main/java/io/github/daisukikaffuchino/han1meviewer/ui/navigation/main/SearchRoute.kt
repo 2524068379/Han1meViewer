@@ -7,13 +7,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.han1meviewer.getHanimeShareText
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.search.AdvancedSearchSheet
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.search.SearchScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.SearchViewModel
 import io.github.daisukikaffuchino.utils.rememberCopyTextToClipboard
-import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.serialization.json.Json
 
 @Composable
@@ -23,7 +20,6 @@ fun SearchRouteScreen(
     onNavigateToVideo: (String) -> Unit,
 ) {
     val viewModel: SearchViewModel = viewModel()
-    val copyTextToClipboard = rememberCopyTextToClipboard()
     var showAdvancedSearchSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(route.advancedSearchJson) {
@@ -56,10 +52,6 @@ fun SearchRouteScreen(
         initialQuery = route.query,
         onBack = onBack,
         onOpenVideo = onNavigateToVideo,
-        onLongPressCopy = { videoCode, title ->
-            copyTextToClipboard(getHanimeShareText(title, videoCode))
-            SonnerToast.success(R.string.copy_to_clipboard)
-        },
         onOpenAdvancedSearch = { showAdvancedSearchSheet = true },
     )
 }

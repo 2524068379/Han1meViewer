@@ -1,7 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.mylist
 
-import android.app.Application
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
@@ -12,8 +11,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.CoroutineScope
 
-class FavSubViewModel(application: Application) : MyListSubViewModel(application) {
+class FavSubViewModel(scope: CoroutineScope) : MyListSubViewModel(scope) {
 
     var favVideoPage = 1
     private var csrfToken: String? = null
@@ -34,7 +34,7 @@ class FavSubViewModel(application: Application) : MyListSubViewModel(application
                 NetworkRepo.addToMyFavVideo(
                     videoCode = videoCode,
                     likeStatus = true,
-                    currentUserId = Preferences.savedUserId,
+                    currentUserId = SettingsRepository.savedUserId,
                     token = csrfToken,
                 )
             },
