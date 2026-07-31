@@ -4,6 +4,7 @@ import io.github.daisukikaffuchino.han1meviewer.HorizontalCardCountConfig
 import io.github.daisukikaffuchino.han1meviewer.SearchGridColumnsConfig
 import io.github.daisukikaffuchino.han1meviewer.logic.model.AppLanguage
 import io.github.daisukikaffuchino.han1meviewer.logic.model.AppSettings
+import io.github.daisukikaffuchino.han1meviewer.logic.model.DisplayDensity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.PaletteStyle
 import io.github.daisukikaffuchino.han1meviewer.logic.model.PlayerKernel
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SettingsStore
@@ -105,6 +106,8 @@ object SettingsRepository : SettingsStore {
     val downloadSpeedLimit get() = DOWNLOAD_SPEED_BYTES[current.downloadSpeedLimitIndex]
     val searchGridColumnsConfig get() = SearchGridColumnsConfig(current.searchGridColumnsCompact, current.searchGridColumnsMedium, current.searchGridColumnsExpanded, current.searchGridColumnsLarge)
     val horizontalCardCountConfig get() = HorizontalCardCountConfig(current.horizontalCardCountNarrow, current.horizontalCardCountCompact, current.horizontalCardCountMedium, current.horizontalCardCountExpanded)
+    val alwaysShowUpdateCard get() = current.alwaysShowUpdateCard
+    val displayDensity get() = current.displayDensity
 
     suspend fun setLoginState(value: Boolean) = update { it.copy(isAlreadyLogin = value) }
     suspend fun setCloudFlareCookie(value: String, host: String = current.cloudFlareCookieHost) = update { it.copy(cloudFlareCookie = value, cloudFlareCookieHost = host.lowercase()) }
@@ -127,6 +130,8 @@ object SettingsRepository : SettingsStore {
     suspend fun setHomeCategories(order: List<String>, hidden: Set<String>) = update { it.copy(homeCategoryOrder = order, hiddenHomeCategoryKeys = hidden) }
     suspend fun setCachedUpdateJson(value: String?) = update { it.copy(cachedUpdateJson = value) }
     suspend fun setIgnoredVersionCode(value: Int) = update { it.copy(ignoredVersionCode = value) }
+    suspend fun setAlwaysShowUpdateCard(value: Boolean) = update { it.copy(alwaysShowUpdateCard = value) }
+    suspend fun setDisplayDensity(value: DisplayDensity) = update { it.copy(displayDensity = value) }
 
     private fun String.withTrailingSlash() = if (endsWith('/')) this else "$this/"
     private fun rootUrl(value: String) = runCatching { URI(value).let { "${it.scheme}://${it.rawAuthority}" } }.getOrDefault(value)

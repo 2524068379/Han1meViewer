@@ -60,6 +60,17 @@ fun HomePageContent(
         state = listState,
         contentPadding = PaddingValues(top = contentTopPadding),
     ) {
+        item(key = "banner") {
+            BannerCarousel(
+                banners = banners,
+                onBannerClick = { videoCode ->
+                    videoCode?.let {
+                        onEvent(HomeUiEvent.OpenVideo(it))
+                    }
+                },
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            )
+        }
         if (updateInfo != null) {
             item(key = "app_update_${updateInfo.versionCode}") {
                 AppUpdateCard(
@@ -73,17 +84,6 @@ fun HomePageContent(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                 )
             }
-        }
-        item(key = "banner") {
-            BannerCarousel(
-                banners = banners,
-                onBannerClick = { videoCode ->
-                    videoCode?.let {
-                        onEvent(HomeUiEvent.OpenVideo(it))
-                    }
-                },
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-            )
         }
         if (updateAnnouncement != null) {
             item(key = "update_announcement") {

@@ -44,6 +44,7 @@ enum class HomeSettingsPage {
     Appearance,
     InterfaceInteraction,
     DataPrivacy,
+    DeveloperOptions,
     About,
 }
 
@@ -51,6 +52,7 @@ private enum class HomeSettingsChoiceDialog {
     VideoLanguage,
     VideoQuality,
     AppLanguage,
+    DisplayDensity,
 }
 
 /** Renders one settings category while keeping the existing preference callbacks intact. */
@@ -80,6 +82,8 @@ fun HomeSettingsScreen(
     onHorizontalCardCountConfigChange: (HorizontalCardCountConfig) -> Unit,
     onUseLockScreenChange: (Boolean) -> Unit,
     onSecureModeChange: (Boolean) -> Unit,
+    onAlwaysShowUpdateCardChange: (Boolean) -> Unit,
+    onDisplayDensityChange: (Int) -> Unit,
     onHomeCategoryPreferencesChange: (List<String>, Set<String>) -> Unit,
     hKeyframeSettingsContent: @Composable () -> Unit,
     networkSettingsContent: @Composable () -> Unit,
@@ -140,6 +144,17 @@ fun HomeSettingsScreen(
         onSelect = {
             activeDialog = null
             onOpenAppLanguageSettings(it)
+        },
+    )
+    ChoiceDialog(
+        visible = activeDialog == HomeSettingsChoiceDialog.DisplayDensity,
+        title = stringResource(R.string.application_dpi),
+        options = listOf("75%" to "75", "100%" to "100", "125%" to "125"),
+        selectedValue = state.displayDensityPercent.toString(),
+        onDismiss = { activeDialog = null },
+        onSelect = { value ->
+            activeDialog = null
+            onDisplayDensityChange(value.toInt())
         },
     )
 
@@ -453,6 +468,27 @@ fun HomeSettingsScreen(
                 }
             }
 
+            HomeSettingsPage.DeveloperOptions -> {
+                item {
+                    SettingsSection(stringResource(R.string.developer_options)) {
+                        SettingSwitchItem(
+                            title = stringResource(R.string.always_show_update_card),
+                            summary = stringResource(R.string.simulated_update_data),
+                            checked = state.alwaysShowUpdateCard,
+                            iconRes = R.drawable.ic_security_update,
+                            onCheckedChange = onAlwaysShowUpdateCardChange,
+                        )
+                        SettingNavigationItem(
+                            title = stringResource(R.string.application_dpi),
+                            summary = stringResource(R.string.display_density),
+                            valueText = "${state.displayDensityPercent}%",
+                            iconRes = R.drawable.ic_fullscreen,
+                            onClick = { activeDialog = HomeSettingsChoiceDialog.DisplayDensity },
+                        )
+                    }
+                }
+            }
+
             HomeSettingsPage.About -> {
                 item {
                     SettingsSection(stringResource(R.string.information)) {
@@ -557,6 +593,8 @@ private fun HomeSettingsScreenPreview() {
             onHorizontalCardCountConfigChange = {},
             onUseLockScreenChange = {},
             onSecureModeChange = {},
+            onAlwaysShowUpdateCardChange = {},
+            onDisplayDensityChange = {},
             onHomeCategoryPreferencesChange = { _, _ -> },
             hKeyframeSettingsContent = {},
             networkSettingsContent = {},
@@ -610,4 +648,6 @@ private fun previewHomeSettingsState() = HomeSettingsUiState(
     homeCategoryOrder = emptyList(),
     hiddenHomeCategoryKeys = emptySet(),
     useAvHomeCategoryTitles = false,
+    alwaysShowUpdateCard = false,
+    displayDensityPercent = 100,
 )

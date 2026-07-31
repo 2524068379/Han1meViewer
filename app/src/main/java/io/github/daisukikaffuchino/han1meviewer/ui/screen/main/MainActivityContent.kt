@@ -1,6 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.main
 
 import android.content.Intent
+import android.content.res.Configuration
 import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
@@ -117,6 +119,11 @@ fun MainActivityContent(
         val currentRoute = backStack.currentKey
         val selectedDrawerDestination = MainDrawerDestination.fromRoute(backStack.topLevelKey)
         val drawerEnabled = currentRoute == HomeRoute
+        val permanentDrawer = drawerEnabled &&
+            LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+        LaunchedEffect(permanentDrawer) {
+            if (permanentDrawer) drawerState.close()
+        }
         LaunchedEffect(Unit) {
             val clipboardText = clipboard.getClipEntry()
                 ?.clipData
@@ -156,6 +163,7 @@ fun MainActivityContent(
         MainActivityScaffold(
             drawerState = drawerState,
             drawerEnabled = drawerEnabled,
+            permanentDrawer = permanentDrawer,
             selectedDestination = selectedDrawerDestination,
             avatarUrl = headerAvatarUrl,
             username = headerUsername,
@@ -195,7 +203,8 @@ fun MainActivityContent(
                     TopNavigation(
                         activity = activity,
                         backStack = backStack,
-                        isDrawerOpen = isDrawerOpen,
+                        isDrawerOpen = isDrawerOpen && !permanentDrawer,
+                        showHomeNavigationIcon = !permanentDrawer,
                         onOpenDrawer = {
                             if (drawerEnabled) {
                                 scope.launch { drawerState.open() }

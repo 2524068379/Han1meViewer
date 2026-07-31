@@ -51,6 +51,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.BackupManager
 import io.github.daisukikaffuchino.han1meviewer.logic.model.AppLanguage
+import io.github.daisukikaffuchino.han1meviewer.logic.model.DisplayDensity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.PaletteStyle
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ThemeAccent
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ThemeMode
@@ -252,6 +253,14 @@ fun HomeSettingsRouteScreen(
             coroutineScope.launch {
                 SettingsRepository.update { it.copy(secureMode = enabled) }
                 activity.setSecureMode(enabled)
+            }
+        },
+        onAlwaysShowUpdateCardChange = { enabled ->
+            coroutineScope.launch { SettingsRepository.setAlwaysShowUpdateCard(enabled) }
+        },
+        onDisplayDensityChange = { percent ->
+            coroutineScope.launch {
+                SettingsRepository.setDisplayDensity(DisplayDensity.fromPercent(percent))
             }
         },
         hKeyframeSettingsContent = {
@@ -515,5 +524,7 @@ private fun buildHomeSettingsUiState(
         homeCategoryOrder = homeCategoryOrder,
         hiddenHomeCategoryKeys = hiddenHomeCategoryKeys,
         useAvHomeCategoryTitles = SettingsRepository.baseUrl == HanimeConstants.HANIME_URL[3],
+        alwaysShowUpdateCard = SettingsRepository.alwaysShowUpdateCard,
+        displayDensityPercent = SettingsRepository.displayDensity.percent,
     )
 }

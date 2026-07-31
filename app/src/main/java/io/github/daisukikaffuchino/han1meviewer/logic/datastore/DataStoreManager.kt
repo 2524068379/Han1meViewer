@@ -13,6 +13,7 @@ import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import io.github.daisukikaffuchino.han1meviewer.logic.model.AppLanguage
 import io.github.daisukikaffuchino.han1meviewer.logic.model.AppSettings
+import io.github.daisukikaffuchino.han1meviewer.logic.model.DisplayDensity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.PaletteStyle
 import io.github.daisukikaffuchino.han1meviewer.logic.model.PlayerKernel
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ProxyType
@@ -151,6 +152,8 @@ object DataStoreManager : SettingsStore {
         horizontalCardCountMedium = floatString("horizontal_card_count_medium", defaults.horizontalCardCountMedium), horizontalCardCountExpanded = floatString("horizontal_card_count_expanded", defaults.horizontalCardCountExpanded),
         homeCategoryOrder = nullableString("home_category_order")?.split(',')?.filter(String::isNotBlank).orEmpty(),
         hiddenHomeCategoryKeys = nullableString("home_category_hidden")?.split(',')?.filter(String::isNotBlank)?.toSet().orEmpty(),
+        alwaysShowUpdateCard = bool("developer_always_show_update_card", defaults.alwaysShowUpdateCard),
+        displayDensity = DisplayDensity.fromPercent(int("developer_display_density_percent", defaults.displayDensity.percent)),
     )
 
     private fun MutablePreferences.write(value: AppSettings) {
@@ -173,6 +176,7 @@ object DataStoreManager : SettingsStore {
         put("search_grid_columns_compact", searchGridColumnsCompact); put("search_grid_columns_medium", searchGridColumnsMedium); put("search_grid_columns_expanded", searchGridColumnsExpanded); put("search_grid_columns_large", searchGridColumnsLarge)
         put("horizontal_card_count_narrow", horizontalCardCountNarrow.toString()); put("horizontal_card_count_compact", horizontalCardCountCompact.toString()); put("horizontal_card_count_medium", horizontalCardCountMedium.toString()); put("horizontal_card_count_expanded", horizontalCardCountExpanded.toString())
         put("home_category_order", homeCategoryOrder.joinToString(",")); put("home_category_hidden", hiddenHomeCategoryKeys.joinToString(","))
+        put("developer_always_show_update_card", alwaysShowUpdateCard); put("developer_display_density_percent", displayDensity.percent)
     }
 
     private fun Preferences.bool(name: String, default: Boolean) = runCatching { this[booleanPreferencesKey(name)] }.getOrNull() ?: default

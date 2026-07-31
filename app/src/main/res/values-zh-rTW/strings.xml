@@ -646,6 +646,13 @@
     <string name="settings_data_privacy">資料和隱私</string>
     <string name="settings_data_privacy_summary">隱私保護、備份、還原與快取資料</string>
     <string name="settings_about_summary">版本、開源授權與專案連結</string>
+    <string name="developer_options">開發者選項</string>
+    <string name="developer_options_summary">僅用於除錯的工具與介面模擬</string>
+    <string name="always_show_update_card">一律顯示更新卡片</string>
+    <string name="simulated_update_data">模擬的更新資料</string>
+    <string name="application_dpi">應用程式 DPI 調節</string>
+    <string name="display_density">顯示密度</string>
+    <string name="simulated_update_description">這是用於除錯首頁更新卡片的模擬資料。</string>
     <string name="accent_color">強調色</string>
     <string name="display">顯示</string>
     <string name="preset_color_scheme">預設配色</string>

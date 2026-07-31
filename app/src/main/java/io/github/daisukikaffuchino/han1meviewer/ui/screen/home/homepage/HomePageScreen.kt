@@ -35,10 +35,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants
+import io.github.daisukikaffuchino.han1meviewer.BuildConfig
+import io.github.daisukikaffuchino.han1meviewer.HA1_GITHUB_URL
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
 import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateState
+import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.state.dataOrNull
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PullRefreshOverlay
@@ -65,12 +68,14 @@ import io.github.daisukikaffuchino.utils.SonnerToast
 fun HomePageScreen(
     viewModel: HomePageViewModel,
     isDrawerOpen: Boolean,
+    showNavigationIcon: Boolean,
     onEvent: (HomeUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pageState by viewModel.homePageFlow.collectAsStateWithLifecycle()
     val updateState by viewModel.appUpdateState.collectAsStateWithLifecycle()
     val updateAnnouncement by viewModel.updateAnnouncement.collectAsStateWithLifecycle()
+    val settings by SettingsRepository.settings.collectAsStateWithLifecycle()
     val refreshState = rememberPullToRefreshState()
     val homeListState = rememberLazyListState()
     var wasRefreshing by remember { mutableStateOf(false) }
@@ -104,7 +109,22 @@ fun HomePageScreen(
     }
 
     val isCurrentlyRefreshing = (pageState as? PageState.Success)?.isRefreshing == true
-    val availableUpdate = (updateState as? AppUpdateState.Available)?.info
+    val simulatedUpdateDescription = stringResource(R.string.simulated_update_description)
+    val simulatedUpdate = remember(simulatedUpdateDescription) {
+        AppUpdateInfo(
+            versionName = "Debug Preview",
+            versionCode = Int.MAX_VALUE,
+            downloadUrl = HA1_GITHUB_URL,
+            updateDescription = simulatedUpdateDescription,
+            forceUpdate = false,
+        )
+    }
+    val showSimulatedUpdate = BuildConfig.DEBUG && settings.alwaysShowUpdateCard
+    val availableUpdate = if (showSimulatedUpdate) {
+        simulatedUpdate
+    } else {
+        (updateState as? AppUpdateState.Available)?.info
+    }
     val forcedUpdate = availableUpdate?.takeIf { it.forceUpdate }
 
     LaunchedEffect(pageState) {
@@ -159,14 +179,15 @@ fun HomePageScreen(
                         .pullToRefresh(
                             state = refreshState,
                             isRefreshing = isCurrentlyRefreshing,
-                            enabled = updateState !is AppUpdateState.Checking,
+                            enabled = showSimulatedUpdate || updateState !is AppUpdateState.Checking,
                             onRefresh = {
                                 viewModel.getHomePage(isRefresh = true)
                             }
                         )
                 ) {
                     PageContent(
-                        isLoading = updateState is AppUpdateState.Checking || pageState.isFirstPageLoading,
+                        isLoading = (!showSimulatedUpdate && updateState is AppUpdateState.Checking) ||
+                            pageState.isFirstPageLoading,
                         isError = pageState.isFirstPageError,
                         isEmpty = pageState.isFirstPageError || pageState.isFirstPageEmpty,
                         errorMessage = (pageState as? PageState.Error)?.throwable
@@ -174,7 +195,7 @@ fun HomePageScreen(
                             ?.let { stringResource(it) }
                             ?: "",
                         onRetry = { viewModel.getHomePage(isRefresh = false) },
-                        loadingMessage = if (updateState is AppUpdateState.Checking) {
+                        loadingMessage = if (!showSimulatedUpdate && updateState is AppUpdateState.Checking) {
                             stringResource(R.string.checking_for_updates)
                         } else {
                             loadingHint
@@ -215,6 +236,7 @@ fun HomePageScreen(
             onSearchClick = { onEvent(HomeUiEvent.OpenSearchPage()) },
             onNavigateToPreview = { onEvent(HomeUiEvent.NavigateToPreview) },
             containerColor = topBarContainerColor,
+            showNavigationIcon = showNavigationIcon,
             modifier = Modifier.zIndex(1f),
         )
     }

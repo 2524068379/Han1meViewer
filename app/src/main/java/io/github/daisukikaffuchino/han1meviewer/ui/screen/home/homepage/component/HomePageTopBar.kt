@@ -39,6 +39,7 @@ fun HomePageTopBar(
     onOpenDrawer: () -> Unit,
     onSearchClick: () -> Unit,
     onNavigateToPreview: () -> Unit,
+    showNavigationIcon: Boolean = true,
     modifier: Modifier = Modifier,
     containerColor: Color = HanimeDefaults.Colors.pageSurface,
 ) {
@@ -47,13 +48,17 @@ fun HomePageTopBar(
         title = {
             Han1meViewerText()
         },
-        navigationIcon = {
-            IconButton(onClick = onOpenDrawer) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_menu),
-                    contentDescription = stringResource(R.string.open_menu),
-                )
+        navigationIcon = if (showNavigationIcon) {
+            {
+                IconButton(onClick = onOpenDrawer) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_menu),
+                        contentDescription = stringResource(R.string.open_menu),
+                    )
+                }
             }
+        } else {
+            {}
         },
         actions = {
             Row {

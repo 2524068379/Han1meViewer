@@ -35,6 +35,7 @@ import java.time.format.DateTimeFormatter
 fun HomeRouteScreen(
     activity: MainActivity,
     isDrawerOpen: Boolean,
+    showNavigationIcon: Boolean,
     onOpenDrawer: () -> Unit,
     onNavigateToPreview: () -> Unit,
     onNavigateToSearch: (String?) -> Unit,
@@ -60,6 +61,7 @@ fun HomeRouteScreen(
         HomePageScreen(
             viewModel = viewModel,
             isDrawerOpen = isDrawerOpen,
+            showNavigationIcon = showNavigationIcon,
             onEvent = { event ->
                 when (event) {
                     is HomeUiEvent.OpenDrawer -> onOpenDrawer()

@@ -23,6 +23,9 @@ object InterfaceInteractionSettingsRoute : HanimeScreen
 object DataPrivacySettingsRoute : HanimeScreen
 
 @Serializable
+object DeveloperOptionsSettingsRoute : HanimeScreen
+
+@Serializable
 object AboutSettingsRoute : HanimeScreen
 
 @Serializable
@@ -71,6 +74,9 @@ enum class SettingsDestinationSpec(
     DataPrivacy(
         titleRes = R.string.settings_data_privacy,
     ),
+    DeveloperOptions(
+        titleRes = R.string.developer_options,
+    ),
     About(
         titleRes = R.string.about,
     ),
@@ -107,6 +113,7 @@ enum class SettingsDestinationSpec(
             Appearance -> AppearanceSettingsRoute
             InterfaceInteraction -> InterfaceInteractionSettingsRoute
             DataPrivacy -> DataPrivacySettingsRoute
+            DeveloperOptions -> DeveloperOptionsSettingsRoute
             About -> AboutSettingsRoute
             OpenSourceLicenses -> OpenSourceLicensesRoute
             Player -> PlayerSettingsRoute

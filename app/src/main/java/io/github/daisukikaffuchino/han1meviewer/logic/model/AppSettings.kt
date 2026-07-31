@@ -66,6 +66,17 @@ enum class ProxyType(val id: Int) {
     }
 }
 
+enum class DisplayDensity(val percent: Int, val scale: Float) {
+    Compact(75, 0.75f),
+    Default(100, 1f),
+    Comfortable(125, 1.25f);
+
+    companion object {
+        fun fromPercent(percent: Int): DisplayDensity =
+            entries.firstOrNull { it.percent == percent } ?: Default
+    }
+}
+
 data class AppSettings(
     val appLanguage: AppLanguage = AppLanguage.SYSTEM,
     val themeMode: ThemeMode = ThemeMode.Light,
@@ -148,6 +159,8 @@ data class AppSettings(
     val horizontalCardCountExpanded: Float = 5.1f,
     val homeCategoryOrder: List<String> = emptyList(),
     val hiddenHomeCategoryKeys: Set<String> = emptySet(),
+    val alwaysShowUpdateCard: Boolean = false,
+    val displayDensity: DisplayDensity = DisplayDensity.Default,
 ) {
     companion object {
         const val DEFAULT_LAUNCHER_ICON =

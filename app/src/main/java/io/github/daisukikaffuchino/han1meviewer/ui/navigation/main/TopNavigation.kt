@@ -32,6 +32,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.AboutSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.AppearanceSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DataPrivacySettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DeveloperOptionsSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadSettingsRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframeSettingsRoute
@@ -73,6 +74,7 @@ fun TopNavigation(
     activity: MainActivity,
     backStack: TopLevelBackStack<HanimeScreen>,
     isDrawerOpen: Boolean,
+    showHomeNavigationIcon: Boolean,
     onOpenDrawer: () -> Unit,
 ) {
     var pendingAvatarCropResult by remember { mutableStateOf<String?>(null) }
@@ -120,6 +122,7 @@ fun TopNavigation(
             HomeRouteScreen(
                 activity = activity,
                 isDrawerOpen = isDrawerOpen,
+                showNavigationIcon = showHomeNavigationIcon,
                 onOpenDrawer = onOpenDrawer,
                 onNavigateToPreview = { backStack.add(PreviewRoute) },
                 onNavigateToSearch = { query -> backStack.add(SearchRoute(query = query)) },
@@ -241,6 +244,7 @@ fun TopNavigation(
                         backStack.add(InterfaceInteractionSettingsRoute)
                     },
                     onOpenDataPrivacy = { backStack.add(DataPrivacySettingsRoute) },
+                    onOpenDeveloperOptions = { backStack.add(DeveloperOptionsSettingsRoute) },
                     onOpenAbout = { backStack.add(AboutSettingsRoute) },
                 )
             }
@@ -304,6 +308,18 @@ fun TopNavigation(
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.DataPrivacy,
+                )
+            }
+        }
+        entry<DeveloperOptionsSettingsRoute>(metadata = pageTransition()) {
+            SettingsScaffold(
+                backStack = backStack,
+                destination = SettingsDestinationSpec.DeveloperOptions,
+                fallbackDestination = HomeSettingsRoute,
+            ) {
+                HomeSettingsRouteScreen(
+                    activity = activity,
+                    page = HomeSettingsPage.DeveloperOptions,
                 )
             }
         }

@@ -40,4 +40,6 @@ data class HomeSettingsUiState(
     val homeCategoryOrder: List<String>,
     val hiddenHomeCategoryKeys: Set<String>,
     val useAvHomeCategoryTitles: Boolean,
+    val alwaysShowUpdateCard: Boolean,
+    val displayDensityPercent: Int,
 )

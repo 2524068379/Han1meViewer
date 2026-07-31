@@ -675,6 +675,13 @@ Recommendations are as follows:\n
     <string name="settings_data_privacy">Data and privacy</string>
     <string name="settings_data_privacy_summary">Privacy protection, backup, restore and cached data</string>
     <string name="settings_about_summary">Version, open source licenses and project links</string>
+    <string name="developer_options">Developer options</string>
+    <string name="developer_options_summary">Debug-only tools and interface simulation</string>
+    <string name="always_show_update_card">Always show update card</string>
+    <string name="simulated_update_data">Simulated update data</string>
+    <string name="application_dpi">App DPI adjustment</string>
+    <string name="display_density">Display density</string>
+    <string name="simulated_update_description">This update card contains simulated data for debugging the home screen.</string>
     <string name="accent_color">Accent color</string>
     <string name="display">Display</string>
     <string name="preset_color_scheme">Preset color scheme</string>
