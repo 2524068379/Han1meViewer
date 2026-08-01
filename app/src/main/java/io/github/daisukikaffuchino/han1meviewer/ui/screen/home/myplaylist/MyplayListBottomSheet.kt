@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledTonalIconButton
@@ -52,13 +53,13 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
-import io.github.daisukikaffuchino.han1meviewer.ui.component.BottomSheetHandler
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.VideoCardItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeTopAppBar
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyVerticalGrid
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.RetryableImage
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.SpacingNormal
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.VideoNormalCardMinWidth
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MyPlayListViewModel
@@ -128,7 +129,12 @@ fun PlaylistBottomSheet(
             }
     }
 
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, dragHandle = null) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        dragHandle = null,
+        containerColor = HanimeDefaults.Colors.pageSurface,
+    ) {
         if (playlist.isEmpty() && playlistState is PageLoadingState.Loading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -216,7 +222,9 @@ private fun PlaylistSheetContent(
         Box(Modifier
             .fillMaxWidth()
             .height(240.dp)) {
-            BottomSheetHandler()
+            BottomSheetDefaults.DragHandle(
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
 
             if (playlist.isNotEmpty()) {
                 RetryableImage(

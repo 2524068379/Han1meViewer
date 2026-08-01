@@ -7,16 +7,15 @@ import androidx.compose.material3.Text
 import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.core.content.edit
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
@@ -29,12 +28,7 @@ import io.github.daisukikaffuchino.utils.rememberCopyTextToClipboard
 import io.github.daisukikaffuchino.utils.decodeFromStringByBase64
 import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.serialization.json.Json
-
-private const val H_KEYFRAMES_ENABLE = "h_keyframes_enable"
-private const val SHOW_COMMENT_WHEN_COUNTDOWN = "show_comment_when_countdown"
-private const val SHARED_H_KEYFRAMES_ENABLE = "shared_h_keyframes_enable"
-private const val SHARED_H_KEYFRAMES_USE_FIRST = "shared_h_keyframes_use_first"
-private const val WHEN_COUNTDOWN_REMIND = "when_countdown_remind"
+import kotlinx.coroutines.launch
 
 @Composable
 fun HKeyframesRouteScreen(
@@ -169,32 +163,28 @@ fun HKeyframeSettingsRouteScreen(
     embedded: Boolean = false,
 ) {
     val context = LocalContext.current
-    var refreshKey by remember { mutableIntStateOf(0) }
-    val uiState = remember(refreshKey, context) { buildHKeyframeSettingsUiState(context) }
+    val coroutineScope = rememberCoroutineScope()
+    val settings by SettingsRepository.settings.collectAsStateWithLifecycle()
+    val uiState = remember(settings, context) { buildHKeyframeSettingsUiState(context) }
 
     HKeyframeSettingsScreen(
         state = uiState,
         onHKeyframesEnableChange = {
-            saveBoolean(H_KEYFRAMES_ENABLE, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(hKeyframesEnable = it) } }
         },
         onOpenHKeyframeManage = onNavigateToHKeyframes,
         onSharedHKeyframesEnableChange = {
-            saveBoolean(SHARED_H_KEYFRAMES_ENABLE, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(sharedHKeyframesEnable = it) } }
         },
         onSharedHKeyframesUseFirstChange = {
-            saveBoolean(SHARED_H_KEYFRAMES_USE_FIRST, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(sharedHKeyframesUseFirst = it) } }
         },
         onOpenSharedHKeyframeManage = onNavigateToSharedHKeyframes,
         onShowCommentWhenCountdownChange = {
-            saveBoolean(SHOW_COMMENT_WHEN_COUNTDOWN, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(showCommentWhenCountdown = it) } }
         },
         onWhenCountdownRemindChange = {
-            Preferences.preferenceSp.edit { putInt(WHEN_COUNTDOWN_REMIND, it) }
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(whenCountdownRemindSeconds = it) } }
         },
         embedded = embedded,
     )
@@ -202,19 +192,19 @@ fun HKeyframeSettingsRouteScreen(
 
 private fun buildHKeyframeSettingsUiState(context: Context): HKeyframeSettingsUiState {
     return HKeyframeSettingsUiState(
-        hKeyframesEnable = Preferences.hKeyframesEnable,
-        hKeyframesSummary = if (Preferences.hKeyframesEnable) {
+        hKeyframesEnable = SettingsRepository.hKeyframesEnable,
+        hKeyframesSummary = if (SettingsRepository.hKeyframesEnable) {
             context.getString(R.string.h_keyframes_enable_tip)
         } else {
             context.getString(R.string.h_keyframes_disable_tip)
         },
-        sharedHKeyframesEnable = Preferences.sharedHKeyframesEnable,
-        sharedHKeyframesUseFirst = Preferences.sharedHKeyframesUseFirst,
-        showCommentWhenCountdown = Preferences.showCommentWhenCountdown,
-        whenCountdownRemind = Preferences.whenCountdownRemind / 1000,
+        sharedHKeyframesEnable = SettingsRepository.sharedHKeyframesEnable,
+        sharedHKeyframesUseFirst = SettingsRepository.sharedHKeyframesUseFirst,
+        showCommentWhenCountdown = SettingsRepository.showCommentWhenCountdown,
+        whenCountdownRemind = SettingsRepository.whenCountdownRemind / 1000,
         whenCountdownRemindSummary = toPrettyCountdownRemindString(
             context,
-            Preferences.whenCountdownRemind / 1000
+            SettingsRepository.whenCountdownRemind / 1000
         ),
     )
 }

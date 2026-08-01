@@ -2,12 +2,10 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage
 
 import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.annotation.StringRes
-import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.han1meviewer.SAVED_USER_ID
 import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateChecker
 import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateState
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
@@ -20,8 +18,9 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.logout
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel
-import io.github.daisukikaffuchino.utils.getSpValue
-import io.github.daisukikaffuchino.utils.putSpValue
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HanimeScreen
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HomeRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.TopLevelBackStack
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -32,6 +31,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 class HomePageViewModel: ViewModel() {
+    val mainBackStack = TopLevelBackStack<HanimeScreen>(HomeRoute)
+
     data class SessionExpiredMessage(
         val message: String?,
         @param:StringRes val fallbackResId: Int,
@@ -60,6 +61,7 @@ class HomePageViewModel: ViewModel() {
     }
 
     fun initializeHomePage() {
+        if (!SettingsRepository.usageNoticeAccepted || !SettingsRepository.usageSourceVerified) return
         if (initializationJob != null || _appUpdateState.value !is AppUpdateState.Checking) return
         initializationJob = viewModelScope.launch {
             val updateResult = AppUpdateChecker.checkForUpdate()
@@ -77,11 +79,14 @@ class HomePageViewModel: ViewModel() {
     fun ignoreUpdate(versionCode: Int) {
         val available = _appUpdateState.value as? AppUpdateState.Available ?: return
         if (available.info.forceUpdate || available.info.versionCode != versionCode) return
-        AppUpdateChecker.ignoreUpdate(versionCode)
-        _appUpdateState.value = AppUpdateState.NoUpdate
+        viewModelScope.launch {
+            AppUpdateChecker.ignoreUpdate(versionCode)
+            _appUpdateState.value = AppUpdateState.NoUpdate
+        }
     }
 
     fun getHomePage(isRefresh: Boolean = false){
+        if (!SettingsRepository.usageNoticeAccepted || !SettingsRepository.usageSourceVerified) return
         when (val updateState = _appUpdateState.value) {
             AppUpdateState.Checking -> {
                 initializeHomePage()
@@ -118,7 +123,7 @@ class HomePageViewModel: ViewModel() {
                     is WebsiteState.Success -> {
                         AppViewModel.csrfToken = networkState.info.csrfToken
                         networkState.info.userId.takeIf { it.isNotEmpty() }?.let { userId ->
-                            Preferences.preferenceSp.edit { putString(SAVED_USER_ID, userId) }
+                            SettingsRepository.setSavedUserId(userId)
                         }
                         val homeData = HomeData(page = networkState.info)
                         _homePageFlow.value = PageState.Success(info = homeData, isRefreshing = false)
@@ -130,7 +135,6 @@ class HomePageViewModel: ViewModel() {
     }
 
     fun dismissAnnouncements(){
-        putSpValue("last_dismiss_time", System.currentTimeMillis(), "setting_pref")
         val current = _homePageFlow.value
         if (current is PageState.Success) {
             _homePageFlow.value = current.copy(info = current.info.copy(announcements = emptyList()))

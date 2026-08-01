@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,7 +60,11 @@ fun CloudflareScreen(
                     .align(Alignment.BottomCenter)
                     .padding(16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    containerColor = lerp(
+                        MaterialTheme.colorScheme.errorContainer,
+                        MaterialTheme.colorScheme.surface,
+                        0.6f
+                    )
                 ),
             ) {
                 Text(

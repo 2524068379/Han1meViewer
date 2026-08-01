@@ -125,7 +125,7 @@ fun VideoCommentCard(
                     Icon(
                         painter = painterResource(R.drawable.ic_report),
                         contentDescription = stringResource(R.string.report_reason_hint),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f)
                     )
                 }
             }

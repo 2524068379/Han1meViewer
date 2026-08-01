@@ -3,36 +3,27 @@ package io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.core.content.edit
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.MpvChoiceDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.MpvPlayerSettingsScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.MpvPlayerSettingsUiState
-
-private const val MPV_PROFILE = "mpv_profile"
-private const val MPV_INTERPOLATION = "mpv_interpolation"
-private const val MPV_DEBAND = "mpv_deband"
-private const val MPV_FRAMEDROP = "mpv_framedrop"
-private const val MPV_HWDEC = "mpv_hwdecx"
-private const val MPV_CACHE_SECS = "mpv_cache_secs"
-private const val MPV_TLS_VERIFY = "mpv_tls_verify"
-private const val MPV_NETWORK_TIMEOUT = "mpv_network_timeout"
-private const val ENABLE_GPU_NEXT_RENDERER = "mpv_gpu_next_render"
-private const val CUSTOM_PARAMS = "mpv_custom_parameters"
+import kotlinx.coroutines.launch
 
 @Composable
 fun MpvPlayerSettingsRouteScreen() {
     val context = LocalContext.current
-    var refreshKey by remember { mutableIntStateOf(0) }
+    val coroutineScope = rememberCoroutineScope()
+    val settings by SettingsRepository.settings.collectAsStateWithLifecycle()
     var activeDialog by remember { mutableStateOf<MpvChoiceDialog?>(null) }
-    val uiState = remember(refreshKey, context) { buildMpvPlayerSettingsUiState(context) }
+    val uiState = remember(settings, context) { buildMpvPlayerSettingsUiState(context) }
 
     MpvPlayerSettingsScreen(
         state = uiState,
@@ -54,51 +45,41 @@ fun MpvPlayerSettingsRouteScreen() {
         onOpenCustomParamsDialog = { activeDialog = MpvChoiceDialog.CustomParams },
         onDismissDialog = { activeDialog = null },
         onProfileChange = {
-            saveString(MPV_PROFILE, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(mpvProfile = it) } }
         },
         onEnableGpuNextRendererChange = {
-            saveBoolean(ENABLE_GPU_NEXT_RENDERER, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(enableGpuNextRenderer = it) } }
         },
         onInterpolationChange = {
-            saveBoolean(MPV_INTERPOLATION, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(mpvInterpolation = it) } }
         },
         onDebandChange = {
-            saveBoolean(MPV_DEBAND, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(mpvDeband = it) } }
         },
         onFramedropChange = {
-            saveBoolean(MPV_FRAMEDROP, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(mpvFramedrop = it) } }
         },
         onHwdecChange = {
-            saveString(MPV_HWDEC, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(mpvHwdec = it) } }
         },
         onCacheSecsChange = {
-            Preferences.preferenceSp.edit { putInt(MPV_CACHE_SECS, it) }
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(mpvCacheSecs = it) } }
         },
         onTlsVerifyChange = {
-            saveBoolean(MPV_TLS_VERIFY, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(mpvTlsVerify = it) } }
         },
         onNetworkTimeoutChange = {
-            Preferences.preferenceSp.edit { putInt(MPV_NETWORK_TIMEOUT, it) }
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(mpvNetworkTimeout = it) } }
         },
         onCustomParamsChange = {
-            saveString(CUSTOM_PARAMS, it)
-            refreshKey++
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(customMpvParams = it) } }
         },
     )
 }
 
 private fun buildMpvPlayerSettingsUiState(context: Context): MpvPlayerSettingsUiState {
-    val profile = Preferences.mpvProfile
-    val hwdec = Preferences.mpvHwdec
+    val profile = SettingsRepository.mpvProfile
+    val hwdec = SettingsRepository.mpvHwdec
     return MpvPlayerSettingsUiState(
         profile = profile,
         profileDisplay = when (profile) {
@@ -106,17 +87,17 @@ private fun buildMpvPlayerSettingsUiState(context: Context): MpvPlayerSettingsUi
             "gpu-hq" -> context.getString(R.string.profile_gpu_hq)
             else -> profile
         },
-        enableGpuNextRenderer = Preferences.enableGPUNextRenderer,
-        interpolation = Preferences.mpvInterpolation,
-        deband = Preferences.mpvDeband,
-        framedrop = Preferences.mpvFramedrop,
+        enableGpuNextRenderer = SettingsRepository.enableGPUNextRenderer,
+        interpolation = SettingsRepository.mpvInterpolation,
+        deband = SettingsRepository.mpvDeband,
+        framedrop = SettingsRepository.mpvFramedrop,
         hwdec = hwdec,
         hwdecDisplay = "${context.getString(R.string.mpv_hwdec_summary)} ($hwdec)",
-        cacheSecs = Preferences.mpvCacheSecs,
-        cacheSecsSummary = "${context.getString(R.string.mpv_cache_secs_summary)} (${Preferences.mpvCacheSecs} S)",
-        tlsVerify = Preferences.mpvTlsVerify,
-        networkTimeout = Preferences.mpvNetworkTimeout,
-        networkTimeoutSummary = "${context.getString(R.string.mpv_network_timeout_summary)} (${Preferences.mpvNetworkTimeout} S)",
-        customParams = Preferences.customMpvParams,
+        cacheSecs = SettingsRepository.mpvCacheSecs,
+        cacheSecsSummary = "${context.getString(R.string.mpv_cache_secs_summary)} (${SettingsRepository.mpvCacheSecs} S)",
+        tlsVerify = SettingsRepository.mpvTlsVerify,
+        networkTimeout = SettingsRepository.mpvNetworkTimeout,
+        networkTimeoutSummary = "${context.getString(R.string.mpv_network_timeout_summary)} (${SettingsRepository.mpvNetworkTimeout} S)",
+        customParams = SettingsRepository.customMpvParams,
     )
 }

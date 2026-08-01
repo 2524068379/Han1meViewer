@@ -49,29 +49,3 @@ sealed interface PlaylistEvent {
     /** 创建新播放列表 */
     data class OnCreatePlaylist(val title: String, val desc: String) : PlaylistEvent
 }
-
-/**
- * 播放列表详情弹窗的回调集合。
- *
- * 将弹窗所需的 ViewModel 交互抽象为回调，避免弹窗直接持有 ViewModel。
- */
-data class PlaylistSheetCallbacks(
-    val loadItems: (page: Int, listCode: String, refresh: Boolean) -> Unit,
-    val modifyPlaylist: (listCode: String, title: String, desc: String, delete: Boolean) -> Unit,
-    val deleteFromPlaylist: (listCode: String, videoCode: String, position: Int) -> Unit,
-    val updateScrollState: (listCode: String, firstVisibleIndex: Int, scrollOffset: Int) -> Unit,
-    val getScrollState: (listCode: String) -> Pair<Int, Int>,
-    val onLoadPlaylists: () -> Unit,
-)
-
-/**
- * 播放列表详情弹窗的 UI 状态。
- */
-data class PlaylistSheetUiState(
-    val playlistItems: List<HanimeInfo> = emptyList(),
-    val playlistState: PageLoadingState<*> = PageLoadingState.Loading,
-    val playlistDesc: String? = null,
-    val currentListCode: String = "",
-    val currentListTitle: String = "",
-    val currentPage: Int = 1,
-)

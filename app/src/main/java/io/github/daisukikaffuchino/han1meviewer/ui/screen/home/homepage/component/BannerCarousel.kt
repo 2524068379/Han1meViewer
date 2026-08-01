@@ -1,14 +1,15 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.component
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -55,14 +57,19 @@ fun BannerCarousel(
     if (banners.isEmpty()) return
 
     val pagerState = rememberPagerState(pageCount = { banners.size.coerceAtLeast(1) })
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     Column(modifier = modifier) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(16f / 9f)
-                .clip(RoundedCornerShape(12.dp))
-        ) {
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val aspectRatio = if (isLandscape) 21f / 9f else 16f / 9f
+            val naturalHeight = maxWidth / aspectRatio
+            val bannerHeight = if (isLandscape) minOf(naturalHeight, 240.dp) else naturalHeight
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(bannerHeight)
+                    .clip(RoundedCornerShape(12.dp)),
+            ) {
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
@@ -145,6 +152,7 @@ fun BannerCarousel(
                     }
                 }
             }
+        }
         }
     }
 }

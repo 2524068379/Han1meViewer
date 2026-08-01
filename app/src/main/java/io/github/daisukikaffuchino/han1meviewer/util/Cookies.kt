@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.util
 
 import io.github.daisukikaffuchino.utils.LogUtil
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import okhttp3.Cookie
 
 @JvmInline
@@ -49,7 +49,7 @@ fun CookieString.toLoginCookieList(domain: String): List<Cookie> {
  * 讓[preferencesCookieList]成爲 存在偏好設置 但不存在個人信息 的[emptyList]
  */
 private fun preferencesCookieList(domain: String): List<Cookie> {
-    val videoLanguage = Preferences.videoLanguage
+    val videoLanguage = SettingsRepository.videoLanguage
     val videoLanguageCookie = Cookie.Builder().domain(domain)
         .name("user_lang")
         .value(videoLanguage)

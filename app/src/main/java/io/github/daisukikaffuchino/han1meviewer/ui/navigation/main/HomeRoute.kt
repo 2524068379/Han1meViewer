@@ -10,7 +10,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.getHanimeShareText
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
@@ -35,6 +35,7 @@ import java.time.format.DateTimeFormatter
 fun HomeRouteScreen(
     activity: MainActivity,
     isDrawerOpen: Boolean,
+    showNavigationIcon: Boolean,
     onOpenDrawer: () -> Unit,
     onNavigateToPreview: () -> Unit,
     onNavigateToSearch: (String?) -> Unit,
@@ -42,7 +43,7 @@ fun HomeRouteScreen(
     onNavigateToVideo: (String) -> Unit,
 ) {
     val viewModel = activity.viewModel
-    val checkInEnabled by Preferences.checkInEnabledFlow.collectAsStateWithLifecycle()
+    val checkInEnabled by SettingsRepository.checkInEnabledFlow.collectAsStateWithLifecycle()
     val checkInViewModel: CheckInCalendarViewModel? = if (checkInEnabled) composeViewModel() else null
     val copyTextToClipboard = rememberCopyTextToClipboard()
     val uriHandler = LocalUriHandler.current
@@ -60,6 +61,7 @@ fun HomeRouteScreen(
         HomePageScreen(
             viewModel = viewModel,
             isDrawerOpen = isDrawerOpen,
+            showNavigationIcon = showNavigationIcon,
             onEvent = { event ->
                 when (event) {
                     is HomeUiEvent.OpenDrawer -> onOpenDrawer()

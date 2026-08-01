@@ -1,15 +1,15 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
-import android.app.Application
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.exception.NotLoggedInException
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccount
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccountAction
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccountActionEvent
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccountSubmittingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
-import io.github.daisukikaffuchino.utils.ApplicationViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 
-class UserAccountViewModel(application: Application) : ApplicationViewModel(application) {
+class UserAccountViewModel : ViewModel() {
 
     private val _accountState = MutableStateFlow<WebsiteState<UserAccount>>(WebsiteState.Loading)
     val accountState = _accountState.asStateFlow()
@@ -30,10 +30,10 @@ class UserAccountViewModel(application: Application) : ApplicationViewModel(appl
 
     fun loadAccount(forceReload: Boolean = false) {
         if (!forceReload && _accountState.value is WebsiteState.Success) return
-        val userId = Preferences.savedUserId
+        val userId = SettingsRepository.savedUserId
         if (userId.isBlank()) {
             _accountState.value = WebsiteState.Error(
-                IllegalStateException(application.getString(io.github.daisukikaffuchino.han1meviewer.R.string.not_logged_in_currently))
+                NotLoggedInException()
             )
             return
         }

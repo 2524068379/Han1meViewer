@@ -43,7 +43,6 @@ fun LoginScreen(
     isRefreshing: Boolean,
     onBack: () -> Unit,
     onRefresh: () -> Unit,
-    onShowLoginDialog: () -> Unit,
     onOpenQrScanner: () -> Unit,
     webViewFactory: () -> WebView,
 ) {
@@ -148,7 +147,6 @@ fun LoginScreenPreview() {
             isRefreshing = true,
             onBack = {},
             onRefresh = {},
-            onShowLoginDialog = {},
             onOpenQrScanner = {},
             webViewFactory = {
                 WebView(context).apply {

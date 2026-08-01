@@ -3,9 +3,12 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.video
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -33,19 +36,13 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ThumbDown
-import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material.icons.outlined.ThumbDown
-import androidx.compose.material.icons.outlined.ThumbUp
-import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.AlertDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticButton as Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -83,7 +80,6 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.CheckInRecordEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo
 import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
-import io.github.daisukikaffuchino.han1meviewer.ui.component.BottomSheetHandler
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ExpandableRichText
 import io.github.daisukikaffuchino.han1meviewer.ui.component.TagChipGroup
 import io.github.daisukikaffuchino.han1meviewer.ui.component.VideoCardItem
@@ -97,8 +93,10 @@ import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeVideoIntroduction
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberCardResponsiveWidth
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberRandomLoadingHint
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.SpacingNormal
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.VideoNormalCardMinWidth
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.VideoSimplifiedCardMinWidth
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
 import io.github.daisukikaffuchino.han1meviewer.util.DisplayTextLocalizer
 import io.github.daisukikaffuchino.utils.SonnerToast
 import io.github.daisukikaffuchino.utils.VibrationUtil
@@ -119,7 +117,6 @@ fun VideoIntroductionScreen(
     state: VideoLoadingState<HanimeVideo>,
     fromDownload: Boolean,
     hideRelatedInIntro: Boolean,
-    shareText: String,
     playlistInitialIndex: Int?,
     introFirstVisibleItemIndex: Int,
     introFirstVisibleItemScrollOffset: Int,
@@ -142,7 +139,6 @@ fun VideoIntroductionScreen(
     onCopyShareText: () -> Unit,
     onOpenWebPage: () -> Unit,
     onOpenOriginalComic: (() -> Unit)?,
-    onCopyText: (String) -> Unit,
     onShowAllPlaylist: (() -> Unit)?,
     onPlaylistScrollChange: (Int) -> Unit,
     onIntroductionScrollChange: (Int, Int) -> Unit,
@@ -162,7 +158,6 @@ fun VideoIntroductionScreen(
                 video = currentVideo,
                 fromDownload = fromDownload,
                 hideRelatedInIntro = hideRelatedInIntro,
-                shareText = shareText,
                 playlistInitialIndex = playlistInitialIndex,
                 introFirstVisibleItemIndex = introFirstVisibleItemIndex,
                 introFirstVisibleItemScrollOffset = introFirstVisibleItemScrollOffset,
@@ -184,7 +179,6 @@ fun VideoIntroductionScreen(
                 onCopyShareText = onCopyShareText,
                 onOpenWebPage = onOpenWebPage,
                 onOpenOriginalComic = onOpenOriginalComic,
-                onCopyText = onCopyText,
                 onShowAllPlaylist = onShowAllPlaylist,
                 onPlaylistScrollChange = onPlaylistScrollChange,
                 onIntroductionScrollChange = onIntroductionScrollChange,
@@ -216,7 +210,6 @@ private fun VideoIntroductionContent(
     video: HanimeVideo,
     fromDownload: Boolean,
     hideRelatedInIntro: Boolean,
-    shareText: String,
     playlistInitialIndex: Int?,
     introFirstVisibleItemIndex: Int,
     introFirstVisibleItemScrollOffset: Int,
@@ -238,7 +231,6 @@ private fun VideoIntroductionContent(
     onCopyShareText: () -> Unit,
     onOpenWebPage: () -> Unit,
     onOpenOriginalComic: (() -> Unit)?,
-    onCopyText: (String) -> Unit,
     onShowAllPlaylist: (() -> Unit)?,
     onPlaylistScrollChange: (Int) -> Unit,
     onIntroductionScrollChange: (Int, Int) -> Unit,
@@ -349,7 +341,7 @@ private fun VideoIntroductionContent(
         }
 
         item(key = "title") {
-            TitleSection(video = video, onCopyText = onCopyText)
+            TitleSection(video = video)
         }
 
         item(key = "meta") {
@@ -625,7 +617,8 @@ private fun MyListDialog(
                                     onValueChange = { checked ->
                                         VibrationUtil.performHapticFeedback(view)
                                         selectedStates =
-                                            selectedStates.toMutableList().also { it[index] = checked }
+                                            selectedStates.toMutableList()
+                                                .also { it[index] = checked }
                                     },
                                 )
                                 .padding(vertical = 4.dp),
@@ -664,7 +657,7 @@ private fun MyListDialog(
     )
 }
 
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PlaylistBottomSheet(
     playlist: HanimeVideo.Playlist,
@@ -678,7 +671,7 @@ private fun PlaylistBottomSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        dragHandle = { BottomSheetHandler() },
+        containerColor = HanimeDefaults.Colors.pageSurface,
     ) {
         Column(
             modifier = Modifier
@@ -826,8 +819,16 @@ private fun ArtistSection(
     onToggleSubscribe: () -> Unit,
 ) {
     val view = LocalView.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    val cardShape = shapeByInteraction(
+        shapes = HanimeDefaults.cardShapes(),
+        pressed = pressed,
+        animationSpec = HanimeDefaults.shapesDefaultAnimationSpec,
+    )
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = cardShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),
@@ -836,6 +837,8 @@ private fun ArtistSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .combinedClickable(
+                    interactionSource = interactionSource,
+                    indication = LocalIndication.current,
                     onClick = {
                         VibrationUtil.performHapticFeedback(view)
                         onOpenArtist()
@@ -900,7 +903,7 @@ private fun ArtistSection(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun TitleSection(video: HanimeVideo, onCopyText: (String) -> Unit) {
+private fun TitleSection(video: HanimeVideo) {
     val primaryTitle = video.chineseTitle?.takeIf { it.isNotBlank() } ?: video.title
     val secondaryTitle = video.title.takeIf { it != primaryTitle }
 
@@ -963,7 +966,7 @@ private fun MetaSection(
         MetaInfoItem(
             icon = {
                 Icon(
-                    imageVector = Icons.Rounded.PlayArrow,
+                    painter = painterResource(R.drawable.ic_play_arrow),
                     contentDescription = null,
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
@@ -975,7 +978,7 @@ private fun MetaSection(
         MetaInfoItem(
             icon = {
                 Icon(
-                    imageVector = Icons.Rounded.Schedule,
+                    painter = painterResource(R.drawable.ic_access_time),
                     contentDescription = null,
                     modifier = Modifier.size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
@@ -1058,9 +1061,9 @@ private fun VideoRatingButtons(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector =
-                    if (video.isFav) Icons.Filled.ThumbUp
-                    else Icons.Outlined.ThumbUp,
+                painter =
+                    if (video.isFav) painterResource(R.drawable.ic_thumb_up_alt)
+                    else painterResource(R.drawable.ic_thumb_up_off_alt),
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
                 tint = likeContentColor,
@@ -1094,9 +1097,9 @@ private fun VideoRatingButtons(
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector =
-                    if (video.isUnlike) Icons.Filled.ThumbDown
-                    else Icons.Outlined.ThumbDown,
+                painter =
+                    if (video.isUnlike) painterResource(R.drawable.ic_thumb_down_alt)
+                    else painterResource(R.drawable.ic_thumb_down_off_alt),
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
                 tint = dislikeContentColor
@@ -1288,6 +1291,7 @@ private fun PlaylistSection(
                     videoItem = item,
                     isHorizontalCard = item.itemType == HanimeInfo.NORMAL,
                     isPlaying = item.isPlaying,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                     onClickVideosItem = { onOpenVideo(item) },
                     onLongClickVideosItem = { _, _ -> },
                 )
@@ -1325,6 +1329,7 @@ internal fun RelatedVideosSection(
                         modifier = Modifier.width(itemWidth),
                         videoItem = item,
                         isHorizontalCard = item.itemType == HanimeInfo.NORMAL,
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                         onClickVideosItem = { onOpenVideo(item) },
                         onLongClickVideosItem = { _, _ -> },
                     )
@@ -1341,7 +1346,6 @@ private fun SectionHeader(
     actionText: String? = null,
     onActionClick: (() -> Unit)? = null,
 ) {
-    val view = LocalView.current
     Column(
         modifier = Modifier.padding(start = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -1387,7 +1391,6 @@ private fun VideoIntroductionScreenPreview() {
             state = VideoLoadingState.Success(fakeVideoIntroduction),
             fromDownload = false,
             hideRelatedInIntro = false,
-            shareText = "share text",
             playlistInitialIndex = 1,
             downloadPrompt = null,
             onRetry = {},
@@ -1408,7 +1411,6 @@ private fun VideoIntroductionScreenPreview() {
             onCopyShareText = {},
             onOpenWebPage = {},
             onOpenOriginalComic = {},
-            onCopyText = {},
             onShowAllPlaylist = {},
             onPlaylistScrollChange = {},
             introFirstVisibleItemIndex = 0,
@@ -1428,7 +1430,6 @@ private fun VideoIntroductionScreenLoadingPreview() {
             state = VideoLoadingState.Loading,
             fromDownload = false,
             hideRelatedInIntro = false,
-            shareText = "",
             playlistInitialIndex = 0,
             downloadPrompt = null,
             onRetry = {},
@@ -1449,7 +1450,6 @@ private fun VideoIntroductionScreenLoadingPreview() {
             onCopyShareText = {},
             onOpenWebPage = {},
             onOpenOriginalComic = null,
-            onCopyText = {},
             onShowAllPlaylist = null,
             onPlaylistScrollChange = {},
             introFirstVisibleItemIndex = 0,
@@ -1469,7 +1469,6 @@ private fun VideoIntroductionScreenErrorPreview() {
             state = VideoLoadingState.Error(Throwable("network error")),
             fromDownload = false,
             hideRelatedInIntro = false,
-            shareText = "",
             playlistInitialIndex = 0,
             downloadPrompt = null,
             onRetry = {},
@@ -1490,7 +1489,6 @@ private fun VideoIntroductionScreenErrorPreview() {
             onCopyShareText = {},
             onOpenWebPage = {},
             onOpenOriginalComic = null,
-            onCopyText = {},
             onShowAllPlaylist = null,
             onPlaylistScrollChange = {},
             introFirstVisibleItemIndex = 0,

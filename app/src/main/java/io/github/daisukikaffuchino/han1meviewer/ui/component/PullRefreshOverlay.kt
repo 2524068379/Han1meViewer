@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.zIndex
 
@@ -19,7 +18,6 @@ import androidx.compose.ui.zIndex
 fun BoxScope.PullRefreshOverlay(
     state: PullToRefreshState,
     isRefreshing: Boolean,
-    containerColor: Color = Color.Unspecified,
 ) {
     val scaleFraction = remember(isRefreshing, state.distanceFraction) {
         if (isRefreshing) 1f
@@ -39,7 +37,6 @@ fun BoxScope.PullRefreshOverlay(
             PullToRefreshDefaults.LoadingIndicator(
                 state = state,
                 isRefreshing = isRefreshing,
-//                containerColor = containerColor,
             )
         }
     }

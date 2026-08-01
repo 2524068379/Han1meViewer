@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
@@ -326,9 +328,23 @@ private fun DownloadFabMenu(
         exit = fadeOut() + slideOutVertically { it / 2 },
     ) {
 
-            FloatingActionButtonMenu(
-                expanded = expanded,
-                button = {
+        FloatingActionButtonMenu(
+            expanded = expanded,
+            button = {
+                if (expanded) {
+                    FilledIconButton(
+                        onClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            expanded = !expanded
+                        },
+                        modifier = Modifier.size(56.dp),
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_close),
+                            contentDescription = stringResource(R.string.close),
+                        )
+                    }
+                } else {
                     FloatingActionButton(
                         onClick = {
                             VibrationUtil.performHapticFeedback(view)
@@ -336,88 +352,88 @@ private fun DownloadFabMenu(
                         },
                     ) {
                         Icon(
-                            painter = painterResource(
-                                if (expanded) R.drawable.ic_close else R.drawable.ic_menu,
-                            ),
-                            contentDescription = stringResource(if (expanded) R.string.close else R.string.download),
+                            painter = painterResource(R.drawable.ic_menu),
+                            contentDescription = stringResource(R.string.download),
                         )
                     }
-                },
-            ) {
-                if (currentPage == 0) {
-                    FloatingActionButtonMenuItem(
-                        text = { Text(stringResource(R.string.start_all)) },
-                        icon = {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_play_arrow),
-                                contentDescription = null,
-                            )
-                        },
-                        onClick = {
-                            VibrationUtil.performHapticFeedback(view)
-                            onResumeAll()
-                            expanded = false
-                        },
-                    )
-                    FloatingActionButtonMenuItem(
-                        text = { Text(stringResource(R.string.pause_all)) },
-                        icon = {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_pause),
-                                contentDescription = null,
-                            )
-                        },
-                        onClick = {
-                            VibrationUtil.performHapticFeedback(view)
-                            onPauseAll()
-                            expanded = false
-                        },
-                    )
-                } else {
-                    FloatingActionButtonMenuItem(
-                        text = { Text(stringResource(R.string.edit)) },
-                        icon = {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_format_list_bulleted),
-                                contentDescription = null,
-                            )
-                        },
-                        onClick = {
-                            VibrationUtil.performHapticFeedback(view)
-                            onToggleMultiSelect()
-                            expanded = false
-                        },
-                    )
-                    FloatingActionButtonMenuItem(
-                        text = { Text(stringResource(R.string.create_new_group)) },
-                        icon = {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_add),
-                                contentDescription = null,
-                            )
-                        },
-                        onClick = {
-                            VibrationUtil.performHapticFeedback(view)
-                            onCreateGroup()
-                            expanded = false
-                        },
-                    )
-                    FloatingActionButtonMenuItem(
-                        text = { Text(stringResource(R.string.read_download_dir_title)) },
-                        icon = {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_download),
-                                contentDescription = null,
-                            )
-                        },
-                        onClick = {
-                            VibrationUtil.performHapticFeedback(view)
-                            onImportDownloaded()
-                            expanded = false
-                        },
-                    )
                 }
+
+            },
+        ) {
+            if (currentPage == 0) {
+                FloatingActionButtonMenuItem(
+                    text = { Text(stringResource(R.string.start_all)) },
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_play_arrow),
+                            contentDescription = null,
+                        )
+                    },
+                    onClick = {
+                        VibrationUtil.performHapticFeedback(view)
+                        onResumeAll()
+                        expanded = false
+                    },
+                )
+                FloatingActionButtonMenuItem(
+                    text = { Text(stringResource(R.string.pause_all)) },
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_pause),
+                            contentDescription = null,
+                        )
+                    },
+                    onClick = {
+                        VibrationUtil.performHapticFeedback(view)
+                        onPauseAll()
+                        expanded = false
+                    },
+                )
+            } else {
+                FloatingActionButtonMenuItem(
+                    text = { Text(stringResource(R.string.edit)) },
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_format_list_bulleted),
+                            contentDescription = null,
+                        )
+                    },
+                    onClick = {
+                        VibrationUtil.performHapticFeedback(view)
+                        onToggleMultiSelect()
+                        expanded = false
+                    },
+                )
+                FloatingActionButtonMenuItem(
+                    text = { Text(stringResource(R.string.create_new_group)) },
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_add),
+                            contentDescription = null,
+                        )
+                    },
+                    onClick = {
+                        VibrationUtil.performHapticFeedback(view)
+                        onCreateGroup()
+                        expanded = false
+                    },
+                )
+                FloatingActionButtonMenuItem(
+                    text = { Text(stringResource(R.string.read_download_dir_title)) },
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_download),
+                            contentDescription = null,
+                        )
+                    },
+                    onClick = {
+                        VibrationUtil.performHapticFeedback(view)
+                        onImportDownloaded()
+                        expanded = false
+                    },
+                )
             }
+        }
 
     }
 }

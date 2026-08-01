@@ -2,7 +2,9 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.preview.getchupr
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import coil3.ImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.ImageRequest
@@ -46,6 +48,19 @@ internal fun getchuImageRequest(url: String?): ImageRequest {
     return ImageRequest.Builder(context)
         .data(url)
         .build()
+}
+
+@Composable
+internal fun rememberGetchuImageLoader(): ImageLoader {
+    val context = LocalContext.current
+    val isInspectionMode = LocalInspectionMode.current
+    return remember(context, isInspectionMode) {
+        if (isInspectionMode) {
+            ImageLoader.Builder(context).build()
+        } else {
+            createGetchuImageLoader(context)
+        }
+    }
 }
 
 internal fun createGetchuImageLoader(context: Context): ImageLoader {

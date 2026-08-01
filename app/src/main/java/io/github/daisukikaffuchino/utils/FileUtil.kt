@@ -2,7 +2,15 @@ package io.github.daisukikaffuchino.utils
 
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.content.ContentResolver
+import android.content.Context
+import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmapOrNull
+import androidx.core.net.toUri
+import io.github.daisukikaffuchino.han1meviewer.FILE_PROVIDER_AUTHORITY
+import io.github.daisukikaffuchino.han1meviewer.HJson
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.decodeFromStream
 import java.io.File
 import java.io.OutputStream
 
@@ -39,3 +47,41 @@ fun Drawable.saveTo(
         }
     } == true
 }
+
+/**
+ * Validates a downloaded video and returns a URI for LocalUriHandler.
+ */
+fun Context.getDownloadedHanimeVideoUri(
+    uri: String,
+    onFileNotFound: (() -> Unit)? = null,
+): String? {
+    val videoUri = uri.toUri()
+    if (videoUri.scheme == ContentResolver.SCHEME_CONTENT) {
+        try {
+            contentResolver.openFileDescriptor(videoUri, "r")?.use { pfd ->
+                if (pfd.statSize <= 0) {
+                    onFileNotFound?.invoke()
+                    return null
+                }
+            }
+        } catch (_: Exception) {
+            onFileNotFound?.invoke()
+            return null
+        }
+        return videoUri.toString()
+    }
+
+    val videoFile = File(videoUri.path ?: "")
+    if (!videoFile.exists()) {
+        onFileNotFound?.invoke()
+        return null
+    }
+    return FileProvider.getUriForFile(this, FILE_PROVIDER_AUTHORITY, videoFile).toString()
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+inline fun <reified T> loadAssetAs(filePath: String): T? = runCatching {
+    applicationContext.assets.open(filePath).use { inputStream ->
+        HJson.decodeFromStream<T>(inputStream)
+    }
+}.getOrNull()

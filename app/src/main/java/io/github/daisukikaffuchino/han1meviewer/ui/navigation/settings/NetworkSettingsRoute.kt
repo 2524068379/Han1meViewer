@@ -14,13 +14,14 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.core.content.edit
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.Parser
 import io.github.daisukikaffuchino.han1meviewer.logic.network.DohConfig
@@ -41,22 +42,7 @@ import io.github.daisukikaffuchino.utils.SonnerToast
 import okhttp3.Request
 import java.net.InetAddress
 import java.util.concurrent.Executors
-
-private const val NETWORK_PROXY_TYPE = "proxy_type"
-private const val NETWORK_PROXY_IP = "proxy_ip"
-private const val NETWORK_PROXY_PORT = "proxy_port"
-private const val NETWORK_DOMAIN_NAME = "domain_name"
-private const val NETWORK_SELECTED_BASE_URL = "selectedBaseUrl"
-private const val NETWORK_USE_CUSTOM_MIRROR_SITE = "use_custom_mirror_site"
-private const val NETWORK_CUSTOM_MIRROR_SITE = "custom_mirror_site"
-private const val NETWORK_APPEND_CUSTOM_MIRROR_PATH = "append_custom_mirror_path"
-private const val NETWORK_USE_BUILT_IN_HOSTS = "use_built_in_hosts"
-private const val NETWORK_CUSTOM_HOSTS_DATA = "custom_hosts_data"
-private const val NETWORK_USE_DOH = "use_doh"
-private const val NETWORK_DOH_PRESET = "doh_preset"
-private const val NETWORK_DOH_CUSTOM_URL = "doh_custom_url"
-private const val NETWORK_DOH_BOOTSTRAP_IPS = "doh_bootstrap_ips"
-private const val NETWORK_DOH_TIMEOUT_SECONDS = "doh_timeout_seconds"
+import kotlinx.coroutines.launch
 
 private enum class DohConflictTarget {
     EnableDoH,
@@ -66,8 +52,9 @@ private enum class DohConflictTarget {
 @Composable
 fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
     val context = LocalContext.current
-    var refreshKey by remember { mutableIntStateOf(0) }
-    var currentHost by remember { mutableStateOf(Preferences.baseUrl) }
+    val coroutineScope = rememberCoroutineScope()
+    val settings by SettingsRepository.settings.collectAsStateWithLifecycle()
+    var currentHost by remember { mutableStateOf(SettingsRepository.baseUrl) }
     var isDelayTesting by remember { mutableStateOf(false) }
     var isDohTesting by remember { mutableStateOf(false) }
     var isCustomMirrorTesting by remember { mutableStateOf(false) }
@@ -80,22 +67,24 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
     var showDohConflictConfirm by remember { mutableStateOf(false) }
     var showSocksWarning by remember { mutableStateOf(false) }
     var pendingDomainValue by remember { mutableStateOf("") }
-    var pendingUseCustomMirrorSite by remember { mutableStateOf(Preferences.useCustomMirrorSite) }
-    var pendingCustomMirrorSite by remember { mutableStateOf(Preferences.customMirrorSite) }
-    var pendingAppendCustomMirrorPath by remember { mutableStateOf(Preferences.appendCustomMirrorPath) }
+    var pendingUseCustomMirrorSite by remember { mutableStateOf(SettingsRepository.useCustomMirrorSite) }
+    var pendingCustomMirrorSite by remember { mutableStateOf(SettingsRepository.customMirrorSite) }
+    var pendingAppendCustomMirrorPath by remember { mutableStateOf(SettingsRepository.appendCustomMirrorPath) }
     var pendingDohConflictTarget by remember { mutableStateOf(DohConflictTarget.EnableDoH) }
-    var pendingDohEnabled by remember { mutableStateOf(Preferences.useDoH) }
-    var pendingDohPreset by remember { mutableStateOf(Preferences.dohPreset) }
-    var pendingDohCustomUrl by remember { mutableStateOf(Preferences.dohCustomUrl) }
-    var pendingDohBootstrapIps by remember { mutableStateOf(Preferences.dohBootstrapIps) }
-    var pendingDohTimeoutSeconds by remember { mutableIntStateOf(Preferences.dohTimeoutSeconds) }
+    var pendingDohEnabled by remember { mutableStateOf(SettingsRepository.useDoH) }
+    var pendingDohPreset by remember { mutableStateOf(SettingsRepository.dohPreset) }
+    var pendingDohCustomUrl by remember { mutableStateOf(SettingsRepository.dohCustomUrl) }
+    var pendingDohBootstrapIps by remember { mutableStateOf(SettingsRepository.dohBootstrapIps) }
+    var pendingDohTimeoutSeconds by remember { mutableIntStateOf(SettingsRepository.dohTimeoutSeconds) }
     val delayResults = remember { mutableStateListOf<DelayResultUi>() }
     val dohTestResults = remember { mutableStateListOf<DohTestResultUi>() }
     val delayHandler = remember { Handler(Looper.getMainLooper()) }
     val dohHandler = remember { Handler(Looper.getMainLooper()) }
     val executor = remember { Executors.newCachedThreadPool() }
-    val uiState = remember(refreshKey, context) { buildNetworkSettingsUiState(context) }
+    val uiState = remember(settings, context) { buildNetworkSettingsUiState(context) }
     val networkTimeoutText = stringResource(R.string.network_timeout_text)
+    val customMirrorInvalidText = stringResource(R.string.custom_mirror_site_invalid)
+    val customMirrorTestingText = stringResource(R.string.custom_mirror_site_testing)
     fun stopDelayTest() {
         isDelayTesting = false
         delayHandler.removeCallbacksAndMessages(null)
@@ -138,8 +127,8 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
 
     fun runDohTest() {
         if (isDohTesting) return
-        val host = Preferences.baseUrl.toUri().host ?: applicationContext.getString(R.string.unknow)
-        currentHost = Preferences.baseUrl
+        val host = SettingsRepository.baseUrl.toUri().host ?: applicationContext.getString(R.string.unknow)
+        currentHost = SettingsRepository.baseUrl
         dohTestResults.clear()
         isDohTesting = true
         executor.execute {
@@ -189,26 +178,26 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
         dohTestResults = dohTestResults,
         isDelayTesting = isDelayTesting,
         isDohTesting = isDohTesting,
-        proxyType = Preferences.proxyType,
-        proxyIp = Preferences.proxyIp,
-        proxyPort = Preferences.proxyPort,
-        dohEnabled = Preferences.useDoH,
-        dohPreset = Preferences.dohPreset,
-        dohCustomUrl = Preferences.dohCustomUrl,
-        dohBootstrapIps = Preferences.dohBootstrapIps,
-        dohTimeoutSeconds = Preferences.dohTimeoutSeconds,
-        useCustomMirrorSite = Preferences.useCustomMirrorSite,
-        customMirrorSite = Preferences.customMirrorSite,
-        appendCustomMirrorPath = Preferences.appendCustomMirrorPath,
+        proxyType = SettingsRepository.proxyType,
+        proxyIp = SettingsRepository.proxyIp,
+        proxyPort = SettingsRepository.proxyPort,
+        dohEnabled = SettingsRepository.useDoH,
+        dohPreset = SettingsRepository.dohPreset,
+        dohCustomUrl = SettingsRepository.dohCustomUrl,
+        dohBootstrapIps = SettingsRepository.dohBootstrapIps,
+        dohTimeoutSeconds = SettingsRepository.dohTimeoutSeconds,
+        useCustomMirrorSite = SettingsRepository.useCustomMirrorSite,
+        customMirrorSite = SettingsRepository.customMirrorSite,
+        appendCustomMirrorPath = SettingsRepository.appendCustomMirrorPath,
         customMirrorTestResult = customMirrorTestResult,
         isCustomMirrorTesting = isCustomMirrorTesting,
         onDomainChange = { newValue ->
-            val origin = Preferences.baseUrl
+            val origin = SettingsRepository.baseUrl
             if (newValue != origin) {
                 pendingDomainValue = newValue
                 pendingUseCustomMirrorSite = false
-                pendingCustomMirrorSite = Preferences.customMirrorSite
-                pendingAppendCustomMirrorPath = Preferences.appendCustomMirrorPath
+                pendingCustomMirrorSite = SettingsRepository.customMirrorSite
+                pendingAppendCustomMirrorPath = SettingsRepository.appendCustomMirrorPath
                 showDomainRestartConfirm = true
             }
         },
@@ -219,9 +208,9 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
                 return@NetworkSettingsScreen
             }
             val customMirrorSite = normalizedUrl.orEmpty()
-            if (enabled != Preferences.useCustomMirrorSite ||
-                customMirrorSite != Preferences.customMirrorSite ||
-                appendPath != Preferences.appendCustomMirrorPath
+            if (enabled != SettingsRepository.useCustomMirrorSite ||
+                customMirrorSite != SettingsRepository.customMirrorSite ||
+                appendPath != SettingsRepository.appendCustomMirrorPath
             ) {
                 pendingUseCustomMirrorSite = enabled
                 pendingCustomMirrorSite = customMirrorSite
@@ -236,12 +225,12 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
         onTestCustomMirrorSite = { url, appendPath ->
             val normalizedUrl = normalizeCustomMirrorSite(url)
             if (normalizedUrl == null) {
-                customMirrorTestResult = context.getString(R.string.custom_mirror_site_invalid)
+                customMirrorTestResult = customMirrorInvalidText
                 return@NetworkSettingsScreen
             }
             if (isCustomMirrorTesting) return@NetworkSettingsScreen
             isCustomMirrorTesting = true
-            customMirrorTestResult = context.getString(R.string.custom_mirror_site_testing)
+            customMirrorTestResult = customMirrorTestingText
             executor.execute {
                 val result = testCustomMirrorSite(context, normalizedUrl, appendPath)
                 Handler(Looper.getMainLooper()).post {
@@ -251,14 +240,15 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
             }
         },
         onUseBuiltInHostsChange = { value ->
-            if (value && Preferences.useDoH) {
+            if (value && SettingsRepository.useDoH) {
                 showDohConflictConfirm = true
                 pendingDohConflictTarget = DohConflictTarget.EnableBuiltInHosts
                 return@NetworkSettingsScreen
             }
-            Preferences.preferenceSp.edit { putBoolean(NETWORK_USE_BUILT_IN_HOSTS, value) }
-            refreshKey++
-            showHostsRestartConfirm = true
+            coroutineScope.launch {
+                SettingsRepository.update { it.copy(useBuiltInHosts = value) }
+                showHostsRestartConfirm = true
+            }
         },
         onSaveCustomHosts = { data ->
             val errors = HDns.validateCustomHosts(data)
@@ -266,41 +256,33 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
                 showCustomHostsValidationError = errors
                 return@NetworkSettingsScreen
             }
-            Preferences.preferenceSp.edit(commit = true) {
-                putString(NETWORK_CUSTOM_HOSTS_DATA, data)
-            }
-            refreshKey++
-            if (Preferences.useBuiltInHosts) {
-                HanimeNetwork.rebuildNetwork()
+            coroutineScope.launch {
+                SettingsRepository.update { it.copy(customHostsData = data) }
+                if (SettingsRepository.useBuiltInHosts) HanimeNetwork.rebuildNetwork()
             }
         },
-        customHostsData = Preferences.customHostsData,
+        customHostsData = SettingsRepository.customHostsData,
         onSaveDohSettings = { enabled, preset, url, bootstrapIps, timeoutSeconds ->
             pendingDohEnabled = enabled
             pendingDohPreset = preset
             pendingDohCustomUrl = url
             pendingDohBootstrapIps = bootstrapIps
             pendingDohTimeoutSeconds = timeoutSeconds
-            if (enabled && Preferences.useBuiltInHosts) {
+            if (enabled && SettingsRepository.useBuiltInHosts) {
                 showDohConflictConfirm = true
                 pendingDohConflictTarget = DohConflictTarget.EnableDoH
                 return@NetworkSettingsScreen
             }
-            Preferences.preferenceSp.edit(commit = true) {
-                putBoolean(NETWORK_USE_DOH, enabled)
-                putString(NETWORK_DOH_PRESET, preset)
-                putString(NETWORK_DOH_CUSTOM_URL, url)
-                putString(NETWORK_DOH_BOOTSTRAP_IPS, bootstrapIps)
-                putInt(NETWORK_DOH_TIMEOUT_SECONDS, timeoutSeconds.coerceIn(1, 60))
+            coroutineScope.launch {
+                SettingsRepository.update { it.copy(useDoH = enabled, dohPreset = preset, dohCustomUrl = url, dohBootstrapIps = bootstrapIps, dohTimeoutSeconds = timeoutSeconds.coerceIn(1, 60)) }
+                currentHost = SettingsRepository.baseUrl
+                HanimeNetwork.rebuildNetwork()
             }
-            currentHost = Preferences.baseUrl
-            refreshKey++
-            HanimeNetwork.rebuildNetwork()
         },
         onOpenDelayTest = {
             val host =
-                Preferences.baseUrl.toUri().host ?: applicationContext.getString(R.string.unknow)
-            currentHost = Preferences.baseUrl
+                SettingsRepository.baseUrl.toUri().host ?: applicationContext.getString(R.string.unknow)
+            currentHost = SettingsRepository.baseUrl
             delayResults.clear()
             isDelayTesting = true
             executor.execute {
@@ -332,14 +314,11 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
             if (type == HProxySelector.TYPE_SOCKS) {
                 showSocksWarning = true
             }
-            Preferences.preferenceSp.edit(commit = true) {
-                putInt(NETWORK_PROXY_TYPE, type)
-                putString(NETWORK_PROXY_IP, ip)
-                putInt(NETWORK_PROXY_PORT, port)
+            coroutineScope.launch {
+                SettingsRepository.update { it.copy(proxyType = io.github.daisukikaffuchino.han1meviewer.logic.model.ProxyType.fromId(type), proxyIp = ip, proxyPort = port) }
+                HProxySelector.rebuildNetwork()
+                HanimeNetwork.rebuildNetwork()
             }
-            HProxySelector.rebuildNetwork()
-            HanimeNetwork.rebuildNetwork()
-            refreshKey++
         },
         embedded = embedded,
     )
@@ -352,23 +331,25 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
         dismissText = stringResource(R.string.cancel),
         cancelable = false,
         onConfirm = {
-            Preferences.preferenceSp.edit(commit = true) {
-                if (pendingDomainValue.isNotEmpty()) {
-                    putString(NETWORK_DOMAIN_NAME, pendingDomainValue)
-                    putString(NETWORK_SELECTED_BASE_URL, pendingDomainValue)
+            coroutineScope.launch {
+                SettingsRepository.update {
+                    it.copy(
+                        domainName = pendingDomainValue.ifEmpty { it.domainName },
+                        selectedBaseUrl = pendingDomainValue.ifEmpty { it.selectedBaseUrl },
+                        useCustomMirrorSite = pendingUseCustomMirrorSite,
+                        customMirrorSite = pendingCustomMirrorSite,
+                        appendCustomMirrorPath = pendingAppendCustomMirrorPath,
+                    )
                 }
-                putBoolean(NETWORK_USE_CUSTOM_MIRROR_SITE, pendingUseCustomMirrorSite)
-                putString(NETWORK_CUSTOM_MIRROR_SITE, pendingCustomMirrorSite)
-                putBoolean(NETWORK_APPEND_CUSTOM_MIRROR_PATH, pendingAppendCustomMirrorPath)
+                logout()
+                ActivityManager.restart(killProcess = true)
             }
-            logout()
-            ActivityManager.restart(killProcess = true)
         },
         onDismiss = {
             pendingDomainValue = ""
-            pendingUseCustomMirrorSite = Preferences.useCustomMirrorSite
-            pendingCustomMirrorSite = Preferences.customMirrorSite
-            pendingAppendCustomMirrorPath = Preferences.appendCustomMirrorPath
+            pendingUseCustomMirrorSite = SettingsRepository.useCustomMirrorSite
+            pendingCustomMirrorSite = SettingsRepository.customMirrorSite
+            pendingAppendCustomMirrorPath = SettingsRepository.appendCustomMirrorPath
             showDomainRestartConfirm = false
         },
     )
@@ -423,9 +404,9 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
             showDomainRestartConfirm = true
         },
         onDismiss = {
-            pendingUseCustomMirrorSite = Preferences.useCustomMirrorSite
-            pendingCustomMirrorSite = Preferences.customMirrorSite
-            pendingAppendCustomMirrorPath = Preferences.appendCustomMirrorPath
+            pendingUseCustomMirrorSite = SettingsRepository.useCustomMirrorSite
+            pendingCustomMirrorSite = SettingsRepository.customMirrorSite
+            pendingAppendCustomMirrorPath = SettingsRepository.appendCustomMirrorPath
             showCustomMirrorWarningConfirm = false
         },
     )
@@ -438,26 +419,16 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
         dismissText = stringResource(R.string.cancel),
         cancelable = false,
         onConfirm = {
-            Preferences.preferenceSp.edit(commit = true) {
-                when (pendingDohConflictTarget) {
-                    DohConflictTarget.EnableDoH -> {
-                        putBoolean(NETWORK_USE_BUILT_IN_HOSTS, false)
-                        putBoolean(NETWORK_USE_DOH, pendingDohEnabled)
-                        putString(NETWORK_DOH_PRESET, pendingDohPreset)
-                        putString(NETWORK_DOH_CUSTOM_URL, pendingDohCustomUrl)
-                        putString(NETWORK_DOH_BOOTSTRAP_IPS, pendingDohBootstrapIps)
-                        putInt(NETWORK_DOH_TIMEOUT_SECONDS, pendingDohTimeoutSeconds.coerceIn(1, 60))
-                    }
-
-                    DohConflictTarget.EnableBuiltInHosts -> {
-                        putBoolean(NETWORK_USE_DOH, false)
-                        putBoolean(NETWORK_USE_BUILT_IN_HOSTS, true)
+            coroutineScope.launch {
+                SettingsRepository.update {
+                    when (pendingDohConflictTarget) {
+                        DohConflictTarget.EnableDoH -> it.copy(useBuiltInHosts = false, useDoH = pendingDohEnabled, dohPreset = pendingDohPreset, dohCustomUrl = pendingDohCustomUrl, dohBootstrapIps = pendingDohBootstrapIps, dohTimeoutSeconds = pendingDohTimeoutSeconds.coerceIn(1, 60))
+                        DohConflictTarget.EnableBuiltInHosts -> it.copy(useDoH = false, useBuiltInHosts = true)
                     }
                 }
+                showDohConflictConfirm = false
+                HanimeNetwork.rebuildNetwork()
             }
-            showDohConflictConfirm = false
-            refreshKey++
-            HanimeNetwork.rebuildNetwork()
         },
         onDismiss = { showDohConflictConfirm = false },
     )
@@ -475,31 +446,31 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
 
 private fun buildNetworkSettingsUiState(context: Context): NetworkSettingsUiState {
     return NetworkSettingsUiState(
-        domainName = Preferences.baseUrl,
-        domainDisplay = buildDomainOptions(context).firstOrNull { it.second == Preferences.baseUrl }?.first
-            ?: Preferences.baseUrl,
-        proxySummary = when (Preferences.proxyType) {
+        domainName = SettingsRepository.baseUrl,
+        domainDisplay = buildDomainOptions(context).firstOrNull { it.second == SettingsRepository.baseUrl }?.first
+            ?: SettingsRepository.baseUrl,
+        proxySummary = when (SettingsRepository.proxyType) {
             HProxySelector.TYPE_DIRECT -> context.getString(R.string.direct)
             HProxySelector.TYPE_SYSTEM -> context.getString(R.string.system_proxy)
             HProxySelector.TYPE_HTTP -> context.getString(
                 R.string.http_proxy,
-                Preferences.proxyIp,
-                Preferences.proxyPort
+                SettingsRepository.proxyIp,
+                SettingsRepository.proxyPort
             )
 
             HProxySelector.TYPE_SOCKS -> context.getString(
                 R.string.socks_proxy,
-                Preferences.proxyIp,
-                Preferences.proxyPort
+                SettingsRepository.proxyIp,
+                SettingsRepository.proxyPort
             )
 
             else -> context.getString(R.string.direct)
         },
-        useBuiltInHosts = Preferences.useBuiltInHosts,
-        useCustomMirrorSite = Preferences.useCustomMirrorSite,
-        customMirrorSite = Preferences.customMirrorSite,
-        appendCustomMirrorPath = Preferences.appendCustomMirrorPath,
-        useDoH = Preferences.useDoH,
+        useBuiltInHosts = SettingsRepository.useBuiltInHosts,
+        useCustomMirrorSite = SettingsRepository.useCustomMirrorSite,
+        customMirrorSite = SettingsRepository.customMirrorSite,
+        appendCustomMirrorPath = SettingsRepository.appendCustomMirrorPath,
+        useDoH = SettingsRepository.useDoH,
         dohSummary = buildDohSummary(context),
         delaySummary = context.getString(R.string.node_latency_sum),
     )
@@ -598,10 +569,10 @@ private fun buildCustomMirrorApiBaseUrl(homeUrl: String, appendPath: Boolean): S
 }
 
 private fun buildDohSummary(context: Context): String {
-    if (!Preferences.useDoH) return context.getString(R.string.doh_disabled_summary)
-    if (Preferences.useBuiltInHosts) return context.getString(R.string.doh_conflict_message)
-    val core = if (Preferences.dohPreset == "custom") {
-        Preferences.dohCustomUrl.ifBlank { context.getString(R.string.custom) }
+    if (!SettingsRepository.useDoH) return context.getString(R.string.doh_disabled_summary)
+    if (SettingsRepository.useBuiltInHosts) return context.getString(R.string.doh_conflict_message)
+    val core = if (SettingsRepository.dohPreset == "custom") {
+        SettingsRepository.dohCustomUrl.ifBlank { context.getString(R.string.custom) }
     } else {
         DohConfig.selectedPreset().title
     }

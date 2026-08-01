@@ -3,19 +3,33 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.video
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.os.Build
-import android.view.View
+import android.os.SystemClock
+import android.text.format.DateFormat
+import android.view.HapticFeedbackConstants
+import android.view.SurfaceHolder
+import android.view.SurfaceView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.AndroidExternalSurface
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,40 +39,37 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.automirrored.outlined.VolumeUp
-import androidx.compose.material.icons.outlined.Brightness7
-import androidx.compose.material.icons.outlined.FastForward
-import androidx.compose.material.icons.outlined.Fullscreen
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.LockOpen
-import androidx.compose.material.icons.outlined.Pause
-import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,28 +78,56 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import coil3.compose.AsyncImage
+import io.github.daisukikaffuchino.han1meviewer.R
+import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledTonalIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.player.PlaybackEngine
+import io.github.daisukikaffuchino.han1meviewer.ui.player.PlaybackQuality
+import io.github.daisukikaffuchino.han1meviewer.ui.player.PlayerDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
+import io.github.daisukikaffuchino.utils.SonnerToast
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.util.Date
+import kotlin.math.abs
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun VideoPlayerUi(
     modifier: Modifier = Modifier,
-    playerView: View? = null,
-    title: String = "[中字候补] 一眼顶针，鉴定为纯纯的初生",
-    currentTime: String = "12:36",
-    totalTime: String = "24:12",
-    progress: Float = 0.45f,
-    bufferedProgress: Float = 0.72f,
+    playbackEngine: PlaybackEngine? = null,
+    posterUrl: String? = null,
+    title: String,
+    currentTime: String,
+    totalTime: String,
+    progress: Float,
+    bufferedProgress: Float,
+    currentVolume: Float,
+    currentBrightness: Float,
     showControls: Boolean = true,
+    isFullscreen: Boolean = false,
     isPlaying: Boolean = false,
     isLocked: Boolean = false,
+    showPoster: Boolean = false,
     showResumeButton: Boolean = false,
     showLoading: Boolean = false,
     showRetry: Boolean = false,
@@ -98,144 +137,448 @@ fun VideoPlayerUi(
     onFullscreenClick: () -> Unit = {},
     onLockClick: () -> Unit = {},
     onProgressChange: (Float) -> Unit = {},
+    onResumeClick: () -> Unit = onPlayClick,
+    onRetry: () -> Unit = {},
+    qualities: List<PlaybackQuality> = emptyList(),
+    selectedQuality: String? = null,
+    onQualitySelected: (Int) -> Unit = {},
+    playbackSpeed: Float = PlayerDefaults.DEFAULT_SPEED,
+    onPlaybackSpeedSelected: (Float) -> Unit = {},
+    superResolutionLabel: String,
+    superResolutionOptions: List<String> = emptyList(),
+    selectedSuperResolutionIndex: Int = 0,
+    onSuperResolutionSelected: (Int) -> Unit = {},
+    hKeyframeLabel: String,
+    isHKeyframesEnabled: Boolean = true,
+    hKeyframeOptions: List<String> = emptyList(),
+    hKeyframes: List<HKeyframeEntity.Keyframe> = emptyList(),
+    isHKeyframeLocal: Boolean = false,
+    onHKeyframeSelected: (Int) -> Unit = {},
+    onHKeyframeUpdated: (HKeyframeEntity.Keyframe, HKeyframeEntity.Keyframe) -> Unit = { _, _ -> },
+    onHKeyframeDeleted: (HKeyframeEntity.Keyframe) -> Unit = {},
+    onHKeyframeLongPress: () -> Unit = {},
+    onLongPressStart: () -> Unit = {},
+    onLongPressEnd: () -> Unit = {},
+    onVolumeChange: (Float) -> Unit = {},
+    onBrightnessChange: (Float) -> Unit = {},
+    onProgressGesture: (Float) -> Unit = onProgressChange,
+    progressGestureSensitivity: Float = PlayerDefaults.DEFAULT_PROGRESS_SLIDE_SENSITIVITY.toFloat(),
+    countdownLabel: String? = null,
+    videoAspectRatio: Float = 16f / 9f,
 ) {
     var showControlsState by remember { mutableStateOf(true) }
+    var gestureType by remember { mutableStateOf<GestureIndicatorType?>(null) }
+    var gesturePercent by remember { mutableFloatStateOf(0.5f) }
+    var dragStartedOnLeft by remember { mutableStateOf(true) }
+    var progressDirection by remember { mutableStateOf<ProgressGestureDirection?>(null) }
+    var isProgressGestureActive by remember { mutableStateOf(false) }
+    var showLongPressSpeedHint by remember { mutableStateOf(false) }
+    var suppressTapUntilMs by remember { mutableLongStateOf(0L) }
+    var activeSidePanel by remember { mutableStateOf<PlayerSidePanel?>(null) }
+    var displayedSidePanel by remember { mutableStateOf<PlayerSidePanel?>(null) }
+    var showUnlockButton by remember { mutableStateOf(false) }
+    var unlockButtonTimeoutToken by remember { mutableIntStateOf(0) }
+    val context = LocalContext.current
+    val view = LocalView.current
+    var deviceTime by remember(context) {
+        mutableStateOf(DateFormat.getTimeFormat(context).format(Date()))
+    }
 
-    LaunchedEffect(showControlsState, isPlaying) {
-        if (showControlsState && isPlaying) {
-            kotlinx.coroutines.delay(3000)
+    LaunchedEffect(context) {
+        while (true) {
+            deviceTime = DateFormat.getTimeFormat(context).format(Date())
+            delay(60_000L.milliseconds)
+        }
+    }
+
+    LaunchedEffect(showControlsState, isPlaying, activeSidePanel) {
+        if (showControlsState && isPlaying && activeSidePanel == null) {
+            delay(3000.milliseconds)
             showControlsState = false
         }
     }
 
-    val effectiveShowControls = showControlsState
+    val effectiveShowControls = showControls && showControlsState && !isLocked
+    val playerUiVisible = effectiveShowControls && activeSidePanel == null
+    val speedSelectedIndex = PlayerDefaults.speeds.indexOfFirst { it == playbackSpeed }
+        .takeIf { it >= 0 }
+        ?: PlayerDefaults.speeds.indexOfFirst { it == PlayerDefaults.DEFAULT_SPEED }
+    val resolvedQualityLabel =
+        selectedQuality ?: qualities.lastOrNull()?.label
+        ?: stringResource(R.string.player_auto_quality)
+    val qualitySelectedIndex = qualities.indexOfFirst { it.label == resolvedQualityLabel }
+    val latestProgress by rememberUpdatedState(progress)
+    val latestVolume by rememberUpdatedState(currentVolume)
+    val latestBrightness by rememberUpdatedState(currentBrightness)
+    val latestProgressSensitivity by rememberUpdatedState(progressGestureSensitivity)
+    val latestOnProgressGesture by rememberUpdatedState(onProgressGesture)
+    val latestOnVolumeChange by rememberUpdatedState(onVolumeChange)
+    val latestOnBrightnessChange by rememberUpdatedState(onBrightnessChange)
+    val latestIsPlaying by rememberUpdatedState(isPlaying)
+    val latestOnLongPressStart by rememberUpdatedState(onLongPressStart)
+    val latestOnLongPressEnd by rememberUpdatedState(onLongPressEnd)
+
+    LaunchedEffect(isPlaying) {
+        if (!isPlaying) showLongPressSpeedHint = false
+    }
+
+    LaunchedEffect(activeSidePanel) {
+        if (activeSidePanel != null) {
+            displayedSidePanel = activeSidePanel
+            showControlsState = true
+        }
+    }
+
+    LaunchedEffect(effectiveShowControls, isLocked) {
+        if (!effectiveShowControls || isLocked) {
+            activeSidePanel = null
+        }
+    }
+
+    LaunchedEffect(isLocked, unlockButtonTimeoutToken) {
+        if (isLocked) {
+            showControlsState = false
+            showUnlockButton = true
+            delay(3000.milliseconds)
+            showUnlockButton = false
+        } else {
+            showUnlockButton = false
+            showControlsState = true
+        }
+    }
 
     Box(
         modifier = modifier
             .background(Color.Black)
+            .pointerInput(isLocked) {
+                if (isLocked) {
+                    detectTapGestures(onTap = { unlockButtonTimeoutToken++ })
+                } else {
+                    val longPressTimeout = viewConfiguration.longPressTimeoutMillis
+                    detectTapGestures(
+                        onPress = {
+                            coroutineScope {
+                                var activated = false
+                                val activationJob = launch {
+                                    delay(longPressTimeout.milliseconds)
+                                    if (latestIsPlaying) {
+                                        activated = true
+                                        showLongPressSpeedHint = true
+                                        showControlsState = false
+                                        suppressTapUntilMs = Long.MAX_VALUE
+                                        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                        latestOnLongPressStart()
+                                    }
+                                }
+                                tryAwaitRelease()
+                                activationJob.cancel()
+                                if (activated) {
+                                    showLongPressSpeedHint = false
+                                    showControlsState = false
+                                    if (suppressTapUntilMs == Long.MAX_VALUE) {
+                                        suppressTapUntilMs = SystemClock.uptimeMillis() + 500L
+                                    }
+                                    latestOnLongPressEnd()
+                                }
+                            }
+                        },
+                        onTap = {
+                            if (SystemClock.uptimeMillis() <= suppressTapUntilMs) {
+                                suppressTapUntilMs = 0L
+                            } else {
+                                showControlsState = !showControlsState
+                            }
+                        },
+                        onDoubleTap = { onPlayClick() },
+                    )
+                }
+            }
     ) {
 
         /**
          * 视频渲染层
          */
-        if (playerView != null) {
-            AndroidView(
-                factory = { playerView },
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            val safeAspectRatio = if (videoAspectRatio > 0f) videoAspectRatio else 16f / 9f
+            val containerAspectRatio = if (maxHeight.value > 0f) {
+                maxWidth.value / maxHeight.value
+            } else {
+                safeAspectRatio
+            }
+            val videoModifier = if (safeAspectRatio >= containerAspectRatio) {
+                Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(safeAspectRatio)
+            } else {
+                Modifier
+                    .fillMaxHeight()
+                    .aspectRatio(safeAspectRatio)
+            }
+
+            if (playbackEngine != null) {
+                Box(
+                    modifier = videoModifier
+                        .background(Color.Black)
+                ) {
+                    if (playbackEngine is io.github.daisukikaffuchino.han1meviewer.ui.player.MpvPlaybackEngine) {
+                        AndroidView(
+                            modifier = Modifier.fillMaxSize(),
+                            factory = { context ->
+                                SurfaceView(context).apply {
+                                    holder.addCallback(object : SurfaceHolder.Callback {
+                                        override fun surfaceCreated(holder: SurfaceHolder) {
+                                            playbackEngine.attachSurface(holder.surface)
+                                        }
+
+                                        override fun surfaceChanged(
+                                            holder: SurfaceHolder,
+                                            format: Int,
+                                            width: Int,
+                                            height: Int,
+                                        ) {
+                                            playbackEngine.updateSurfaceSize(width, height)
+                                        }
+
+                                        override fun surfaceDestroyed(holder: SurfaceHolder) {
+                                            playbackEngine.detachSurface(holder.surface)
+                                        }
+                                    })
+                                }
+                            },
+                        )
+                    } else {
+                        AndroidExternalSurface(
+                            modifier = Modifier.fillMaxSize(),
+                            isOpaque = true,
+                        ) {
+                            onSurface { surface, _, _ ->
+                                playbackEngine.attachSurface(surface)
+                                surface.onDestroyed {
+                                    playbackEngine.detachSurface(surface)
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                Box(
+                    modifier = videoModifier.background(Color.Black)
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(isLocked) {
+                    if (!isLocked) {
+                        var gestureStartProgress = 0f
+                        var gestureStartVolume = 0f
+                        var gestureStartBrightness = 0f
+                        detectDragGestures(
+                            onDragStart = { offset ->
+                                dragStartedOnLeft = offset.x < size.width / 2f
+                                gestureType = null
+                                progressDirection = null
+                                isProgressGestureActive = false
+                                gestureStartProgress = latestProgress
+                                gestureStartVolume = latestVolume
+                                gestureStartBrightness = latestBrightness
+                            },
+                            onDragEnd = {
+                                gestureType = null
+                                isProgressGestureActive = false
+                            },
+                            onDragCancel = {
+                                gestureType = null
+                                isProgressGestureActive = false
+                            },
+                            onDrag = { _, dragAmount ->
+                                val type =
+                                    gestureType ?: if (abs(dragAmount.x) > abs(dragAmount.y)) {
+                                        GestureIndicatorType.Progress
+                                    } else if (dragStartedOnLeft) {
+                                        GestureIndicatorType.Brightness
+                                    } else {
+                                        GestureIndicatorType.Volume
+                                    }
+                                if (gestureType == null) {
+                                    gesturePercent = when (type) {
+                                        GestureIndicatorType.Progress -> gestureStartProgress
+                                        GestureIndicatorType.Brightness -> gestureStartBrightness
+                                        GestureIndicatorType.Volume -> gestureStartVolume
+                                    }
+                                    isProgressGestureActive = type == GestureIndicatorType.Progress
+                                }
+                                gestureType = type
+                                val next = when (type) {
+                                    GestureIndicatorType.Progress -> {
+                                        progressDirection = if (dragAmount.x < 0f) {
+                                            ProgressGestureDirection.Backward
+                                        } else {
+                                            ProgressGestureDirection.Forward
+                                        }
+                                        (gesturePercent + dragAmount.x /
+                                                (size.width * latestProgressSensitivity.coerceAtLeast(
+                                                    1f
+                                                )))
+                                            .coerceIn(0f, 1f)
+                                    }
+
+                                    else ->
+                                        (gesturePercent - dragAmount.y /
+                                                (size.height * 0.8f).coerceAtLeast(1f)).coerceIn(
+                                            0f,
+                                            1f
+                                        )
+                                }
+                                gesturePercent = next
+                                when (type) {
+                                    GestureIndicatorType.Brightness -> latestOnBrightnessChange(next)
+                                    GestureIndicatorType.Volume -> latestOnVolumeChange(next)
+                                    GestureIndicatorType.Progress -> latestOnProgressGesture(next)
+                                }
+                            },
+                        )
+                    }
+                },
+        )
+
+        gestureType?.let { type ->
+            GestureIndicatorOverlay(
+                visible = true,
+                type = type,
+                percent = gesturePercent,
+                progressDirection = progressDirection,
                 modifier = Modifier.fillMaxSize(),
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black)
             )
         }
 
         /**
          * 封面
          */
-        AsyncImage(
-            model = null,
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-        )
+        if (showPoster && posterUrl != null) {
+            AsyncImage(
+                model = posterUrl,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
+        }
 
         /**
          * 顶部渐变
          */
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Black.copy(alpha = 0.75f),
-                            Color.Transparent
+        AnimatedVisibility(
+            visible = playerUiVisible,
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Black.copy(alpha = 0.75f),
+                                Color.Transparent
+                            )
                         )
                     )
-                )
-        )
+            )
+        }
 
         /**
          * 底部渐变
          */
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp)
-                .align(Alignment.BottomCenter)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.Black.copy(alpha = 0.82f)
+        AnimatedVisibility(
+            visible = playerUiVisible,
+            modifier = Modifier.align(Alignment.BottomCenter),
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.82f)
+                            )
                         )
                     )
-                )
-        )
+            )
+        }
 
         /**
          * 顶部控制栏
          */
         AnimatedVisibility(
-            visible = effectiveShowControls,
-            modifier = Modifier.align(Alignment.TopCenter)
+            visible = playerUiVisible,
+            modifier = Modifier.align(Alignment.TopCenter),
+            enter = fadeIn(),
+            exit = fadeOut(),
         ) {
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .statusBarsPadding()
+                    .then(if (isFullscreen) Modifier.statusBarsPadding() else Modifier)
                     .padding(
                         horizontal = 16.dp,
-                        vertical = 8.dp
+                        vertical = 4.dp,
                     )
             ) {
 
                 /**
                  * Background
                  */
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .clip(RoundedCornerShape(20.dp))
-                ) {
-
+                if (isFullscreen) {
                     Box(
                         modifier = Modifier
                             .matchParentSize()
-                            .then(
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                    Modifier.graphicsLayer {
-                                        renderEffect =
-                                            RenderEffect
-                                                .createBlurEffect(
-                                                    32f,
-                                                    32f,
-                                                    Shader.TileMode.CLAMP
-                                                )
-                                                .asComposeRenderEffect()
+                            .clip(RoundedCornerShape(20.dp))
+                    ) {
+
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .then(
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                        Modifier.graphicsLayer {
+                                            renderEffect =
+                                                RenderEffect
+                                                    .createBlurEffect(
+                                                        32f,
+                                                        32f,
+                                                        Shader.TileMode.CLAMP
+                                                    )
+                                                    .asComposeRenderEffect()
+                                        }
+                                    } else {
+                                        Modifier
                                     }
-                                } else {
-                                    Modifier
-                                }
-                            )
-                            .background(
-                                Color.Black.copy(alpha = 0.18f)
-                            )
-                    )
+                                )
+                                .background(
+                                    Color.Black.copy(alpha = 0.18f)
+                                )
+                        )
 
-                    Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .border(
-                                1.dp,
-                                Color.White.copy(alpha = 0.06f),
-                                RoundedCornerShape(20.dp)
-                            )
-                    )
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .border(
+                                    1.dp,
+                                    Color.White.copy(alpha = 0.06f),
+                                    RoundedCornerShape(20.dp)
+                                )
+                        )
+                    }
                 }
 
                 /**
@@ -260,7 +603,7 @@ fun VideoPlayerUi(
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                            painter = painterResource(R.drawable.ic_arrow_back_ios),
                             contentDescription = null,
                             tint = Color.White,
                             modifier = Modifier.size(20.dp)
@@ -277,10 +620,10 @@ fun VideoPlayerUi(
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Home,
+                            painter = painterResource(R.drawable.ic_home),
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                     }
 
@@ -300,64 +643,116 @@ fun VideoPlayerUi(
 
                     Spacer(modifier = Modifier.width(10.dp))
 
-                    /**
-                     * Small Status Chips
-                     */
-                    CompactChip("H关键帧")
+                    if (isFullscreen) {
+                        PlayerMenuChip(
+                            label = hKeyframeLabel,
+                            onClick = {
+                                if (isHKeyframesEnabled) {
+                                    activeSidePanel = PlayerSidePanel.HKeyframe
+                                } else {
+                                    SonnerToast.info(R.string.h_keyframes_not_enabled)
+                                }
+                            },
+                            onLongClick = {
+                                if (isHKeyframesEnabled) {
+                                    onHKeyframeLongPress()
+                                } else {
+                                    SonnerToast.info(R.string.h_keyframes_not_enabled)
+                                }
+                            },
+                        )
 
-                    Spacer(modifier = Modifier.width(6.dp))
-                    CompactChip("1.5x")
+                        if (superResolutionOptions.isNotEmpty()) {
+                            Spacer(modifier = Modifier.width(6.dp))
 
-                    Spacer(modifier = Modifier.width(6.dp))
+                            PlayerMenuChip(
+                                label = superResolutionLabel,
+                                onClick = { activeSidePanel = PlayerSidePanel.SuperResolution },
+                            )
 
-                    CompactChip("Anime4K")
 
-                    Spacer(modifier = Modifier.width(10.dp))
+                        }
 
-                    /**
-                     * Time
-                     */
-                    Text(
-                        text = "11:45",
-                        color = Color.White.copy(alpha = 0.72f),
-                        style = MaterialTheme.typography.labelSmall
-                    )
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = deviceTime,
+                                color = Color.White.copy(alpha = 0.72f),
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                            PlayerBatteryIndicator()
+                        }
+                    }
                 }
+            }
+        }
+
+        AnimatedVisibility(
+            visible = showLongPressSpeedHint,
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(start = 24.dp),
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = Color.Black.copy(alpha = 0.46f),
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_fast_forward),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(20.dp),
+                )
             }
         }
 
         /**
          * 中间播放按钮
          */
-        if (!isPlaying || effectiveShowControls) {
+        AnimatedVisibility(
+            visible =
+                !isLocked &&
+                        activeSidePanel == null &&
+                        gestureType == null &&
+                        (!isPlaying || effectiveShowControls),
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                if (showLoading) {
-                    LoadingIndicator()
+                if (showLoading && !isProgressGestureActive) {
+                    ContainedLoadingIndicator()
                 } else if (!isPlaying) {
-                    FilledIconButton(
+                    FilledTonalIconButton(
                         onClick = onPlayClick,
-                        modifier = Modifier.size(72.dp),
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.92f)
-                        )
+                        modifier = Modifier.size(72.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.PlayArrow,
+                            painter = painterResource(R.drawable.ic_play_arrow),
                             contentDescription = null,
                             modifier = Modifier.size(42.dp)
                         )
                     }
                 } else {
                     // Playing: small pause button when controls are visible
-                    IconButton(onClick = onPlayClick) {
+                    IconButton(
+                        onClick = onPlayClick,
+                        modifier = Modifier.size(72.dp)
+                    ) {
                         Icon(
-                            imageVector = Icons.Outlined.Pause,
+                            painter = painterResource(R.drawable.ic_pause),
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(42.dp)
                         )
                     }
                 }
@@ -368,8 +763,10 @@ fun VideoPlayerUi(
          * 锁定按钮
          */
         AnimatedVisibility(
-            visible = showControls,
-            modifier = Modifier.align(Alignment.CenterEnd)
+            visible = if (isLocked) showUnlockButton else playerUiVisible,
+            modifier = Modifier.align(Alignment.CenterEnd),
+            enter = fadeIn(),
+            exit = fadeOut(),
         ) {
             FilledIconButton(
                 onClick = onLockClick,
@@ -381,10 +778,10 @@ fun VideoPlayerUi(
                 )
             ) {
                 Icon(
-                    imageVector = if (isLocked)
-                        Icons.Outlined.Lock
+                    painter = if (isLocked)
+                        painterResource(R.drawable.ic_lock)
                     else
-                        Icons.Outlined.LockOpen,
+                        painterResource(R.drawable.ic_unlock),
                     contentDescription = null,
                     tint = Color.White
                 )
@@ -395,8 +792,10 @@ fun VideoPlayerUi(
          * 底部控制栏
          */
         AnimatedVisibility(
-            visible = showControls,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            visible = playerUiVisible,
+            modifier = Modifier.align(Alignment.BottomCenter),
+            enter = fadeIn(),
+            exit = fadeOut(),
         ) {
 
             Box(
@@ -405,7 +804,7 @@ fun VideoPlayerUi(
                     .navigationBarsPadding()
                     .padding(
                         horizontal = 18.dp,
-                        vertical = 10.dp
+                        vertical = 4.dp,
                     )
             ) {
 
@@ -487,14 +886,17 @@ fun VideoPlayerUi(
                          * Play
                          */
                         IconButton(
-                            onClick = {},
+                            onClick = onPlayClick,
                             modifier = Modifier.size(26.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.PlayArrow,
+                                painter = if (isPlaying)
+                                    painterResource(R.drawable.ic_pause)
+                                else
+                                    painterResource(R.drawable.ic_play_arrow),
                                 contentDescription = null,
                                 tint = Color.White,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         }
 
@@ -504,20 +906,27 @@ fun VideoPlayerUi(
                          * Time
                          */
                         Text(
-                            text = "$currentTime / $totalTime",
+                            text = stringResource(
+                                R.string.player_time_format,
+                                currentTime,
+                                totalTime
+                            ),
                             color = Color.White.copy(alpha = 0.88f),
                             style = MaterialTheme.typography.labelSmall
                         )
 
                         Spacer(modifier = Modifier.weight(1f))
 
-                        /**
-                         * Quality
-                         */
-                        Text(
-                            text = "1080P",
-                            color = Color.White.copy(alpha = 0.72f),
-                            style = MaterialTheme.typography.labelSmall
+                        PlayerMenuChip(
+                            label = stringResource(R.string.player_speed_format, playbackSpeed),
+                            onClick = { activeSidePanel = PlayerSidePanel.Speed },
+                        )
+
+                        Spacer(modifier = Modifier.width(6.dp))
+
+                        PlayerMenuChip(
+                            label = resolvedQualityLabel,
+                            onClick = { activeSidePanel = PlayerSidePanel.Quality },
                         )
 
                         Spacer(modifier = Modifier.width(2.dp))
@@ -530,10 +939,10 @@ fun VideoPlayerUi(
                             modifier = Modifier.size(26.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.Fullscreen,
+                                painter = painterResource(R.drawable.ic_fullscreen),
                                 contentDescription = null,
                                 tint = Color.White,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                     }
@@ -545,16 +954,18 @@ fun VideoPlayerUi(
          * Resume 按钮
          */
         AnimatedVisibility(
-            visible = showResumeButton,
+            visible = showResumeButton && activeSidePanel == null,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 92.dp)
+                .padding(bottom = 72.dp),
+            enter = fadeIn(),
+            exit = fadeOut(),
         ) {
             ElevatedButton(
-                onClick = {},
+                onClick = onResumeClick,
                 shape = RoundedCornerShape(50),
             ) {
-                Text("从头开始播放")
+                Text(stringResource(R.string.player_play_from_beginning))
             }
         }
 
@@ -562,39 +973,42 @@ fun VideoPlayerUi(
          * Retry
          */
         AnimatedVisibility(
-            visible = showRetry,
-            modifier = Modifier.align(Alignment.Center)
+            visible = showRetry && activeSidePanel == null,
+            modifier = Modifier.align(Alignment.Center),
+            enter = fadeIn(),
+            exit = fadeOut(),
         ) {
             Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = HanimeDefaults.Colors.pageSurface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
                 shape = RoundedCornerShape(28.dp)
             ) {
 
                 Column(
-                    modifier = Modifier.padding(
-                        horizontal = 28.dp,
-                        vertical = 24.dp
-                    ),
+                    modifier = Modifier.padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
                     Text(
-                        text = "视频加载失败",
+                        text = stringResource(R.string.video_loading_failed),
                         style = MaterialTheme.typography.titleMedium
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     FilledTonalButton(
-                        onClick = {}
+                        onClick = onRetry
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Refresh,
+                            painter = painterResource(R.drawable.ic_refresh),
                             contentDescription = null
                         )
 
                         Spacer(modifier = Modifier.width(6.dp))
 
-                        Text("点击重试")
+                        Text(stringResource(R.string.retry))
                     }
                 }
             }
@@ -604,20 +1018,22 @@ fun VideoPlayerUi(
          * Timer
          */
         AnimatedVisibility(
-            visible = showControls,
+            visible = countdownLabel != null && activeSidePanel == null,
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(
                     top = 90.dp,
                     start = 12.dp
-                )
+                ),
+            enter = fadeIn(),
+            exit = fadeOut(),
         ) {
             Surface(
                 shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.surface.copy(alpha = 0.18f)
             ) {
                 Text(
-                    text = "#9 尻\n9",
+                    text = countdownLabel.orEmpty(),
                     modifier = Modifier.padding(
                         horizontal = 12.dp,
                         vertical = 8.dp
@@ -627,36 +1043,356 @@ fun VideoPlayerUi(
                 )
             }
         }
+
+        AnimatedVisibility(
+            visible = activeSidePanel != null,
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) {
+                            activeSidePanel = null
+                        }
+                )
+
+            }
+        }
+
+        AnimatedVisibility(
+            visible = activeSidePanel != null,
+            enter = slideInHorizontally(initialOffsetX = { it }),
+            exit = slideOutHorizontally(targetOffsetX = { it }),
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                when (displayedSidePanel) {
+                    PlayerSidePanel.HKeyframe -> {
+                        PlayerSidePanelSheet(
+                            options = hKeyframeOptions,
+                            selectedIndex = null,
+                            panelWidth = 216.dp,
+                            hKeyframes = hKeyframes,
+                            isHKeyframeLocal = isHKeyframeLocal,
+                            emptyText = stringResource(R.string.here_is_empty) + "\n" +
+                                    stringResource(R.string.long_press_to_add_h_keyframe),
+                            onSelected = { index ->
+                                activeSidePanel = null
+                                onHKeyframeSelected(index)
+                            },
+                            onHKeyframeUpdated = onHKeyframeUpdated,
+                            onHKeyframeDeleted = onHKeyframeDeleted,
+                        )
+                    }
+
+                    PlayerSidePanel.Speed -> {
+                        PlayerSidePanelSheet(
+                            options = PlayerDefaults.speeds.map {
+                                stringResource(R.string.player_speed_format, it)
+                            },
+                            selectedIndex = speedSelectedIndex,
+                            panelWidth = 156.dp,
+                            onSelected = { index ->
+                                activeSidePanel = null
+                                onPlaybackSpeedSelected(PlayerDefaults.speeds[index])
+                            },
+                        )
+                    }
+
+                    PlayerSidePanel.SuperResolution -> {
+                        PlayerSidePanelSheet(
+                            options = superResolutionOptions,
+                            selectedIndex = selectedSuperResolutionIndex,
+                            panelWidth = 156.dp,
+                            onSelected = { index ->
+                                activeSidePanel = null
+                                onSuperResolutionSelected(index)
+                            },
+                        )
+                    }
+
+                    PlayerSidePanel.Quality -> {
+                        PlayerSidePanelSheet(
+                            options = qualities.map(PlaybackQuality::label),
+                            selectedIndex = qualitySelectedIndex.takeIf { it >= 0 },
+                            panelWidth = 156.dp,
+                            onSelected = { index ->
+                                activeSidePanel = null
+                                onQualitySelected(index)
+                            },
+                        )
+                    }
+
+                    null -> Unit
+                }
+            }
+        }
     }
 }
 
 @Composable
-private fun CompactChip(
-    text: String
+private fun PlayerMenuChip(
+    label: String,
+    onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
 ) {
-
+    val shape = RoundedCornerShape(10.dp)
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(
-                Color.White.copy(alpha = 0.08f)
+            .clip(shape)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick,
             )
+            .background(Color.White.copy(alpha = 0.08f))
             .border(
                 1.dp,
                 Color.White.copy(alpha = 0.06f),
-                RoundedCornerShape(10.dp)
+                shape,
             )
             .padding(
                 horizontal = 8.dp,
-                vertical = 4.dp
+                vertical = 4.dp,
             ),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
-
         Text(
-            text = text,
+            text = label,
             color = Color.White.copy(alpha = 0.88f),
-            style = MaterialTheme.typography.labelSmall
+            style = MaterialTheme.typography.labelSmall,
+        )
+    }
+}
+
+private enum class PlayerSidePanel {
+    HKeyframe,
+    Speed,
+    SuperResolution,
+    Quality,
+}
+
+@Composable
+private fun BoxScope.PlayerSidePanelSheet(
+    options: List<String>,
+    selectedIndex: Int?,
+    onSelected: (Int) -> Unit,
+    emptyText: String? = null,
+    panelWidth: Dp = 156.dp,
+    hKeyframes: List<HKeyframeEntity.Keyframe> = emptyList(),
+    isHKeyframeLocal: Boolean = false,
+    onHKeyframeUpdated: (HKeyframeEntity.Keyframe, HKeyframeEntity.Keyframe) -> Unit = { _, _ -> },
+    onHKeyframeDeleted: (HKeyframeEntity.Keyframe) -> Unit = {},
+) {
+    val isHKeyframePanel = hKeyframes.isNotEmpty() || isHKeyframeLocal || emptyText != null
+    var editingKeyframe by remember { mutableStateOf<HKeyframeEntity.Keyframe?>(null) }
+    var deletingKeyframe by remember { mutableStateOf<HKeyframeEntity.Keyframe?>(null) }
+    Box(
+        modifier = Modifier
+            .align(Alignment.CenterEnd)
+            .width(panelWidth)
+            .fillMaxHeight()
+    ) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .then(
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        Modifier.graphicsLayer {
+                            renderEffect = RenderEffect
+                                .createBlurEffect(32f, 32f, Shader.TileMode.CLAMP)
+                                .asComposeRenderEffect()
+                        }
+                    } else {
+                        Modifier
+                    }
+                )
+                .background(Color.White.copy(alpha = 0.84f))
+        )
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 6.dp, vertical = 12.dp),
+        ) {
+            if (isHKeyframePanel && hKeyframes.isNotEmpty()) {
+                itemsIndexed(hKeyframes) { index, keyframe ->
+                    val label = options.getOrNull(index).orEmpty()
+                    val separatorIndex = label.indexOf(' ')
+                    val marker = if (separatorIndex >= 0) {
+                        label.substring(0, separatorIndex)
+                    } else {
+                        stringResource(R.string.player_keyframe_index, index + 1)
+                    }
+                    val time =
+                        if (separatorIndex >= 0) label.substring(separatorIndex + 1) else label
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelected(index) }
+                            .padding(horizontal = 10.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = marker,
+                                color = Color.Black,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = time,
+                                color = Color.Black,
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                        }
+                        keyframe.prompt?.takeIf(String::isNotBlank)?.let { prompt ->
+                            Text(
+                                text = prompt,
+                                color = Color.Black.copy(alpha = 0.68f),
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                        if (isHKeyframeLocal) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End,
+                            ) {
+                                TextButton(onClick = { editingKeyframe = keyframe }) {
+                                    Text(stringResource(R.string.edit), color = Color.Black)
+                                }
+                                TextButton(onClick = { deletingKeyframe = keyframe }) {
+                                    Text(stringResource(R.string.delete), color = Color.Black)
+                                }
+                            }
+                        }
+                    }
+                }
+            } else if (options.isEmpty()) {
+                item {
+                    Text(
+                        text = emptyText.orEmpty(),
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 24.dp),
+                    )
+                }
+            } else {
+                itemsIndexed(options) { index, option ->
+                    val isSelected = index == selectedIndex
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelected(index) }
+                            .background(
+                                if (isSelected) {
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                                } else {
+                                    Color.Transparent
+                                }
+                            )
+                            .padding(vertical = 11.dp, horizontal = 10.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = option,
+                            color = Color.Black,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    editingKeyframe?.let { keyframe ->
+        var positionText by remember(keyframe) { mutableStateOf(keyframe.position.toString()) }
+        var promptText by remember(keyframe) { mutableStateOf(keyframe.prompt.orEmpty()) }
+        var isPositionError by remember(keyframe) { mutableStateOf(false) }
+        AlertDialog(
+            onDismissRequest = { editingKeyframe = null },
+            title = { Text(stringResource(R.string.modify_h_keyframe)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        value = positionText,
+                        onValueChange = {
+                            positionText = it
+                            isPositionError = false
+                        },
+                        label = { Text(stringResource(R.string.position_ms)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        isError = isPositionError,
+                        singleLine = true,
+                    )
+                    OutlinedTextField(
+                        value = promptText,
+                        onValueChange = { promptText = it },
+                        label = { Text(stringResource(R.string.prompt)) },
+                        maxLines = 3,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val position = positionText.toLongOrNull()
+                        if (position == null || position < 0L) {
+                            isPositionError = true
+                        } else {
+                            onHKeyframeUpdated(
+                                keyframe,
+                                keyframe.copy(
+                                    position = position,
+                                    prompt = promptText.ifBlank { null },
+                                ),
+                            )
+                            editingKeyframe = null
+                        }
+                    }
+                ) {
+                    Text(stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { editingKeyframe = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+        )
+    }
+
+    deletingKeyframe?.let { keyframe ->
+        AlertDialog(
+            onDismissRequest = { deletingKeyframe = null },
+            title = { Text(stringResource(R.string.sure_to_delete)) },
+            text = { Text(keyframe.position.toString()) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onHKeyframeDeleted(keyframe)
+                        deletingKeyframe = null
+                    }
+                ) {
+                    Text(stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { deletingKeyframe = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
         )
     }
 }
@@ -689,7 +1425,7 @@ fun PlayerSlider(
                  */
                 Box(
                     modifier = Modifier
-                        .size(14.dp)
+                        .size(15.dp)
                         .background(
                             Color.White.copy(alpha = 0.22f),
                             CircleShape
@@ -701,7 +1437,7 @@ fun PlayerSlider(
                  */
                 Box(
                     modifier = Modifier
-                        .size(8.dp)
+                        .size(9.dp)
                         .background(
                             Color.White,
                             CircleShape
@@ -776,24 +1512,30 @@ enum class GestureIndicatorType {
     Progress,
 }
 
+private enum class ProgressGestureDirection {
+    Backward,
+    Forward,
+}
+
 @Composable
-fun GestureIndicatorOverlay(
+private fun GestureIndicatorOverlay(
     visible: Boolean,
     type: GestureIndicatorType,
     percent: Float,
     modifier: Modifier = Modifier,
-    text: String = "${(percent * 100).toInt()}%"
+    progressDirection: ProgressGestureDirection? = null,
+    text: String? = null,
 ) {
+    val displayText = text ?: stringResource(
+        R.string.player_progress_percent,
+        (percent * 100).toInt(),
+    )
 
     AnimatedVisibility(
         visible = visible,
         modifier = modifier,
-        enter = fadeIn() + scaleIn(
-            initialScale = 0.92f
-        ),
-        exit = fadeOut() + scaleOut(
-            targetScale = 0.92f
-        )
+        enter = fadeIn(),
+        exit = fadeOut(),
     ) {
 
         Box(
@@ -876,38 +1618,38 @@ fun GestureIndicatorOverlay(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(
-                            horizontal = 20.dp,
-                            vertical = 22.dp
-                        ),
+                        .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
 
                     Icon(
-                        imageVector = when (type) {
-                            GestureIndicatorType.Brightness -> Icons.Outlined.Brightness7
-                            GestureIndicatorType.Volume -> Icons.AutoMirrored.Outlined.VolumeUp
-                            GestureIndicatorType.Progress -> Icons.Outlined.FastForward
+                        painter = when (type) {
+                            GestureIndicatorType.Brightness -> painterResource(R.drawable.ic_light_mode)
+                            GestureIndicatorType.Volume -> painterResource(R.drawable.ic_volume_up)
+                            GestureIndicatorType.Progress -> when (progressDirection) {
+                                ProgressGestureDirection.Backward -> painterResource(R.drawable.ic_fast_rewind)
+                                else -> painterResource(R.drawable.ic_fast_forward)
+                            }
                         },
                         contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(42.dp)
+                        modifier = Modifier.size(36.dp)
                     )
 
-                    Spacer(modifier = Modifier.height(18.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
                         text = when (type) {
-                            GestureIndicatorType.Brightness -> "亮度"
-                            GestureIndicatorType.Volume -> "音量"
-                            GestureIndicatorType.Progress -> "进度"
+                            GestureIndicatorType.Brightness -> stringResource(R.string.player_gesture_brightness)
+                            GestureIndicatorType.Volume -> stringResource(R.string.player_gesture_volume)
+                            GestureIndicatorType.Progress -> stringResource(R.string.player_gesture_progress)
                         },
                         color = Color.White.copy(alpha = 0.92f),
                         style = MaterialTheme.typography.titleMedium
                     )
 
-                    Spacer(modifier = Modifier.height(18.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     LinearProgressIndicator(
                         progress = { percent.coerceIn(0f, 1f) },
@@ -918,10 +1660,10 @@ fun GestureIndicatorOverlay(
                         trackColor = Color.White.copy(alpha = 0.12f),
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        text = text,
+                        text = displayText,
                         color = Color.White,
                         style = MaterialTheme.typography.headlineSmall
                     )
@@ -942,7 +1684,22 @@ private fun VideoPlayerUiPreview() {
     MaterialTheme(
         colorScheme = darkColorScheme()
     ) {
-        VideoPlayerUi()
+        VideoPlayerUiPreviewContent()
+    }
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF000000,
+    widthDp = 960,
+    heightDp = 540,
+)
+@Composable
+private fun VideoPlayerUiFullscreenPreview() {
+    MaterialTheme(
+        colorScheme = darkColorScheme(),
+    ) {
+        VideoPlayerUiPreviewContent(isFullscreen = true, isPlaying = true)
     }
 }
 
@@ -957,10 +1714,9 @@ private fun VideoPlayerUiLoadingPreview() {
     MaterialTheme(
         colorScheme = darkColorScheme()
     ) {
-        VideoPlayerUi(
+        VideoPlayerUiPreviewContent(
             showLoading = true,
             isPlaying = true,
-            showResumeButton = false,
         )
     }
 }
@@ -974,9 +1730,8 @@ private fun VideoPlayerUiLoadingPreview() {
 @Composable
 private fun VideoPlayerUiRetryPreview() {
     ComponentPreview {
-        VideoPlayerUi(
+        VideoPlayerUiPreviewContent(
             showRetry = true,
-            showResumeButton = false,
         )
     }
 }
@@ -996,4 +1751,43 @@ private fun GestureIndicatorOverlayPreview() {
             percent = 0.5f,
         )
     }
+}
+
+@Composable
+private fun VideoPlayerUiPreviewContent(
+    isFullscreen: Boolean = false,
+    isPlaying: Boolean = false,
+    showLoading: Boolean = false,
+    showRetry: Boolean = false,
+) {
+    VideoPlayerUi(
+        title = VideoPlayerUiPreviewData.title,
+        currentTime = VideoPlayerUiPreviewData.currentTime,
+        totalTime = VideoPlayerUiPreviewData.totalTime,
+        progress = VideoPlayerUiPreviewData.progress,
+        bufferedProgress = VideoPlayerUiPreviewData.bufferedProgress,
+        currentVolume = 0.7f,
+        currentBrightness = 0.65f,
+        isFullscreen = isFullscreen,
+        isPlaying = isPlaying,
+        showLoading = showLoading,
+        showRetry = showRetry,
+        qualities = listOf(PlaybackQuality(label = "1080p", uri = "")),
+        selectedQuality = "1080p",
+        superResolutionLabel = stringResource(R.string.player_anime4k_label),
+        superResolutionOptions = listOf(
+            stringResource(R.string.super_resolution_off),
+            stringResource(R.string.super_resolution_performance),
+            stringResource(R.string.super_resolution_quality),
+        ),
+        hKeyframeLabel = stringResource(R.string.player_h_keyframe),
+    )
+}
+
+private object VideoPlayerUiPreviewData {
+    const val title = "视频标题标题标题标题"
+    const val currentTime = "12:36"
+    const val totalTime = "24:12"
+    const val progress = 0.45f
+    const val bufferedProgress = 0.72f
 }

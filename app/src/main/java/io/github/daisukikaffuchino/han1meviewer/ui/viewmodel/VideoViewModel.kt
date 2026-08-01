@@ -1,16 +1,16 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
-import android.app.Application
 import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
-import io.github.daisukikaffuchino.han1meviewer.HCacheManager
 import io.github.daisukikaffuchino.han1meviewer.HanimeResolution
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
@@ -24,8 +24,9 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
 import io.github.daisukikaffuchino.han1meviewer.util.TagLocalizer
-import io.github.daisukikaffuchino.utils.ApplicationViewModel
-import io.github.daisukikaffuchino.utils.dp
+import androidx.lifecycle.ViewModel
+import io.github.daisukikaffuchino.han1meviewer.logic.platform.AndroidVideoCacheStore
+import io.github.daisukikaffuchino.han1meviewer.logic.platform.VideoCacheStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -46,7 +47,9 @@ import kotlin.math.abs
  * @author Yenaly Liew
  * @time 2022/06/17 017 19:01
  */
-class VideoViewModel(application: Application) : ApplicationViewModel(application) {
+class VideoViewModel(
+    private val videoCacheStore: VideoCacheStore = AndroidVideoCacheStore,
+) : ViewModel() {
 
     data class IntroScrollState(
         val firstVisibleItemIndex: Int = 0,
@@ -58,7 +61,7 @@ class VideoViewModel(application: Application) : ApplicationViewModel(applicatio
         val commentBadgeCount: Int = 0,
         val isScrollDisabled: Boolean = false,
         val isInPipMode: Boolean = false,
-        val playerHeightDp: Int = 250.dp,
+        val playerHeightDp: Dp? = 250.dp,
     )
 
     private data class VideoIntroUiState(
@@ -147,7 +150,7 @@ class VideoViewModel(application: Application) : ApplicationViewModel(applicatio
         _videoHostUiStateFlow.update { it.copy(isInPipMode = isInPipMode) }
     }
 
-    fun setPlayerHeightDp(playerHeightDp: Int) {
+    fun setPlayerHeightDp(playerHeightDp: Dp?) {
         _videoHostUiStateFlow.update { it.copy(playerHeightDp = playerHeightDp) }
     }
 
@@ -211,7 +214,7 @@ class VideoViewModel(application: Application) : ApplicationViewModel(applicatio
         if (videoIntroUiStateMap[videoCode]?.introRestored == true) return
         viewModelScope.launch {
             val flow = if (fromDownload) {
-                HCacheManager.loadHanimeVideoInfo(application,videoCode).map { hv ->
+                videoCacheStore.load(videoCode).map { hv ->
                     if (hv == null) {
                         VideoLoadingState.NoContent
                     } else {
@@ -394,7 +397,13 @@ class VideoViewModel(application: Application) : ApplicationViewModel(applicatio
     }
 
     // boolean: 成功 or 失敗，String: 提示信息
-    private val _modifyHKeyframeFlow = MutableSharedFlow<Pair<Boolean, String>>()
+    data class HKeyframeResult(
+        val succeeded: Boolean,
+        val messageResId: Int,
+        val args: List<Any> = emptyList(),
+    )
+
+    private val _modifyHKeyframeFlow = MutableSharedFlow<HKeyframeResult>()
     val modifyHKeyframeFlow = _modifyHKeyframeFlow.asSharedFlow()
     private val _forceRefresh = MutableSharedFlow<Unit>(replay = 1)
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -412,9 +421,10 @@ class VideoViewModel(application: Application) : ApplicationViewModel(applicatio
                     if (abs(keyframeInDb.position - hKeyframe.position) < MIN_H_KEYFRAME_SAVE_INTERVAL) {
                         LogUtil.d("HKeyframe", "append_hkeyframe:time conflict: $keyframeInDb")
                         _modifyHKeyframeFlow.emit(
-                            false to application.getString(
-                                R.string.interval_must_greater_than_d,
-                                MIN_H_KEYFRAME_SAVE_INTERVAL / 1_000L
+                            HKeyframeResult(
+                                succeeded = false,
+                                messageResId = R.string.interval_must_greater_than_d,
+                                args = listOf(MIN_H_KEYFRAME_SAVE_INTERVAL / 1_000L),
                             )
                         )
                         return@run
@@ -422,9 +432,29 @@ class VideoViewModel(application: Application) : ApplicationViewModel(applicatio
                 }
                 DatabaseRepo.HKeyframe.appendKeyframe(videoCode, title, hKeyframe)
                 LogUtil.d("HKeyframe", "append_hkeyframe:$hKeyframe DONE!")
-                _modifyHKeyframeFlow.emit(true to application.getString(R.string.add_success))
+                _modifyHKeyframeFlow.emit(HKeyframeResult(true, R.string.add_success))
                 _forceRefresh.emit(Unit)
             }
+        }
+    }
+
+    fun modifyHKeyframe(
+        videoCode: String,
+        oldKeyframe: HKeyframeEntity.Keyframe,
+        newKeyframe: HKeyframeEntity.Keyframe,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            DatabaseRepo.HKeyframe.modifyKeyframe(videoCode, oldKeyframe, newKeyframe)
+            _modifyHKeyframeFlow.emit(HKeyframeResult(true, R.string.modify_success))
+            _forceRefresh.emit(Unit)
+        }
+    }
+
+    fun removeHKeyframe(videoCode: String, hKeyframe: HKeyframeEntity.Keyframe) {
+        viewModelScope.launch(Dispatchers.IO) {
+            DatabaseRepo.HKeyframe.removeKeyframe(videoCode, hKeyframe)
+            _modifyHKeyframeFlow.emit(HKeyframeResult(true, R.string.delete_success))
+            _forceRefresh.emit(Unit)
         }
     }
 }

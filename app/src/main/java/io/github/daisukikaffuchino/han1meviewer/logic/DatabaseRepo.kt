@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.logic
 
 import io.github.daisukikaffuchino.utils.LogUtil
-import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.DownloadDatabase
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.HistoryDatabase
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.MiscellanyDatabase
@@ -70,10 +70,10 @@ object DatabaseRepo {
 
         @OptIn(ExperimentalSerializationApi::class)
         fun observe(videoCode: String): Flow<HKeyframeEntity?> {
-            if (Preferences.sharedHKeyframesEnable) {
+            if (SettingsRepository.sharedHKeyframesEnable) {
                 return flow t@{
                     val find = hKeyframeDao.findBy(videoCode)
-                    if (find == null || Preferences.sharedHKeyframesUseFirst) {
+                    if (find == null || SettingsRepository.sharedHKeyframesUseFirst) {
                         runCatching {
                             applicationContext.assets
                                 .open("h_keyframes/$videoCode.json")

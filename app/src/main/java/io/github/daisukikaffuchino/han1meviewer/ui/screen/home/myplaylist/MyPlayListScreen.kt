@@ -3,8 +3,6 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.myplaylist
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -27,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -136,7 +135,7 @@ fun PlaylistScreen(
                 },
             ) {
                 Icon(
-                    Icons.Default.Add,
+                    painter = painterResource(R.drawable.ic_add),
                     contentDescription = stringResource(R.string.create_new_playlist)
                 )
             }

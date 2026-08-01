@@ -3,7 +3,6 @@ package io.github.daisukikaffuchino.han1meviewer.ui.theme
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.SharedPreferences
 import android.os.Build
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.AnimationSpec
@@ -14,13 +13,11 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
@@ -37,8 +34,8 @@ import com.kyant.m3color.scheme.SchemeNeutral
 import com.kyant.m3color.scheme.SchemeRainbow
 import com.kyant.m3color.scheme.SchemeTonalSpot
 import com.kyant.m3color.scheme.SchemeVibrant
-import io.github.daisukikaffuchino.han1meviewer.Preferences
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsPreferenceKeys
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
+import androidx.core.graphics.drawable.toDrawable
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -47,16 +44,16 @@ fun HanimeTheme(
     content: @Composable () -> Unit,
 ) {
     val systemDarkTheme = isSystemInDarkTheme()
-    val themePreferences = rememberThemePreferences()
-    val resolvedDarkTheme = darkTheme ?: when (themePreferences.darkMode) {
+    val settings by SettingsRepository.settings.collectAsState()
+    val resolvedDarkTheme = darkTheme ?: when (settings.themeMode.value) {
         "always_on" -> true
         "always_off" -> false
         else -> systemDarkTheme
     }
-    val accentColor = ThemeAccentColor.fromId(themePreferences.accentColorId)
-    val paletteStyle = AppPaletteStyle.fromId(themePreferences.paletteStyleId)
+    val accentColor = ThemeAccentColor.fromId(settings.themeAccent.id)
+    val paletteStyle = AppPaletteStyle.fromId(settings.paletteStyle.id)
     val keyColor = if (
-        themePreferences.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        settings.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     ) {
         colorResource(android.R.color.system_accent1_500)
     } else {
@@ -73,6 +70,7 @@ fun HanimeTheme(
     if (!view.isInEditMode) {
         SideEffect {
             view.context.findActivity()?.window?.let { window ->
+                window.setBackgroundDrawable(colorScheme.surfaceContainer.toArgb().toDrawable())
                 WindowCompat.getInsetsController(window, view).apply {
                     isAppearanceLightStatusBars = !resolvedDarkTheme
                     isAppearanceLightNavigationBars = !resolvedDarkTheme
@@ -89,43 +87,6 @@ fun HanimeTheme(
 }
 
 @Composable
-private fun rememberThemePreferences(): ThemePreferences {
-    val preferences = Preferences.preferenceSp
-    var snapshot by remember(preferences) { mutableStateOf(preferences.readThemePreferences()) }
-    DisposableEffect(preferences) {
-        val listener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
-            if (key != null && key in THEME_PREFERENCE_KEYS) {
-                snapshot = sharedPreferences.readThemePreferences()
-            }
-        }
-        preferences.registerOnSharedPreferenceChangeListener(listener)
-        onDispose { preferences.unregisterOnSharedPreferenceChangeListener(listener) }
-    }
-    return snapshot
-}
-
-private fun SharedPreferences.readThemePreferences() = ThemePreferences(
-    darkMode = getString(SettingsPreferenceKeys.USE_DARK_MODE, "always_off") ?: "always_off",
-    useDynamicColor = getBoolean(SettingsPreferenceKeys.USE_DYNAMIC_COLOR, false),
-    accentColorId = getInt(SettingsPreferenceKeys.THEME_ACCENT_COLOR, 0),
-    paletteStyleId = getInt(SettingsPreferenceKeys.APP_PALETTE_STYLE, 1),
-)
-
-private data class ThemePreferences(
-    val darkMode: String,
-    val useDynamicColor: Boolean,
-    val accentColorId: Int,
-    val paletteStyleId: Int,
-)
-
-private val THEME_PREFERENCE_KEYS = setOf(
-    SettingsPreferenceKeys.USE_DARK_MODE,
-    SettingsPreferenceKeys.USE_DYNAMIC_COLOR,
-    SettingsPreferenceKeys.THEME_ACCENT_COLOR,
-    SettingsPreferenceKeys.APP_PALETTE_STYLE,
-)
-
-@Composable
 @Stable
 internal fun expressiveColorScheme(
     keyColor: Color,
@@ -136,7 +97,7 @@ internal fun expressiveColorScheme(
 ): ColorScheme {
     val scheme = remember(keyColor, isDark, style, contrastLevel) {
         val hct = Hct.fromInt(keyColor.toArgb())
-        val specVersion = ColorSpec.SpecVersion.SPEC_2021
+        val specVersion = ColorSpec.SpecVersion.SPEC_2026
         val platform = DynamicScheme.Platform.PHONE
         when (style) {
             AppPaletteStyle.TonalSpot -> SchemeTonalSpot(hct, isDark, contrastLevel, specVersion, platform)

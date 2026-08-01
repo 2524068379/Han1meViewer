@@ -95,11 +95,6 @@ data class HanimeDownloadEntity(
     @get:IntRange(from = 0, to = 100)
     val progress get() = (downloadedLength * 100 / length).toInt()
 
-    /**
-     * 是否已下载完成
-     */
-    val isDownloaded get() = state == DownloadState.Finished
-
     val isDownloading get() = state == DownloadState.Downloading
 
     val suffix get() = videoUri.substringAfterLast(".", HFileManager.DEF_VIDEO_TYPE)

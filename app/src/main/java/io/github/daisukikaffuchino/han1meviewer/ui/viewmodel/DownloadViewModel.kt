@@ -1,12 +1,11 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
-import android.app.Application
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.DownloadGroupEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeDownloadEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.VideoWithCategories
-import io.github.daisukikaffuchino.utils.ApplicationViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,7 +24,7 @@ import kotlinx.coroutines.launch
  * 实现分组展示和展开/折叠功能
  * 实现分组移动、重命名等
  */
-class DownloadViewModel(application: Application) : ApplicationViewModel(application) {
+class DownloadViewModel : ViewModel() {
 
     private val _downloaded = MutableStateFlow(mutableListOf<VideoWithCategories>())
     val downloaded = _downloaded.asStateFlow()
