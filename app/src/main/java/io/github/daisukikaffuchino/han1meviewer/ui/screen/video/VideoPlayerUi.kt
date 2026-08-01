@@ -13,7 +13,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.AndroidExternalSurface
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -64,6 +63,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -319,11 +319,11 @@ fun VideoPlayerUi(
             }
 
             if (playbackEngine != null) {
-                Box(
-                    modifier = videoModifier
-                        .background(Color.Black)
-                ) {
-                    if (playbackEngine is io.github.daisukikaffuchino.han1meviewer.ui.player.MpvPlaybackEngine) {
+                key(playbackEngine, safeAspectRatio) {
+                    Box(
+                        modifier = videoModifier
+                            .background(Color.Black)
+                    ) {
                         AndroidView(
                             modifier = Modifier.fillMaxSize(),
                             factory = { context ->
@@ -339,7 +339,9 @@ fun VideoPlayerUi(
                                             width: Int,
                                             height: Int,
                                         ) {
-                                            playbackEngine.updateSurfaceSize(width, height)
+                                            if (playbackEngine is io.github.daisukikaffuchino.han1meviewer.ui.player.MpvPlaybackEngine) {
+                                                playbackEngine.updateSurfaceSize(width, height)
+                                            }
                                         }
 
                                         override fun surfaceDestroyed(holder: SurfaceHolder) {
@@ -347,20 +349,8 @@ fun VideoPlayerUi(
                                         }
                                     })
                                 }
-                            },
-                        )
-                    } else {
-                        AndroidExternalSurface(
-                            modifier = Modifier.fillMaxSize(),
-                            isOpaque = true,
-                        ) {
-                            onSurface { surface, _, _ ->
-                                playbackEngine.attachSurface(surface)
-                                surface.onDestroyed {
-                                    playbackEngine.detachSurface(surface)
-                                }
                             }
-                        }
+                        )
                     }
                 }
             } else {

@@ -140,6 +140,7 @@ class MpvPlaybackEngine(
     }
 
     override fun attachSurface(surface: Surface) {
+        if (released) return
         currentSurface = surface
         if (initialized) {
             MPVLib.attachSurface(surface)
@@ -149,6 +150,7 @@ class MpvPlaybackEngine(
     }
 
     override fun detachSurface(surface: Surface) {
+        if (released) return
         if (currentSurface == surface) {
             currentSurface = null
             if (initialized) {
@@ -182,6 +184,7 @@ class MpvPlaybackEngine(
             MPVLib.command(arrayOf("loadfile", "", "replace"))
             MPVLib.setOptionString("force-window", "no")
             MPVLib.detachSurface()
+            currentSurface = null
             MPVLib.removeObserver(observer)
         }
         closeCurrentFile()
