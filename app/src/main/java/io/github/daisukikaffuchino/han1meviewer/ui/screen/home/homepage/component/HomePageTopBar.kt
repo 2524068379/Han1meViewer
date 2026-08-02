@@ -39,8 +39,8 @@ fun HomePageTopBar(
     onOpenDrawer: () -> Unit,
     onSearchClick: () -> Unit,
     onNavigateToPreview: () -> Unit,
-    showNavigationIcon: Boolean = true,
     modifier: Modifier = Modifier,
+    showNavigationIcon: Boolean = true,
     containerColor: Color = HanimeDefaults.Colors.pageSurface,
 ) {
     HanimeTopAppBar(
@@ -147,6 +147,19 @@ private fun HomePageTopBarPreview() {
             onOpenDrawer = {},
             onSearchClick = {},
             onNavigateToPreview = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "首页顶栏(横)")
+@Composable
+private fun HomePageTopBarLandPreview() {
+    ComponentPreview {
+        HomePageTopBar(
+            onOpenDrawer = {},
+            onSearchClick = {},
+            onNavigateToPreview = {},
+            showNavigationIcon = false
         )
     }
 }

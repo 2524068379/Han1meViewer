@@ -23,7 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.PermanentDrawerSheet
-import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
@@ -87,17 +86,18 @@ fun MainActivityScaffold(
     }
 
     if (permanentDrawer) {
-        PermanentNavigationDrawer(
-            drawerContent = {
-                PermanentDrawerSheet(
-                    modifier = Modifier.width(280.dp),
-                    drawerContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    windowInsets = WindowInsets(0, 0, 0, 0),
-                    content = drawerContent,
-                )
-            },
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(HanimeDefaults.Colors.pageSurface),
         ) {
-            MainDrawerBody(drawerFraction = 0f, content = content)
+            PermanentDrawerSheet(
+                modifier = Modifier.width(280.dp),
+                drawerContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                windowInsets = WindowInsets(0, 0, 0, 0),
+                content = drawerContent,
+            )
+            content()
         }
     } else {
         ModalNavigationDrawer(

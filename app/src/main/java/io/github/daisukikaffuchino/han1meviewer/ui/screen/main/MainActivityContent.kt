@@ -117,9 +117,10 @@ fun MainActivityContent(
     }
     val headerIsLoading = isLoggedIn && homeState is PageState.Loading
     val currentRoute = backStack.currentKey
+    val previousRoute = backStack.backStack.getOrNull(backStack.backStack.lastIndex - 1)
     val selectedDrawerDestination = MainDrawerDestination.fromRoute(backStack.topLevelKey)
     val drawerEnabled = currentRoute == HomeRoute
-    val permanentDrawer = drawerEnabled &&
+    val permanentDrawer = (drawerEnabled || previousRoute == HomeRoute) &&
             LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     LaunchedEffect(permanentDrawer) {
         if (permanentDrawer) drawerState.close()
@@ -205,6 +206,7 @@ fun MainActivityContent(
                     backStack = backStack,
                     isDrawerOpen = isDrawerOpen && !permanentDrawer,
                     showHomeNavigationIcon = !permanentDrawer,
+                    homeContentStartPadding = if (permanentDrawer) 280.dp else 0.dp,
                     onOpenDrawer = {
                         if (drawerEnabled) {
                             scope.launch { drawerState.open() }

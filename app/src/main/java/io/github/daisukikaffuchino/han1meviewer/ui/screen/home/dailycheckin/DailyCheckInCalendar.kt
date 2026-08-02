@@ -114,7 +114,7 @@ fun CalendarGrid(
 
             Box(
                 modifier = Modifier
-                    .size(52.dp)
+                    .size(50.dp)
                     .padding(2.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(bgColor)

@@ -143,7 +143,7 @@ fun DailyCheckInContent(
             state = pagerState,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(320.dp),
+                .height(336.dp),
             verticalAlignment = Alignment.Top,
             beyondViewportPageCount = 1,
             key = { page -> page }
