@@ -33,7 +33,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -72,6 +75,12 @@ fun MainActivityScaffold(
         targetValue = if (drawerState.currentValue == DrawerValue.Open || drawerState.targetValue == DrawerValue.Open) 1f else 0f,
         label = "drawer_fraction",
     )
+    val currentContent by rememberUpdatedState(content)
+    val movableContent = remember {
+        movableContentOf {
+            currentContent()
+        }
+    }
 
     val drawerContent: @Composable ColumnScope.() -> Unit = {
         MainDrawerContent(
@@ -104,7 +113,7 @@ fun MainActivityScaffold(
                 windowInsets = WindowInsets(0, 0, 0, 0),
                 content = drawerContent,
             )
-            content()
+            movableContent()
         }
     } else {
         ModalNavigationDrawer(
@@ -124,7 +133,7 @@ fun MainActivityScaffold(
                 )
             },
         ) {
-            MainDrawerBody(drawerFraction = drawerFraction, content = content)
+            MainDrawerBody(drawerFraction = drawerFraction, content = movableContent)
 
             BackHandler(
                 enabled = drawerState.currentValue == DrawerValue.Open ||
