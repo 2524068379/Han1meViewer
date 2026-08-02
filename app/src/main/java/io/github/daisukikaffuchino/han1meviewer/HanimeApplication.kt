@@ -1,22 +1,25 @@
 package io.github.daisukikaffuchino.han1meviewer
 
-import android.content.ComponentName
-import android.content.pm.PackageManager
-import io.github.daisukikaffuchino.utils.LogUtil
 import android.app.Activity
 import android.app.Application
+import android.content.ComponentName
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
-import io.github.daisukikaffuchino.han1meviewer.logic.network.HProxySelector
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.datastore.DataStoreManager
+import io.github.daisukikaffuchino.han1meviewer.logic.network.HProxySelector
+import io.github.daisukikaffuchino.han1meviewer.ui.crash.CrashHandler
 import io.github.daisukikaffuchino.han1meviewer.util.AnimeShaders
 import io.github.daisukikaffuchino.han1meviewer.util.AppLanguageManager
 import io.github.daisukikaffuchino.utils.ActivityManager
+import io.github.daisukikaffuchino.utils.LogUtil
+import io.github.daisukikaffuchino.utils.applicationContext as globalApplicationContext
 import `is`.xyz.mpv.MPVLib
-import java.net.ProxySelector
 import java.lang.ref.WeakReference
+import java.net.ProxySelector
 
 /**
  * @project Hanime1
@@ -29,15 +32,17 @@ class HanimeApplication : Application(), Application.ActivityLifecycleCallbacks 
         const val TAG = "HanimeApplication"
     }
 
-    /**
-     * 已经在 [HInitializer] 中处理了
-     */
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+        globalApplicationContext = this
+    }
+
     override fun onCreate() {
         super.onCreate()
+        Thread.setDefaultUncaughtExceptionHandler(CrashHandler(applicationContext))
         DataStoreManager.initialize(this)
         SettingsRepository.install(DataStoreManager)
         AppLanguageManager.applyStoredLanguage(this)
-        //applicationContext = this
         registerActivityLifecycleCallbacks(this)
         ProxySelector.setDefault(HProxySelector())
         HProxySelector.rebuildNetwork()
