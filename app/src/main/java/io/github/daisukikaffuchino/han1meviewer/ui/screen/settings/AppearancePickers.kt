@@ -5,11 +5,13 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.settings
 import android.os.Build
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -42,11 +44,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.component.immediateClickable
@@ -76,6 +80,39 @@ fun ThemeAccentColorPicker(
                 option = option,
                 selected = selectedId == option.id,
                 onClick = { onSelect(option.id) },
+            )
+        }
+    }
+}
+
+@Composable
+fun VideoLandscapeLayoutStylePicker(
+    selectedValue: String,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val options = listOf(
+        VideoLandscapeLayoutOption(
+            value = "classic",
+            title = stringResource(R.string.layout_style_classic),
+            previewRes = R.drawable.bg_settings_pad_classic,
+        ),
+        VideoLandscapeLayoutOption(
+            value = "dual_pane",
+            title = stringResource(R.string.layout_style_dual_pane),
+            previewRes = R.drawable.bg_settings_pad_new,
+        ),
+    )
+    PickerContainer(
+        title = stringResource(R.string.video_landscape_layout_style),
+        description = stringResource(R.string.video_landscape_layout_style_summary),
+        modifier = modifier,
+    ) {
+        items(items = options, key = { it.value }) { option ->
+            VideoLandscapeLayoutStyleItem(
+                option = option,
+                selected = selectedValue == option.value,
+                onClick = { onSelect(option.value) },
             )
         }
     }
@@ -259,6 +296,48 @@ private fun AccentColorItem(
 }
 
 @Composable
+private fun VideoLandscapeLayoutStyleItem(
+    option: VideoLandscapeLayoutOption,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    val borderWidth by animateDpAsState(
+        targetValue = if (selected) 3.dp else (-1).dp,
+        animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
+        label = "video-landscape-layout-border",
+    )
+    PickerOption(
+        onClick = onClick,
+        width = 200.dp,
+    ) {
+        Image(
+            painter = painterResource(option.previewRes),
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(4f / 3f)
+                .clip(MaterialTheme.shapes.large)
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .border(
+                    width = borderWidth,
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = MaterialTheme.shapes.large,
+                ),
+        )
+        Text(
+            text = option.title,
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (selected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurface
+            },
+        )
+    }
+}
+
+@Composable
 private fun DarkModeItem(
     option: DarkModeOption,
     selected: Boolean,
@@ -344,6 +423,7 @@ private fun PaletteStyleItem(
 @Composable
 private fun PickerOption(
     onClick: () -> Unit,
+    width: Dp = 106.dp,
     shapes: ButtonShapes = HanimeDefaults.shapes(),
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -351,7 +431,7 @@ private fun PickerOption(
     val shape = animatedShape(shapes, interactionSource)
     Column(
         modifier = Modifier
-            .width(106.dp)
+            .width(width)
             .clip(shape)
             .immediateClickable(
                 interactionSource = interactionSource,
@@ -369,6 +449,12 @@ private data class DarkModeOption(
     val title: String,
     val iconRes: Int,
     val dark: Boolean,
+)
+
+private data class VideoLandscapeLayoutOption(
+    val value: String,
+    val title: String,
+    val previewRes: Int,
 )
 
 private fun ContentDrawScope.drawFadedEdge(

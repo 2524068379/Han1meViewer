@@ -77,6 +77,16 @@ enum class DisplayDensity(val percent: Int, val scale: Float) {
     }
 }
 
+enum class VideoLandscapeLayoutStyle(val value: String) {
+    Classic("classic"),
+    DualPane("dual_pane");
+
+    companion object {
+        fun fromValue(value: String): VideoLandscapeLayoutStyle =
+            entries.firstOrNull { it.value == value } ?: Classic
+    }
+}
+
 data class AppSettings(
     val appLanguage: AppLanguage = AppLanguage.SYSTEM,
     val themeMode: ThemeMode = ThemeMode.Light,
@@ -91,6 +101,7 @@ data class AppSettings(
     val hapticFeedbackEnabled: Boolean = false,
     val disablePredictiveBack: Boolean = false,
     val tabletMode: Boolean = false,
+    val videoLandscapeLayoutStyle: VideoLandscapeLayoutStyle = VideoLandscapeLayoutStyle.Classic,
     val usageNoticeAccepted: Boolean = false,
     val usageSourceVerified: Boolean = false,
     val usageSourcePending: Boolean = false,

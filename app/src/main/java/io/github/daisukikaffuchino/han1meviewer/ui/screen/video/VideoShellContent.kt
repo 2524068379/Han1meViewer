@@ -2,32 +2,66 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.video
 
 import android.content.res.Configuration
 import android.graphics.Rect
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.ui.player.PlaybackEngine
 import io.github.daisukikaffuchino.han1meviewer.ui.player.PlaybackQuality
+import io.github.daisukikaffuchino.utils.VibrationUtil
 import kotlin.math.roundToInt
+
+data class ClassicTabletLayoutConfig(
+    val relatedItems: List<HanimeInfo>,
+    val onHideRelatedInIntroChange: (Boolean) -> Unit,
+    val onSideRelatedCollapsedChange: (Boolean) -> Unit,
+    val onOpenVideo: (HanimeInfo) -> Unit,
+)
 
 @Composable
 fun VideoShellContent(
@@ -86,16 +120,34 @@ fun VideoShellContent(
     videoAspectRatio: Float,
     onPlayerBoundsChanged: (Rect) -> Unit,
     tabsContent: @Composable () -> Unit,
-    relatedItems: List<HanimeInfo>,
-    onHideRelatedInIntroChange: (Boolean) -> Unit,
-    onSideRelatedCollapsedChange: (Boolean) -> Unit,
-    onOpenVideo: (HanimeInfo) -> Unit,
+    classicTabletLayout: ClassicTabletLayoutConfig?,
     modifier: Modifier = Modifier,
 ) {
     val configuration = LocalConfiguration.current
     val isTabletLandscape =
         isTabletMode && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     val showSideRelated = isTabletLandscape && !isInPipMode && !isFullscreen
+    val showClassicSideRelated = showSideRelated && classicTabletLayout != null
+    var isSideRelatedCollapsed by rememberSaveable { mutableStateOf(false) }
+
+    DisposableEffect(showClassicSideRelated) {
+        if (showClassicSideRelated) {
+            classicTabletLayout.onHideRelatedInIntroChange.invoke(true)
+        }
+        onDispose {
+            if (showClassicSideRelated) {
+                classicTabletLayout.onHideRelatedInIntroChange.invoke(false)
+                classicTabletLayout.onSideRelatedCollapsedChange.invoke(false)
+            }
+        }
+    }
+
+    LaunchedEffect(showClassicSideRelated, isSideRelatedCollapsed) {
+        if (!showClassicSideRelated) isSideRelatedCollapsed = false
+        classicTabletLayout?.onSideRelatedCollapsedChange?.invoke(
+            showClassicSideRelated && isSideRelatedCollapsed
+        )
+    }
 
     @Composable
     fun PlayerContent(modifier: Modifier) {
@@ -283,26 +335,103 @@ fun VideoShellContent(
         }
     }
 
-    if (showSideRelated) {
+    if (showClassicSideRelated) {
+        val indicatorWidth = 28.dp
         BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+            val sideWidth by animateDpAsState(
+                targetValue = if (isSideRelatedCollapsed) indicatorWidth else maxWidth * 0.38f,
+                animationSpec = tween(durationMillis = 300),
+                label = "sideRelatedWidth",
+            )
             Row(modifier = Modifier.fillMaxSize()) {
-                PlayerContent(
-                    modifier = Modifier
+                MainContent(
+                    contentModifier = Modifier
                         .weight(1f)
                         .fillMaxHeight(),
                 )
-                Box(
+                Row(
                     modifier = Modifier
+                        .width(sideWidth)
                         .fillMaxHeight()
-                        .statusBarsPadding()
                         .background(MaterialTheme.colorScheme.background)
-                        .fillMaxWidth(0.38f),
                 ) {
-                    tabsContent()
+                    RelatedCollapseIndicator(
+                        collapsed = isSideRelatedCollapsed,
+                        onClick = { isSideRelatedCollapsed = !isSideRelatedCollapsed },
+                        modifier = Modifier
+                            .width(indicatorWidth)
+                            .fillMaxHeight(),
+                    )
+                    if (!isSideRelatedCollapsed) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .verticalScroll(rememberScrollState()),
+                        ) {
+                            RelatedVideosSection(
+                                videos = classicTabletLayout.relatedItems,
+                                onOpenVideo = classicTabletLayout.onOpenVideo,
+                            )
+                        }
+                    }
                 }
+            }
+        }
+    } else if (showSideRelated) {
+        Row(modifier = modifier.fillMaxSize()) {
+            PlayerContent(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .statusBarsPadding()
+                    .consumeWindowInsets(
+                        WindowInsets.safeDrawing.only(WindowInsetsSides.Start)
+                    )
+                    .background(MaterialTheme.colorScheme.background)
+                    .fillMaxWidth(0.38f),
+            ) {
+                tabsContent()
             }
         }
     } else {
         MainContent(contentModifier = modifier.fillMaxSize())
+    }
+}
+
+@Composable
+private fun RelatedCollapseIndicator(
+    collapsed: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val view = LocalView.current
+    Row(
+        modifier = modifier
+            .clickable {
+                VibrationUtil.performHapticFeedback(view)
+                onClick()
+            }
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            painter = if (collapsed) {
+                painterResource(R.drawable.ic_chevron_left)
+            } else {
+                painterResource(R.drawable.ic_chevron_right)
+            },
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .size(22.dp)
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.72f)),
+        )
     }
 }

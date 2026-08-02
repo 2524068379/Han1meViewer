@@ -56,6 +56,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.ParseException
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
+import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoLandscapeLayoutStyle
 import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.bridge.VideoPageHost
@@ -99,6 +100,7 @@ fun VideoRouteHostScreen(
     }
     val playbackController = remember(playbackEngine) { ComposePlaybackController(playbackEngine) }
     val playbackState by playbackController.state.collectAsStateWithLifecycle()
+    val appSettings by SettingsRepository.settings.collectAsStateWithLifecycle()
     val hostUiState by viewModel.videoHostUiStateFlow.collectAsStateWithLifecycle()
     val videoState by viewModel.hanimeVideoStateFlow.collectAsStateWithLifecycle()
     val video = viewModel.hanimeVideoFlow.collectAsStateWithLifecycle().value
@@ -541,9 +543,13 @@ fun VideoRouteHostScreen(
         }
     }
 
-    LaunchedEffect(hostUiState.isInPipMode, isSideRelatedCollapsed) {
+    LaunchedEffect(
+        hostUiState.isInPipMode,
+        isSideRelatedCollapsed,
+        appSettings.tabletMode,
+    ) {
         if (hostUiState.isInPipMode) return@LaunchedEffect
-        val height = if (SettingsRepository.tabletMode) {
+        val height = if (appSettings.tabletMode) {
             if (isSideRelatedCollapsed) 500.dp else 400.dp
         } else {
             250.dp
@@ -552,7 +558,7 @@ fun VideoRouteHostScreen(
     }
 
     VideoShellContent(
-        isTabletMode = SettingsRepository.tabletMode,
+        isTabletMode = appSettings.tabletMode,
         isInPipMode = hostUiState.isInPipMode,
         isFullscreen = isFullscreen,
         playerHeightDp = hostUiState.playerHeightDp,
@@ -734,10 +740,19 @@ fun VideoRouteHostScreen(
                 pageHost = pageHost,
             )
         },
-        relatedItems = relatedItems,
-        onHideRelatedInIntroChange = { viewModel.hideRelatedInIntro = it },
-        onSideRelatedCollapsedChange = { isSideRelatedCollapsed = it },
-        onOpenVideo = { item -> activity.showVideoDetailFragment(item.videoCode) },
+        classicTabletLayout = if (
+            appSettings.tabletMode &&
+            appSettings.videoLandscapeLayoutStyle == VideoLandscapeLayoutStyle.Classic
+        ) {
+            ClassicTabletLayoutConfig(
+                relatedItems = relatedItems,
+                onHideRelatedInIntroChange = { viewModel.hideRelatedInIntro = it },
+                onSideRelatedCollapsedChange = { isSideRelatedCollapsed = it },
+                onOpenVideo = { item -> activity.showVideoDetailFragment(item.videoCode) },
+            )
+        } else {
+            null
+        },
         modifier = Modifier.fillMaxSize(),
     )
 
@@ -833,10 +848,14 @@ fun VideoRouteHostScreen(
             when {
                 isFailed -> SonnerToast.error(
                     String(
-                        Base64.decode("5qCh6aqM5bSp5rqD77yM6K+35ZCR5byA5Y+R6ICF5Y+N6aaI", Base64.DEFAULT),
+                        Base64.decode(
+                            "5qCh6aqM5bSp5rqD77yM6K+35ZCR5byA5Y+R6ICF5Y+N6aaI",
+                            Base64.DEFAULT
+                        ),
                         Charsets.UTF_8
                     )
                 )
+
                 else -> showDialog = !BuildConfig.DEBUG && !svc()
             }
         }
