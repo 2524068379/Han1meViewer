@@ -13,7 +13,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.AndroidExternalSurface
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -64,6 +63,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -172,7 +172,7 @@ fun VideoPlayerUi(
     var dragStartedOnLeft by remember { mutableStateOf(true) }
     var progressDirection by remember { mutableStateOf<ProgressGestureDirection?>(null) }
     var isProgressGestureActive by remember { mutableStateOf(false) }
-    var showLongPressSpeedHint by remember { mutableStateOf(false) }
+    var isLongPressSpeedActive by remember { mutableStateOf(false) }
     var suppressTapUntilMs by remember { mutableLongStateOf(0L) }
     var activeSidePanel by remember { mutableStateOf<PlayerSidePanel?>(null) }
     var displayedSidePanel by remember { mutableStateOf<PlayerSidePanel?>(null) }
@@ -219,7 +219,7 @@ fun VideoPlayerUi(
     val latestOnLongPressEnd by rememberUpdatedState(onLongPressEnd)
 
     LaunchedEffect(isPlaying) {
-        if (!isPlaying) showLongPressSpeedHint = false
+        if (!isPlaying) isLongPressSpeedActive = false
     }
 
     LaunchedEffect(activeSidePanel) {
@@ -263,17 +263,17 @@ fun VideoPlayerUi(
                                     delay(longPressTimeout.milliseconds)
                                     if (latestIsPlaying) {
                                         activated = true
-                                        showLongPressSpeedHint = true
+                                        isLongPressSpeedActive = true
                                         showControlsState = false
                                         suppressTapUntilMs = Long.MAX_VALUE
                                         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                                         latestOnLongPressStart()
                                     }
                                 }
-                                tryAwaitRelease()
+                                val released = tryAwaitRelease()
                                 activationJob.cancel()
-                                if (activated) {
-                                    showLongPressSpeedHint = false
+                                if (activated && released) {
+                                    isLongPressSpeedActive = false
                                     showControlsState = false
                                     if (suppressTapUntilMs == Long.MAX_VALUE) {
                                         suppressTapUntilMs = SystemClock.uptimeMillis() + 500L
@@ -319,11 +319,11 @@ fun VideoPlayerUi(
             }
 
             if (playbackEngine != null) {
-                Box(
-                    modifier = videoModifier
-                        .background(Color.Black)
-                ) {
-                    if (playbackEngine is io.github.daisukikaffuchino.han1meviewer.ui.player.MpvPlaybackEngine) {
+                key(playbackEngine, safeAspectRatio) {
+                    Box(
+                        modifier = videoModifier
+                            .background(Color.Black)
+                    ) {
                         AndroidView(
                             modifier = Modifier.fillMaxSize(),
                             factory = { context ->
@@ -339,7 +339,9 @@ fun VideoPlayerUi(
                                             width: Int,
                                             height: Int,
                                         ) {
-                                            playbackEngine.updateSurfaceSize(width, height)
+                                            if (playbackEngine is io.github.daisukikaffuchino.han1meviewer.ui.player.MpvPlaybackEngine) {
+                                                playbackEngine.updateSurfaceSize(width, height)
+                                            }
                                         }
 
                                         override fun surfaceDestroyed(holder: SurfaceHolder) {
@@ -347,20 +349,8 @@ fun VideoPlayerUi(
                                         }
                                     })
                                 }
-                            },
-                        )
-                    } else {
-                        AndroidExternalSurface(
-                            modifier = Modifier.fillMaxSize(),
-                            isOpaque = true,
-                        ) {
-                            onSurface { surface, _, _ ->
-                                playbackEngine.attachSurface(surface)
-                                surface.onDestroyed {
-                                    playbackEngine.detachSurface(surface)
-                                }
                             }
-                        }
+                        )
                     }
                 }
             } else {
@@ -377,8 +367,16 @@ fun VideoPlayerUi(
                         var gestureStartProgress = 0f
                         var gestureStartVolume = 0f
                         var gestureStartBrightness = 0f
+                        var longPressOwnsDrag = false
                         detectDragGestures(
                             onDragStart = { offset ->
+                                longPressOwnsDrag = isLongPressSpeedActive
+                                if (longPressOwnsDrag) {
+                                    gestureType = null
+                                    progressDirection = null
+                                    isProgressGestureActive = false
+                                    return@detectDragGestures
+                                }
                                 dragStartedOnLeft = offset.x < size.width / 2f
                                 gestureType = null
                                 progressDirection = null
@@ -388,14 +386,32 @@ fun VideoPlayerUi(
                                 gestureStartBrightness = latestBrightness
                             },
                             onDragEnd = {
+                                if (longPressOwnsDrag) {
+                                    isLongPressSpeedActive = false
+                                    showControlsState = false
+                                    if (suppressTapUntilMs == Long.MAX_VALUE) {
+                                        suppressTapUntilMs = SystemClock.uptimeMillis() + 500L
+                                    }
+                                    latestOnLongPressEnd()
+                                    longPressOwnsDrag = false
+                                }
                                 gestureType = null
                                 isProgressGestureActive = false
                             },
                             onDragCancel = {
+                                if (longPressOwnsDrag) {
+                                    isLongPressSpeedActive = false
+                                    showControlsState = false
+                                    latestOnLongPressEnd()
+                                    longPressOwnsDrag = false
+                                }
                                 gestureType = null
                                 isProgressGestureActive = false
                             },
                             onDrag = { _, dragAmount ->
+                                if (longPressOwnsDrag || isLongPressSpeedActive) {
+                                    return@detectDragGestures
+                                }
                                 val type =
                                     gestureType ?: if (abs(dragAmount.x) > abs(dragAmount.y)) {
                                         GestureIndicatorType.Progress
@@ -691,7 +707,7 @@ fun VideoPlayerUi(
         }
 
         AnimatedVisibility(
-            visible = showLongPressSpeedHint,
+            visible = isLongPressSpeedActive,
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .padding(start = 24.dp),

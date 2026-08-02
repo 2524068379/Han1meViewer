@@ -53,6 +53,8 @@ class ExoPlaybackEngine(
             phase = PlaybackPhase.Preparing,
             isBuffering = true,
             errorMessage = null,
+            videoWidth = 0,
+            videoHeight = 0,
             hasRenderedFirstFrame = false,
         )
         player.repeatMode = if (request.looping) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
@@ -93,10 +95,12 @@ class ExoPlaybackEngine(
     }
 
     override fun attachSurface(surface: Surface) {
+        if (released) return
         player.setVideoSurface(surface)
     }
 
     override fun detachSurface(surface: Surface) {
+        if (released) return
         player.clearVideoSurface(surface)
     }
 
