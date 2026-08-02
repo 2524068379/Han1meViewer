@@ -35,6 +35,8 @@ class MpvPlaybackEngine(
     private var pendingRequest: PlaybackRequest? = null
     private var initialized = false
     private var released = false
+    private var surfaceWidth = 0
+    private var surfaceHeight = 0
     private var lastVideoWidth = 0
     private var lastVideoHeight = 0
     private var hasRenderedFrame = false
@@ -106,7 +108,10 @@ class MpvPlaybackEngine(
         }
         MPVLib.setOptionString("force-window", "yes")
         MPVLib.command(arrayOf("loadfile", path, "replace"))
-        currentSurface?.let(MPVLib::attachSurface)
+        currentSurface?.let {
+            MPVLib.attachSurface(it)
+            applySurfaceSize()
+        }
         mutableState.value = mutableState.value.copy(
             phase = PlaybackPhase.Preparing,
             isBuffering = true,
@@ -146,6 +151,7 @@ class MpvPlaybackEngine(
             MPVLib.attachSurface(surface)
             MPVLib.setOptionString("force-window", "yes")
             MPVLib.setPropertyString("vo", videoOutput)
+            applySurfaceSize()
         }
     }
 
@@ -162,13 +168,10 @@ class MpvPlaybackEngine(
     }
 
     fun updateSurfaceSize(width: Int, height: Int) {
-        if (!initialized || released) return
-        if (width > 0 && height > 0) {
-            MPVLib.setPropertyString("android-surface-size", "${width}x${height}")
-            if (MPVLib.getPropertyBoolean("pause") == true) {
-                MPVLib.command(arrayOf("seek", "0", "relative", "exact"))
-            }
-        }
+        if (released || width <= 0 || height <= 0) return
+        surfaceWidth = width
+        surfaceHeight = height
+        applySurfaceSize()
     }
 
     fun setSuperResolution(index: Int) {
@@ -215,6 +218,15 @@ class MpvPlaybackEngine(
     private fun startPlayback() {
         MPVLib.setPropertyBoolean("pause", false)
         publishState()
+    }
+
+    private fun applySurfaceSize() {
+        if (!initialized || released || currentSurface == null) return
+        if (surfaceWidth <= 0 || surfaceHeight <= 0) return
+        MPVLib.setPropertyString("android-surface-size", "${surfaceWidth}x${surfaceHeight}")
+        if (MPVLib.getPropertyBoolean("pause") == true) {
+            MPVLib.command(arrayOf("seek", "0", "relative", "exact"))
+        }
     }
 
     private fun publishState() {

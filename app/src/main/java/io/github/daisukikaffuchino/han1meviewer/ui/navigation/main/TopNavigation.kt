@@ -2,7 +2,10 @@ package io.github.daisukikaffuchino.han1meviewer.ui.navigation.main
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -99,6 +102,14 @@ fun TopNavigation(
             initialOffsetX = { -(it * PageTransitionOffsetFactor).toInt() },
             targetOffsetX = { (it * PageTransitionOffsetFactor).toInt() },
         )
+    }
+
+    fun videoTransition() = NavDisplay.transitionSpec {
+        ContentTransform(EnterTransition.None, ExitTransition.None)
+    } + NavDisplay.popTransitionSpec {
+        ContentTransform(EnterTransition.None, ExitTransition.None)
+    } + NavDisplay.predictivePopTransitionSpec {
+        ContentTransform(EnterTransition.None, ExitTransition.None)
     }
 
     val defaultTransition = fadeScale(
@@ -510,7 +521,7 @@ fun TopNavigation(
                 onBack = onBack,
             )
         }
-        entry<VideoRoute>(metadata = pageTransition()) { route ->
+        entry<VideoRoute>(metadata = videoTransition()) { route ->
             VideoRouteScreen(
                 activity = activity,
                 route = route,

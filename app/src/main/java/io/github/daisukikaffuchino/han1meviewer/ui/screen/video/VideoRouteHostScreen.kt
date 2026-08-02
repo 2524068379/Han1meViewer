@@ -319,11 +319,6 @@ fun VideoRouteHostScreen(
 
             override fun onPipModeChanged(isInPip: Boolean) {
                 viewModel.setPipMode(isInPip)
-                if (isInPip) {
-                    viewModel.setPlayerHeightDp(null)
-                } else {
-                    viewModel.setPlayerHeightDp(if (SettingsRepository.tabletMode) 350.dp else 250.dp)
-                }
                 updatePipAction()
             }
 
@@ -543,25 +538,23 @@ fun VideoRouteHostScreen(
         }
     }
 
-    LaunchedEffect(
-        hostUiState.isInPipMode,
-        isSideRelatedCollapsed,
-        appSettings.tabletMode,
-    ) {
-        if (hostUiState.isInPipMode) return@LaunchedEffect
-        val height = if (appSettings.tabletMode) {
-            if (isSideRelatedCollapsed) 500.dp else 400.dp
-        } else {
-            250.dp
+    val resolvedPlayerHeightDp = when {
+        hostUiState.isInPipMode -> null
+        appSettings.tabletMode -> if (isSideRelatedCollapsed) 500.dp else 400.dp
+        else -> 250.dp
+    }
+
+    LaunchedEffect(resolvedPlayerHeightDp, hostUiState.playerHeightDp) {
+        if (hostUiState.playerHeightDp != resolvedPlayerHeightDp) {
+            viewModel.setPlayerHeightDp(resolvedPlayerHeightDp)
         }
-        if (hostUiState.playerHeightDp != height) viewModel.setPlayerHeightDp(height)
     }
 
     VideoShellContent(
         isTabletMode = appSettings.tabletMode,
         isInPipMode = hostUiState.isInPipMode,
         isFullscreen = isFullscreen,
-        playerHeightDp = hostUiState.playerHeightDp,
+        playerHeightDp = resolvedPlayerHeightDp,
         playbackEngine = playbackEngine,
         posterUrl = video?.coverUrl,
         title = videoTitle,
