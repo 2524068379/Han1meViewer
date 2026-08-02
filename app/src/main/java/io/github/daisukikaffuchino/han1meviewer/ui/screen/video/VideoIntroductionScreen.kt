@@ -30,6 +30,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -88,6 +90,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.content.ErrorConten
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.LoadingContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyRow
+import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyVerticalGrid
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeVideoIntroduction
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberCardResponsiveWidth
@@ -317,97 +320,131 @@ private fun VideoIntroductionContent(
 
     val nestedScrollInterop = rememberNestedScrollInteropConnection()
 
-    LazyColumn(
-        state = listState,
-        modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(nestedScrollInterop),
-        contentPadding = PaddingValues(
-            start = 6.dp,
-            top = 12.dp,
-            end = 6.dp,
-            bottom = 24.dp + bottomInset
-        ),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        video.artist?.let { artist ->
-            item(key = "artist") {
-                ArtistSection(
-                    artist = artist,
-                    onOpenArtist = { onOpenArtist(artist) },
-                    onToggleSubscribe = { onToggleSubscribe(artist) },
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val relatedItems = video.relatedHanimes
+        val relatedIsNormal = relatedItems.firstOrNull()?.itemType == HanimeInfo.NORMAL
+        val relatedMinCardWidth =
+            if (relatedIsNormal) VideoNormalCardMinWidth else VideoSimplifiedCardMinWidth
+        val relatedAvailableWidth = (maxWidth - 12.dp).coerceAtLeast(0.dp)
+        val relatedColumns = maxOf(
+            2,
+            ((relatedAvailableWidth + SpacingNormal) / (relatedMinCardWidth + SpacingNormal)).toInt(),
+        )
+        val relatedRows = remember(relatedItems, relatedColumns) {
+            relatedItems.chunked(relatedColumns)
+        }
+
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(nestedScrollInterop),
+            contentPadding = PaddingValues(
+                start = 6.dp,
+                top = 12.dp,
+                end = 6.dp,
+                bottom = 24.dp + bottomInset
+            ),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            enableItemAnimation = false,
+        ) {
+            video.artist?.let { artist ->
+                item(key = "artist") {
+                    ArtistSection(
+                        artist = artist,
+                        onOpenArtist = { onOpenArtist(artist) },
+                        onToggleSubscribe = { onToggleSubscribe(artist) },
+                    )
+                }
+            }
+
+            item(key = "title") {
+                TitleSection(video = video)
+            }
+
+            item(key = "meta") {
+                MetaSection(
+                    video = video,
+                    fromDownload = fromDownload,
+                    onRateVideo = onRateVideo,
                 )
             }
-        }
 
-        item(key = "title") {
-            TitleSection(video = video)
-        }
-
-        item(key = "meta") {
-            MetaSection(
-                video = video,
-                fromDownload = fromDownload,
-                onRateVideo = onRateVideo,
-            )
-        }
-
-        item(key = "intro") {
-            ExpandableIntroductionSection(
-                introduction = video.introduction.orEmpty(),
-                onIntroductionLinkClick = onIntroductionLinkClick,
-            )
-        }
-
-        if (!fromDownload) {
-            item(key = "actions") {
-                ActionSection(
-                    isFav = video.isFav,
-                    hasOriginalComic = !video.originalComic.isNullOrBlank(),
-                    checkInEnabled = checkInEnabled,
-                    onQuickCheckIn = { showQuickCheckInDialog = true },
-                    onOpenOriginalComic = onOpenOriginalComic,
-                    onToggleFavorite = onToggleFavorite,
-                    onManageMyList = { showMyListDialog = true },
-                    onDownload = { showDownloadQualityDialog = true },
-                    onShare = onShare,
-                    onCopyShareText = onCopyShareText,
-                    onOpenWebPage = onOpenWebPage,
+            item(key = "intro") {
+                ExpandableIntroductionSection(
+                    introduction = video.introduction.orEmpty(),
+                    onIntroductionLinkClick = onIntroductionLinkClick,
                 )
             }
-        }
 
-        if (video.tags.isNotEmpty()) {
-            item(key = "tags") {
-                TagsSection(
-                    tags = video.tags,
-                    onTagClick = onNavigateToSearch,
-                )
+            if (!fromDownload) {
+                item(key = "actions") {
+                    ActionSection(
+                        isFav = video.isFav,
+                        hasOriginalComic = !video.originalComic.isNullOrBlank(),
+                        checkInEnabled = checkInEnabled,
+                        onQuickCheckIn = { showQuickCheckInDialog = true },
+                        onOpenOriginalComic = onOpenOriginalComic,
+                        onToggleFavorite = onToggleFavorite,
+                        onManageMyList = { showMyListDialog = true },
+                        onDownload = { showDownloadQualityDialog = true },
+                        onShare = onShare,
+                        onCopyShareText = onCopyShareText,
+                        onOpenWebPage = onOpenWebPage,
+                    )
+                }
             }
-        }
 
-        if (!fromDownload && video.playlist != null && video.playlist.video.isNotEmpty()) {
-            item(key = "playlist") {
-                PlaylistSection(
-                    playlist = video.playlist,
-                    initialIndex = playlistInitialIndex,
-                    onOpenVideo = onOpenVideo,
-                    onShowAllPlaylist = if (onShowAllPlaylist != null) {
-                        { showPlaylistSheet = true }
-                    } else {
-                        null
-                    },
-                    onPlaylistScrollChange = onPlaylistScrollChange,
-                )
+            if (video.tags.isNotEmpty()) {
+                item(key = "tags") {
+                    TagsSection(
+                        tags = video.tags,
+                        onTagClick = onNavigateToSearch,
+                    )
+                }
             }
-        }
 
-        if (!fromDownload && !hideRelatedInIntro && video.relatedHanimes.isNotEmpty()) {
-            item(key = "related") {
-                RelatedVideosSection(
-                    videos = video.relatedHanimes,
-                    onOpenVideo = onOpenVideo,
-                )
+            if (!fromDownload && video.playlist != null && video.playlist.video.isNotEmpty()) {
+                item(key = "playlist") {
+                    PlaylistSection(
+                        playlist = video.playlist,
+                        initialIndex = playlistInitialIndex,
+                        onOpenVideo = onOpenVideo,
+                        onShowAllPlaylist = if (onShowAllPlaylist != null) {
+                            { showPlaylistSheet = true }
+                        } else {
+                            null
+                        },
+                        onPlaylistScrollChange = onPlaylistScrollChange,
+                    )
+                }
+            }
+
+            if (!fromDownload && !hideRelatedInIntro && relatedItems.isNotEmpty()) {
+                item(key = "related_header", contentType = "section_header") {
+                    SectionHeader(title = stringResource(R.string.related_video))
+                }
+                itemsIndexed(
+                    items = relatedRows,
+                    key = { index, row -> "related_row_${index}_${row.first().videoCode}" },
+                    contentType = { _, _ -> "related_row" },
+                ) { _, row ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(SpacingNormal),
+                    ) {
+                        row.forEach { item ->
+                            RelatedVideoCard(
+                                item = item,
+                                onOpenVideo = onOpenVideo,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                        repeat(relatedColumns - row.size) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
             }
         }
     }
@@ -637,14 +674,7 @@ private fun MyListDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = {
-                    if (selectedStates.none { it }) {
-                        onDismiss()
-                        SonnerToast.warning(R.string.select_at_least_one_playlist)
-                    } else {
-                        onConfirm(selectedStates)
-                    }
-                },
+                onClick = { onConfirm(selectedStates) },
             ) {
                 Text(stringResource(R.string.confirm))
             }
@@ -1300,43 +1330,56 @@ private fun PlaylistSection(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun RelatedVideosSection(
     videos: List<HanimeInfo>,
     onOpenVideo: (HanimeInfo) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Column(
+    val isNormal = videos.firstOrNull()?.itemType == HanimeInfo.NORMAL
+    val minCardWidth = if (isNormal) VideoNormalCardMinWidth else VideoSimplifiedCardMinWidth
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = minCardWidth),
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(SpacingNormal),
         verticalArrangement = Arrangement.spacedBy(SpacingNormal),
+        enableItemAnimation = false,
     ) {
-        SectionHeader(title = stringResource(R.string.related_video))
-
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val isNormal = videos.firstOrNull()?.itemType == HanimeInfo.NORMAL
-            val minCardWidth =
-                if (isNormal) VideoNormalCardMinWidth else VideoSimplifiedCardMinWidth
-            val spacing = SpacingNormal
-            val columns = maxOf(2, ((maxWidth + spacing) / (minCardWidth + spacing)).toInt())
-            val itemWidth = ((maxWidth - (spacing * (columns - 1))) / columns) - 0.5.dp
-            FlowRow(
+        item(
+            key = "related_header",
+            span = { GridItemSpan(maxLineSpan) },
+            contentType = "section_header",
+        ) {
+            SectionHeader(title = stringResource(R.string.related_video))
+        }
+        items(
+            items = videos,
+            key = { it.videoCode },
+            contentType = { "related_video" },
+        ) { item ->
+            RelatedVideoCard(
+                item = item,
+                onOpenVideo = onOpenVideo,
                 modifier = Modifier.fillMaxWidth(),
-                maxItemsInEachRow = columns,
-                horizontalArrangement = Arrangement.spacedBy(spacing),
-                verticalArrangement = Arrangement.spacedBy(spacing)
-            ) {
-                videos.forEach { item ->
-                    VideoCardItem(
-                        modifier = Modifier.width(itemWidth),
-                        videoItem = item,
-                        isHorizontalCard = item.itemType == HanimeInfo.NORMAL,
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                        onClickVideosItem = { onOpenVideo(item) },
-                        onLongClickVideosItem = { _, _ -> },
-                    )
-                }
-            }
+            )
         }
     }
+}
+
+@Composable
+private fun RelatedVideoCard(
+    item: HanimeInfo,
+    onOpenVideo: (HanimeInfo) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    VideoCardItem(
+        modifier = modifier,
+        videoItem = item,
+        isHorizontalCard = item.itemType == HanimeInfo.NORMAL,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        onClickVideosItem = { onOpenVideo(item) },
+        onLongClickVideosItem = { _, _ -> },
+    )
 }
 
 @Composable

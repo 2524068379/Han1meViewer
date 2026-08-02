@@ -10,6 +10,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.PlayerKernel
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SettingsStore
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ThemeAccent
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ThemeMode
+import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoLandscapeLayoutStyle
 import io.github.daisukikaffuchino.han1meviewer.logic.model.DOWNLOAD_SPEED_BYTES
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -90,6 +91,7 @@ object SettingsRepository : SettingsStore {
     val disableMobileDataWarning get() = current.disableMobileDataWarning
     val disablePredictiveBack get() = current.disablePredictiveBack
     val tabletMode get() = current.tabletMode
+    val videoLandscapeLayoutStyle get() = current.videoLandscapeLayoutStyle
     val hapticFeedbackEnabled get() = current.hapticFeedbackEnabled
     val funLoadingHints get() = current.funLoadingHints
     val secureMode get() = current.secureMode
@@ -132,6 +134,8 @@ object SettingsRepository : SettingsStore {
     suspend fun setIgnoredVersionCode(value: Int) = update { it.copy(ignoredVersionCode = value) }
     suspend fun setAlwaysShowUpdateCard(value: Boolean) = update { it.copy(alwaysShowUpdateCard = value) }
     suspend fun setDisplayDensity(value: DisplayDensity) = update { it.copy(displayDensity = value) }
+    suspend fun setVideoLandscapeLayoutStyle(value: VideoLandscapeLayoutStyle) =
+        update { it.copy(videoLandscapeLayoutStyle = value) }
 
     private fun String.withTrailingSlash() = if (endsWith('/')) this else "$this/"
     private fun rootUrl(value: String) = runCatching { URI(value).let { "${it.scheme}://${it.rawAuthority}" } }.getOrDefault(value)

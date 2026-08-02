@@ -55,6 +55,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.DisplayDensity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.PaletteStyle
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ThemeAccent
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ThemeMode
+import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoLandscapeLayoutStyle
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.HomeSettingsPage
@@ -218,6 +219,13 @@ fun HomeSettingsRouteScreen(
         },
         onTabletModeChange = {
             coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(tabletMode = it) } }
+        },
+        onVideoLandscapeLayoutStyleChange = { value ->
+            coroutineScope.launch {
+                SettingsRepository.setVideoLandscapeLayoutStyle(
+                    VideoLandscapeLayoutStyle.fromValue(value)
+                )
+            }
         },
         onCheckInEnabledChange = {
             coroutineScope.launch {
@@ -494,6 +502,7 @@ private fun buildHomeSettingsUiState(
         disableMobileDataWarning = SettingsRepository.disableMobileDataWarning,
         disablePredictiveBack = SettingsRepository.disablePredictiveBack,
         tabletMode = SettingsRepository.tabletMode,
+        videoLandscapeLayoutStyle = SettingsRepository.videoLandscapeLayoutStyle.value,
         disableComments = SettingsRepository.current.disableComments,
         collapseDownloadedGroup = SettingsRepository.collapseDownloadedGroup,
         useDynamicColor = SettingsRepository.useDynamicColor,

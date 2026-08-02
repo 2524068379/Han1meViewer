@@ -75,6 +75,7 @@ fun HomeSettingsScreen(
     onDisableMobileDataWarningChange: (Boolean) -> Unit,
     onDisablePredictiveBackChange: (Boolean) -> Unit,
     onTabletModeChange: (Boolean) -> Unit,
+    onVideoLandscapeLayoutStyleChange: (String) -> Unit,
     onCheckInEnabledChange: (Boolean) -> Unit,
     onDisableCommentsChange: (Boolean) -> Unit,
     onCollapseDownloadedGroupChange: (Boolean) -> Unit,
@@ -374,6 +375,12 @@ fun HomeSettingsScreen(
                             iconRes = R.drawable.ic_tablet,
                             onCheckedChange = onTabletModeChange,
                         )
+                        SettingsAnimatedVisibility(visible = state.tabletMode) {
+                            VideoLandscapeLayoutStylePicker(
+                                selectedValue = state.videoLandscapeLayoutStyle,
+                                onSelect = onVideoLandscapeLayoutStyleChange,
+                            )
+                        }
                         SettingSwitchItem(
                             title = stringResource(R.string.enable_check_in_feature),
                             summary = stringResource(R.string.enable_check_in_feature_summary),
@@ -586,6 +593,7 @@ private fun HomeSettingsScreenPreview() {
             onDisableMobileDataWarningChange = {},
             onDisablePredictiveBackChange = {},
             onTabletModeChange = {},
+            onVideoLandscapeLayoutStyleChange = {},
             onCheckInEnabledChange = {},
             onDisableCommentsChange = {},
             onCollapseDownloadedGroupChange = {},
@@ -626,6 +634,7 @@ private fun previewHomeSettingsState() = HomeSettingsUiState(
     disableMobileDataWarning = false,
     disablePredictiveBack = false,
     tabletMode = false,
+    videoLandscapeLayoutStyle = "classic",
     disableComments = false,
     collapseDownloadedGroup = false,
     useDynamicColor = false,

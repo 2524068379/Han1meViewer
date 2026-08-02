@@ -227,7 +227,7 @@ private fun AccountContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    val defaultPlaceholder = painterResource(R.drawable.bg_default_header)
+                    val defaultPlaceholder = painterResource(R.drawable.h_chan_default_avatar)
                     AsyncImage(
                         model = account.avatarUrl,
                         contentDescription = account.username,

@@ -2,12 +2,18 @@ package io.github.daisukikaffuchino.han1meviewer.ui.navigation.main
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -18,9 +24,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
@@ -75,6 +83,7 @@ fun TopNavigation(
     backStack: TopLevelBackStack<HanimeScreen>,
     isDrawerOpen: Boolean,
     showHomeNavigationIcon: Boolean,
+    homeContentStartPadding: Dp,
     onOpenDrawer: () -> Unit,
 ) {
     var pendingAvatarCropResult by remember { mutableStateOf<String?>(null) }
@@ -101,6 +110,14 @@ fun TopNavigation(
         )
     }
 
+    fun videoTransition() = NavDisplay.transitionSpec {
+        ContentTransform(EnterTransition.None, ExitTransition.None)
+    } + NavDisplay.popTransitionSpec {
+        ContentTransform(EnterTransition.None, ExitTransition.None)
+    } + NavDisplay.predictivePopTransitionSpec {
+        ContentTransform(EnterTransition.None, ExitTransition.None)
+    }
+
     val defaultTransition = fadeScale(
         effectSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
         spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
@@ -119,20 +136,26 @@ fun TopNavigation(
         predictivePopTransitionSpec = { defaultTransition },
         entryProvider = entryProvider {
         entry<HomeRoute> {
-            HomeRouteScreen(
-                activity = activity,
-                isDrawerOpen = isDrawerOpen,
-                showNavigationIcon = showHomeNavigationIcon,
-                onOpenDrawer = onOpenDrawer,
-                onNavigateToPreview = { backStack.add(PreviewRoute) },
-                onNavigateToSearch = { query -> backStack.add(SearchRoute(query = query)) },
-                onNavigateToSearchAdvanced = { params ->
-                    backStack.add(
-                        SearchRoute(advancedSearchJson = Json.encodeToString(params))
-                    )
-                },
-                onNavigateToVideo = onNavigateToVideo,
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(start = homeContentStartPadding),
+            ) {
+                HomeRouteScreen(
+                    activity = activity,
+                    isDrawerOpen = isDrawerOpen,
+                    showNavigationIcon = showHomeNavigationIcon,
+                    onOpenDrawer = onOpenDrawer,
+                    onNavigateToPreview = { backStack.add(PreviewRoute) },
+                    onNavigateToSearch = { query -> backStack.add(SearchRoute(query = query)) },
+                    onNavigateToSearchAdvanced = { params ->
+                        backStack.add(
+                            SearchRoute(advancedSearchJson = Json.encodeToString(params))
+                        )
+                    },
+                    onNavigateToVideo = onNavigateToVideo,
+                )
+            }
         }
         entry<WatchHistoryRoute> {
             WatchHistoryRouteScreen(
@@ -510,7 +533,7 @@ fun TopNavigation(
                 onBack = onBack,
             )
         }
-        entry<VideoRoute>(metadata = pageTransition()) { route ->
+        entry<VideoRoute>(metadata = videoTransition()) { route ->
             VideoRouteScreen(
                 activity = activity,
                 route = route,

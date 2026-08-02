@@ -3,10 +3,8 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.search
 import android.util.SparseArray
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -39,7 +37,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -49,7 +46,10 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -58,10 +58,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -72,16 +79,20 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.SearchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo.Companion.NORMAL
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.VideoCardItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyVerticalGrid
@@ -123,7 +134,8 @@ fun SearchScreen(
     var hasSearched by rememberSaveable(initialQuery) { mutableStateOf(false) }
     var isRefreshing by remember { mutableStateOf(false) }
     var isSearchFocused by remember { mutableStateOf(false) }
-    var isCriteriaVisible by rememberSaveable { mutableStateOf(true) }
+    val criteriaCollapsedFraction = rememberSaveable { mutableFloatStateOf(0f) }
+    var criteriaHeightPx by remember { mutableIntStateOf(0) }
     var isLeavingScreen by remember { mutableStateOf(false) }
 
     val refreshState = rememberPullToRefreshState()
@@ -158,6 +170,7 @@ fun SearchScreen(
         if (resetScroll) {
             viewModel.gridFirstVisibleItemIndex = 0
             viewModel.gridFirstVisibleItemScrollOffset = 0
+            criteriaCollapsedFraction.floatValue = 0f
             scope.launch {
                 gridState.scrollToItem(0)
             }
@@ -259,33 +272,24 @@ fun SearchScreen(
     LaunchedEffect(searchState) {
         if (searchState !is PageLoadingState.Loading) isRefreshing = false
     }
-    LaunchedEffect(filter.isNotEmpty()) {
-        if (filter.isNotEmpty()) isCriteriaVisible = true
+    LaunchedEffect(filter.isNotEmpty(), hasSearchResults) {
+        if (!filter.isNotEmpty() || !hasSearchResults) criteriaCollapsedFraction.floatValue = 0f
     }
-    LaunchedEffect(hasSearchResults) {
-        if (!hasSearchResults) isCriteriaVisible = true
-    }
-    LaunchedEffect(gridState, hasSearchResults, filter.isNotEmpty()) {
-        if (!hasSearchResults || !filter.isNotEmpty()) return@LaunchedEffect
 
-        var previousIndex = gridState.firstVisibleItemIndex
-        var previousOffset = gridState.firstVisibleItemScrollOffset
-        snapshotFlow {
-            gridState.firstVisibleItemIndex to gridState.firstVisibleItemScrollOffset
-        }.distinctUntilChanged().collect { (index, offset) ->
-            val movedForward =
-                index > previousIndex || (index == previousIndex && offset > previousOffset)
-            val movedBackward =
-                index < previousIndex || (index == previousIndex && offset < previousOffset)
+    val criteriaScrollEnabled = filter.isNotEmpty() && hasSearchResults && criteriaHeightPx > 0
+    val criteriaNestedScrollConnection = remember(criteriaScrollEnabled, criteriaHeightPx) {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (!criteriaScrollEnabled || available.y == 0f) return Offset.Zero
 
-            when {
-                index == 0 && offset == 0 -> isCriteriaVisible = true
-                movedForward -> isCriteriaVisible = false
-                movedBackward -> isCriteriaVisible = true
+                val oldCollapsedPx = criteriaCollapsedFraction.floatValue * criteriaHeightPx
+                val newCollapsedPx = (oldCollapsedPx - available.y)
+                    .coerceIn(0f, criteriaHeightPx.toFloat())
+                if (newCollapsedPx == oldCollapsedPx) return Offset.Zero
+
+                criteriaCollapsedFraction.floatValue = newCollapsedPx / criteriaHeightPx
+                return Offset(x = 0f, y = oldCollapsedPx - newCollapsedPx)
             }
-
-            previousIndex = index
-            previousOffset = offset
         }
     }
 
@@ -339,31 +343,33 @@ fun SearchScreen(
             }
         }, ::handleBack, onOpenAdvancedSearch, { isSearchFocused = it }, focusReq)
 
-        AnimatedVisibility(
-            visible = filter.isNotEmpty() && isCriteriaVisible,
-            enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
-            exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
-        ) {
-            ActiveSearchCriteria(
-                filter = filter,
-                viewModel = viewModel,
-                onClearAll = {
-                    clearSearchCriteria(
-                        clearGenre = true,
-                        clearSort = true,
-                        clearDuration = true,
-                        clearTags = true,
-                        clearBrands = true,
-                        clearBroad = true,
-                    )
-                },
-                onClearGenre = { clearSearchCriteria(clearGenre = true) },
-                onClearSort = { clearSearchCriteria(clearSort = true) },
-                onClearDuration = { clearSearchCriteria(clearDuration = true) },
-                onClearTagCount = { clearSearchCriteria(clearTags = true) },
-                onClearBrandCount = { clearSearchCriteria(clearBrands = true) },
-                onClearBroad = { clearSearchCriteria(clearBroad = true) },
-            )
+        if (filter.isNotEmpty()) {
+            CollapsibleSearchCriteria(
+                collapsedFraction = criteriaCollapsedFraction,
+                onHeightChanged = { criteriaHeightPx = it },
+            ) { criteriaModifier ->
+                ActiveSearchCriteria(
+                    filter = filter,
+                    viewModel = viewModel,
+                    onClearAll = {
+                        clearSearchCriteria(
+                            clearGenre = true,
+                            clearSort = true,
+                            clearDuration = true,
+                            clearTags = true,
+                            clearBrands = true,
+                            clearBroad = true,
+                        )
+                    },
+                    onClearGenre = { clearSearchCriteria(clearGenre = true) },
+                    onClearSort = { clearSearchCriteria(clearSort = true) },
+                    onClearDuration = { clearSearchCriteria(clearDuration = true) },
+                    onClearTagCount = { clearSearchCriteria(clearTags = true) },
+                    onClearBrandCount = { clearSearchCriteria(clearBrands = true) },
+                    onClearBroad = { clearSearchCriteria(clearBroad = true) },
+                    modifier = criteriaModifier,
+                )
+            }
         }
 
         PullToRefreshBox(
@@ -373,7 +379,9 @@ fun SearchScreen(
                 doSearch()
             },
             state = refreshState,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(criteriaNestedScrollConnection),
             indicator = {
                 PullToRefreshDefaults.LoadingIndicator(
                     state = refreshState,
@@ -733,6 +741,36 @@ data class SearchFilter(
                 tagCount > 0 ||
                 brandCount > 0 ||
                 broad
+}
+
+@Composable
+private fun CollapsibleSearchCriteria(
+    collapsedFraction: State<Float>,
+    onHeightChanged: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable (Modifier) -> Unit,
+) {
+    Layout(
+        content = {
+            content(Modifier.onSizeChanged { onHeightChanged(it.height) })
+        },
+        modifier = modifier.clipToBounds(),
+    ) { measurables, constraints ->
+        val placeable = measurables.single().measure(
+            constraints.copy(minHeight = 0, maxHeight = Constraints.Infinity)
+        )
+        val collapsedHeight = (placeable.height * collapsedFraction.value)
+            .toInt()
+            .coerceIn(0, placeable.height)
+        val visibleHeight = placeable.height - collapsedHeight
+
+        layout(
+            width = constraints.constrainWidth(placeable.width),
+            height = constraints.constrainHeight(visibleHeight),
+        ) {
+            placeable.placeRelative(x = 0, y = -collapsedHeight)
+        }
+    }
 }
 
 @Composable

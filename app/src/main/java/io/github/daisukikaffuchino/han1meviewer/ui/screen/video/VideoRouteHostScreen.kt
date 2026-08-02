@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -56,6 +57,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.ParseException
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
+import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoLandscapeLayoutStyle
 import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.bridge.VideoPageHost
@@ -99,6 +101,9 @@ fun VideoRouteHostScreen(
     }
     val playbackController = remember(playbackEngine) { ComposePlaybackController(playbackEngine) }
     val playbackState by playbackController.state.collectAsStateWithLifecycle()
+    val appSettings by SettingsRepository.settings.collectAsStateWithLifecycle()
+    val isLargeScreenDevice =
+        LocalConfiguration.current.smallestScreenWidthDp >= LARGE_SCREEN_MIN_WIDTH_DP
     val hostUiState by viewModel.videoHostUiStateFlow.collectAsStateWithLifecycle()
     val videoState by viewModel.hanimeVideoStateFlow.collectAsStateWithLifecycle()
     val video = viewModel.hanimeVideoFlow.collectAsStateWithLifecycle().value
@@ -111,6 +116,19 @@ fun VideoRouteHostScreen(
 
     LaunchedEffect(playbackController) {
         playbackController.setPlaybackSpeed(SettingsRepository.playerSpeed)
+    }
+    LaunchedEffect(isLargeScreenDevice) {
+        val currentSettings = SettingsRepository.current
+        if (
+            isLargeScreenDevice &&
+            !currentSettings.tabletMode &&
+            !currentSettings.largeScreenTabletModeHintShown
+        ) {
+            SettingsRepository.update {
+                it.copy(largeScreenTabletModeHintShown = true)
+            }
+            SonnerToast.info(R.string.large_screen_tablet_mode_hint)
+        }
     }
     val stringLongPressShare = remember(activity) {
         activity.getString(R.string.long_press_share_to_copy)
@@ -317,11 +335,6 @@ fun VideoRouteHostScreen(
 
             override fun onPipModeChanged(isInPip: Boolean) {
                 viewModel.setPipMode(isInPip)
-                if (isInPip) {
-                    viewModel.setPlayerHeightDp(null)
-                } else {
-                    viewModel.setPlayerHeightDp(if (SettingsRepository.tabletMode) 350.dp else 250.dp)
-                }
                 updatePipAction()
             }
 
@@ -541,21 +554,23 @@ fun VideoRouteHostScreen(
         }
     }
 
-    LaunchedEffect(hostUiState.isInPipMode, isSideRelatedCollapsed) {
-        if (hostUiState.isInPipMode) return@LaunchedEffect
-        val height = if (SettingsRepository.tabletMode) {
-            if (isSideRelatedCollapsed) 500.dp else 400.dp
-        } else {
-            250.dp
+    val resolvedPlayerHeightDp = when {
+        hostUiState.isInPipMode -> null
+        appSettings.tabletMode -> if (isSideRelatedCollapsed) 500.dp else 400.dp
+        else -> 250.dp
+    }
+
+    LaunchedEffect(resolvedPlayerHeightDp, hostUiState.playerHeightDp) {
+        if (hostUiState.playerHeightDp != resolvedPlayerHeightDp) {
+            viewModel.setPlayerHeightDp(resolvedPlayerHeightDp)
         }
-        if (hostUiState.playerHeightDp != height) viewModel.setPlayerHeightDp(height)
     }
 
     VideoShellContent(
-        isTabletMode = SettingsRepository.tabletMode,
+        isTabletMode = appSettings.tabletMode,
         isInPipMode = hostUiState.isInPipMode,
         isFullscreen = isFullscreen,
-        playerHeightDp = hostUiState.playerHeightDp,
+        playerHeightDp = resolvedPlayerHeightDp,
         playbackEngine = playbackEngine,
         posterUrl = video?.coverUrl,
         title = videoTitle,
@@ -734,10 +749,19 @@ fun VideoRouteHostScreen(
                 pageHost = pageHost,
             )
         },
-        relatedItems = relatedItems,
-        onHideRelatedInIntroChange = { viewModel.hideRelatedInIntro = it },
-        onSideRelatedCollapsedChange = { isSideRelatedCollapsed = it },
-        onOpenVideo = { item -> activity.showVideoDetailFragment(item.videoCode) },
+        classicTabletLayout = if (
+            appSettings.tabletMode &&
+            appSettings.videoLandscapeLayoutStyle == VideoLandscapeLayoutStyle.Classic
+        ) {
+            ClassicTabletLayoutConfig(
+                relatedItems = relatedItems,
+                onHideRelatedInIntroChange = { viewModel.hideRelatedInIntro = it },
+                onSideRelatedCollapsedChange = { isSideRelatedCollapsed = it },
+                onOpenVideo = { item -> activity.showVideoDetailFragment(item.videoCode) },
+            )
+        } else {
+            null
+        },
         modifier = Modifier.fillMaxSize(),
     )
 
@@ -833,10 +857,14 @@ fun VideoRouteHostScreen(
             when {
                 isFailed -> SonnerToast.error(
                     String(
-                        Base64.decode("5qCh6aqM5bSp5rqD77yM6K+35ZCR5byA5Y+R6ICF5Y+N6aaI", Base64.DEFAULT),
+                        Base64.decode(
+                            "5qCh6aqM5bSp5rqD77yM6K+35ZCR5byA5Y+R6ICF5Y+N6aaI",
+                            Base64.DEFAULT
+                        ),
                         Charsets.UTF_8
                     )
                 )
+
                 else -> showDialog = !BuildConfig.DEBUG && !svc()
             }
         }
@@ -916,3 +944,5 @@ private fun realProgressSensitivity(value: Int): Float {
     val clampedValue = value.coerceIn(1, 7)
     return 4f - (clampedValue - 1) * (3.5f / 6f)
 }
+
+private const val LARGE_SCREEN_MIN_WIDTH_DP = 600

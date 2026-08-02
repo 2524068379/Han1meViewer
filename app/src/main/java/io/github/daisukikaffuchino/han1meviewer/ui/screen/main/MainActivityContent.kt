@@ -74,256 +74,268 @@ fun MainActivityContent(
     onConfirmLogout: () -> Unit,
     onOpenClipboardVideo: (String) -> Unit,
 ) {
-        val backStack = viewModel.mainBackStack
-        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-        val scope = rememberCoroutineScope()
-        val clipboard = LocalClipboard.current
-        val snackbarHostState = remember { SnackbarHostState() }
-        var showUsageNotice by remember { mutableStateOf(!SettingsRepository.usageNoticeAccepted) }
-        var showSourceDialog by remember {
-            mutableStateOf(
-                SettingsRepository.usageNoticeAccepted &&
+    val backStack = viewModel.mainBackStack
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    val clipboard = LocalClipboard.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    var showUsageNotice by remember { mutableStateOf(!SettingsRepository.usageNoticeAccepted) }
+    var showSourceDialog by remember {
+        mutableStateOf(
+            SettingsRepository.usageNoticeAccepted &&
                     !SettingsRepository.usageSourceVerified &&
                     !SettingsRepository.usageSourcePending,
-            )
-        }
-        var showSourceWarning by rememberSaveable {
-            mutableStateOf(
-                SettingsRepository.usageNoticeAccepted &&
+        )
+    }
+    var showSourceWarning by rememberSaveable {
+        mutableStateOf(
+            SettingsRepository.usageNoticeAccepted &&
                     !SettingsRepository.usageSourceVerified &&
                     SettingsRepository.usageSourcePending,
-            )
-        }
-        var sourceLink by rememberSaveable { mutableStateOf("") }
-        var appAccessGranted by remember {
-            mutableStateOf(SettingsRepository.usageNoticeAccepted && SettingsRepository.usageSourceVerified)
-        }
-        val isDrawerOpen =
-            drawerState.currentValue == DrawerValue.Open || drawerState.targetValue == DrawerValue.Open
+        )
+    }
+    var sourceLink by rememberSaveable { mutableStateOf("") }
+    var appAccessGranted by remember {
+        mutableStateOf(SettingsRepository.usageNoticeAccepted && SettingsRepository.usageSourceVerified)
+    }
+    val isDrawerOpen =
+        drawerState.currentValue == DrawerValue.Open || drawerState.targetValue == DrawerValue.Open
 
-        val homeState by viewModel.homePageFlow.collectAsStateWithLifecycle()
-        val showStorageSwitchNotice by HCacheManager.storageSwitchNotice.collectAsStateWithLifecycle()
-        val isLoggedIn by SettingsRepository.loginStateFlow.collectAsStateWithLifecycle()
-        val checkInEnabled by SettingsRepository.checkInEnabledFlow.collectAsStateWithLifecycle()
-        val headerAvatarUrl = if (isLoggedIn) {
-            (homeState as? PageState.Success)?.info?.page?.avatarUrl
-        } else {
-            null
-        }
-        val headerUsername = if (isLoggedIn) {
-            (homeState as? PageState.Success)?.info?.page?.username
-        } else {
-            null
-        }
-        val headerIsLoading = isLoggedIn && homeState is PageState.Loading
-        val currentRoute = backStack.currentKey
-        val selectedDrawerDestination = MainDrawerDestination.fromRoute(backStack.topLevelKey)
-        val drawerEnabled = currentRoute == HomeRoute
-        val permanentDrawer = drawerEnabled &&
+    val homeState by viewModel.homePageFlow.collectAsStateWithLifecycle()
+    val showStorageSwitchNotice by HCacheManager.storageSwitchNotice.collectAsStateWithLifecycle()
+    val isLoggedIn by SettingsRepository.loginStateFlow.collectAsStateWithLifecycle()
+    val checkInEnabled by SettingsRepository.checkInEnabledFlow.collectAsStateWithLifecycle()
+    val headerAvatarUrl = if (isLoggedIn) {
+        (homeState as? PageState.Success)?.info?.page?.avatarUrl
+    } else {
+        null
+    }
+    val headerUsername = if (isLoggedIn) {
+        (homeState as? PageState.Success)?.info?.page?.username
+    } else {
+        null
+    }
+    val headerIsLoading = isLoggedIn && homeState is PageState.Loading
+    val currentRoute = backStack.currentKey
+    val previousRoute = backStack.backStack.getOrNull(backStack.backStack.lastIndex - 1)
+    val selectedDrawerDestination = MainDrawerDestination.fromRoute(backStack.topLevelKey)
+    val drawerEnabled = currentRoute == HomeRoute
+    val permanentDrawer = (drawerEnabled || previousRoute == HomeRoute) &&
             LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-        LaunchedEffect(permanentDrawer) {
-            if (permanentDrawer) drawerState.close()
+    LaunchedEffect(permanentDrawer) {
+        if (permanentDrawer) drawerState.close()
+    }
+    LaunchedEffect(Unit) {
+        val clipboardText = clipboard.getClipEntry()
+            ?.clipData
+            ?.takeIf { it.itemCount > 0 }
+            ?.getItemAt(0)
+            ?.coerceToText(activity)
+        val videoCode = clipboardText?.let { videoUrlRegex.find(it)?.groupValues?.get(1) }
+        if (videoCode != null) {
+            val result = snackbarHostState.showSnackbar(
+                message = activity.getString(R.string.detect_ha1_related_link_in_clipboard),
+                actionLabel = activity.getString(R.string.enter),
+                withDismissAction = true,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                onOpenClipboardVideo(videoCode)
+            }
         }
-        LaunchedEffect(Unit) {
-            val clipboardText = clipboard.getClipEntry()
-                ?.clipData
-                ?.takeIf { it.itemCount > 0 }
-                ?.getItemAt(0)
-                ?.coerceToText(activity)
-            val videoCode = clipboardText?.let { videoUrlRegex.find(it)?.groupValues?.get(1) }
-            if (videoCode != null) {
-                val result = snackbarHostState.showSnackbar(
-                    message = activity.getString(R.string.detect_ha1_related_link_in_clipboard),
-                    actionLabel = activity.getString(R.string.enter),
-                    withDismissAction = true,
+    }
+    LaunchedEffect(Unit) {
+        pendingNavigationRequests.collect { intent ->
+            backStack.handleMainIntent(intent)
+        }
+    }
+    LaunchedEffect(viewModel) {
+        viewModel.sessionExpiredMessage.collect { event ->
+            event.message?.let(SonnerToast::error) ?: SonnerToast.error(event.fallbackResId)
+        }
+    }
+    LaunchedEffect(homeState) {
+        if (homeState is PageState.Error) {
+            val throwable = (homeState as PageState.Error).throwable
+            if (throwable is CloudflareBlockedException) {
+                LogUtil.e("error", "被屏蔽时的处理")
+            }
+        }
+    }
+    MainActivityScaffold(
+        drawerState = drawerState,
+        drawerEnabled = drawerEnabled,
+        permanentDrawer = permanentDrawer,
+        selectedDestination = selectedDrawerDestination,
+        avatarUrl = headerAvatarUrl,
+        username = headerUsername,
+        isLoggedIn = isLoggedIn,
+        isLoading = headerIsLoading,
+        currentSite = SettingsRepository.baseUrl,
+        checkInEnabled = checkInEnabled,
+        onAvatarClick = {
+            if (isLoggedIn) {
+                scope.launch { drawerState.close() }
+                onOpenAccount()
+            } else {
+                scope.launch {
+                    drawerState.close()
+                    onRequireLogin()
+                }
+            }
+        },
+        onAvatarLongClick = {
+            onLogoutClick()
+        },
+        onSwitchSiteClick = onSwitchSiteClick,
+        onDrawerItemSelected = { destination ->
+            val handled = backStack.navigateDrawerDestination(
+                destination = destination,
+                isLoggedIn = isLoggedIn,
+                onRequireLogin = { SonnerToast.warning(R.string.login_first) },
+            )
+            if (handled) {
+                scope.launch { drawerState.close() }
+            }
+            handled
+        },
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (appAccessGranted) {
+                TopNavigation(
+                    activity = activity,
+                    backStack = backStack,
+                    isDrawerOpen = isDrawerOpen && !permanentDrawer,
+                    showHomeNavigationIcon = !permanentDrawer,
+                    homeContentStartPadding = if (permanentDrawer) 280.dp else 0.dp,
+                    onOpenDrawer = {
+                        if (drawerEnabled) {
+                            scope.launch { drawerState.open() }
+                        }
+                    },
                 )
-                if (result == SnackbarResult.ActionPerformed) {
-                    onOpenClipboardVideo(videoCode)
-                }
             }
-        }
-        LaunchedEffect(Unit) {
-            pendingNavigationRequests.collect { intent ->
-                backStack.handleMainIntent(intent)
+            if (showAuthGuard) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.55f)),
+                )
             }
-        }
-        LaunchedEffect(viewModel) {
-            viewModel.sessionExpiredMessage.collect { event ->
-                event.message?.let(SonnerToast::error) ?: SonnerToast.error(event.fallbackResId)
-            }
-        }
-        LaunchedEffect(homeState) {
-            if (homeState is PageState.Error) {
-                val throwable = (homeState as PageState.Error).throwable
-                if (throwable is CloudflareBlockedException) {
-                    LogUtil.e("error", "被屏蔽时的处理")
-                }
-            }
-        }
-        MainActivityScaffold(
-            drawerState = drawerState,
-            drawerEnabled = drawerEnabled,
-            permanentDrawer = permanentDrawer,
-            selectedDestination = selectedDrawerDestination,
-            avatarUrl = headerAvatarUrl,
-            username = headerUsername,
-            isLoggedIn = isLoggedIn,
-            isLoading = headerIsLoading,
-            currentSite = SettingsRepository.baseUrl,
-            checkInEnabled = checkInEnabled,
-            onAvatarClick = {
-                if (isLoggedIn) {
-                    scope.launch { drawerState.close() }
-                    onOpenAccount()
-                } else {
+            UsageNoticeDialog(
+                visible = showUsageNotice,
+                onAccepted = {
                     scope.launch {
-                        drawerState.close()
-                        onRequireLogin()
-                    }
-                }
-            },
-            onAvatarLongClick = {
-                onLogoutClick()
-            },
-            onSwitchSiteClick = onSwitchSiteClick,
-            onDrawerItemSelected = { destination ->
-                val handled = backStack.navigateDrawerDestination(
-                    destination = destination,
-                    isLoggedIn = isLoggedIn,
-                    onRequireLogin = { SonnerToast.warning(R.string.login_first) },
-                )
-                if (handled) {
-                    scope.launch { drawerState.close() }
-                }
-                handled
-            },
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                if (appAccessGranted) {
-                    TopNavigation(
-                        activity = activity,
-                        backStack = backStack,
-                        isDrawerOpen = isDrawerOpen && !permanentDrawer,
-                        showHomeNavigationIcon = !permanentDrawer,
-                        onOpenDrawer = {
-                            if (drawerEnabled) {
-                                scope.launch { drawerState.open() }
-                            }
-                        },
-                    )
-                }
-                if (showAuthGuard) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.55f)),
-                    )
-                }
-                UsageNoticeDialog(
-                    visible = showUsageNotice,
-                    onAccepted = {
-                        scope.launch {
-                            SettingsRepository.setUsageNoticeAccepted(true)
-                            showUsageNotice = false
-                            if (SettingsRepository.usageSourceVerified) {
-                                appAccessGranted = true
-                                viewModel.initializeHomePage()
-                            } else if (SettingsRepository.usageSourcePending) {
-                                showSourceWarning = true
-                            } else {
-                                showSourceDialog = true
-                            }
-                        }
-                    },
-                    onDeclined = { activity.finish() },
-                )
-                AppSourceDialog(
-                    visible = showSourceDialog,
-                    onSelect = { source ->
-                        if (source.equals("github", ignoreCase = true)) {
-                            scope.launch {
-                                SettingsRepository.update { it.copy(usageSourceVerified = true, usageSourcePending = false) }
-                                showSourceDialog = false
-                                appAccessGranted = true
-                                viewModel.initializeHomePage()
-                            }
+                        SettingsRepository.setUsageNoticeAccepted(true)
+                        showUsageNotice = false
+                        if (SettingsRepository.usageSourceVerified) {
+                            appAccessGranted = true
+                            viewModel.initializeHomePage()
+                        } else if (SettingsRepository.usageSourcePending) {
+                            showSourceWarning = true
                         } else {
-                            scope.launch {
-                                SettingsRepository.setUsageSourcePending(true)
-                                showSourceDialog = false
-                                sourceLink = ""
-                                showSourceWarning = true
-                            }
+                            showSourceDialog = true
                         }
-                    },
-                )
-                if (showSourceWarning) {
-                    val expectedRepository = "https://github.com/daisukiKaffuChino/Han1meViewer"
-                    val linkValid = sourceLink.trim().equals(expectedRepository, ignoreCase = true)
-                    AlertDialog(
-                        onDismissRequest = {},
-                        title = { Text(stringResource(R.string.app_source_illegal_title)) },
-                        text = {
-                            androidx.compose.foundation.layout.Column {
-                                Text(stringResource(R.string.app_source_illegal_message))
-                                OutlinedTextField(
-                                    value = sourceLink,
-                                    onValueChange = { sourceLink = it },
-                                    label = { Text(stringResource(R.string.app_source_repository_link)) },
-                                    singleLine = true,
+                    }
+                },
+                onDeclined = { activity.finish() },
+            )
+            AppSourceDialog(
+                visible = showSourceDialog,
+                onSelect = { source ->
+                    if (source.equals("github", ignoreCase = true)) {
+                        scope.launch {
+                            SettingsRepository.update {
+                                it.copy(
+                                    usageSourceVerified = true,
+                                    usageSourcePending = false
                                 )
                             }
-                        },
-                        confirmButton = {
-                            TextButton(
-                                enabled = linkValid,
-                                onClick = {
-                                    scope.launch {
-                                        SettingsRepository.update { it.copy(usageSourceVerified = true, usageSourcePending = false) }
-                                        showSourceWarning = false
-                                        appAccessGranted = true
-                                        viewModel.initializeHomePage()
+                            showSourceDialog = false
+                            appAccessGranted = true
+                            viewModel.initializeHomePage()
+                        }
+                    } else {
+                        scope.launch {
+                            SettingsRepository.setUsageSourcePending(true)
+                            showSourceDialog = false
+                            sourceLink = ""
+                            showSourceWarning = true
+                        }
+                    }
+                },
+            )
+            if (showSourceWarning) {
+                val expectedRepository = "https://github.com/daisukiKaffuChino/Han1meViewer"
+                val linkValid = sourceLink.trim().equals(expectedRepository, ignoreCase = true)
+                AlertDialog(
+                    onDismissRequest = {},
+                    title = { Text(stringResource(R.string.app_source_illegal_title)) },
+                    text = {
+                        androidx.compose.foundation.layout.Column {
+                            Text(stringResource(R.string.app_source_illegal_message))
+                            OutlinedTextField(
+                                value = sourceLink,
+                                onValueChange = { sourceLink = it },
+                                label = { Text(stringResource(R.string.app_source_repository_link)) },
+                                singleLine = true,
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            enabled = linkValid,
+                            onClick = {
+                                scope.launch {
+                                    SettingsRepository.update {
+                                        it.copy(
+                                            usageSourceVerified = true,
+                                            usageSourcePending = false
+                                        )
                                     }
-                                },
-                            ) { Text(stringResource(R.string.app_source_verify)) }
-                        },
-                    )
-                }
-                SnackbarHost(
-                    hostState = snackbarHostState,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp),
+                                    showSourceWarning = false
+                                    appAccessGranted = true
+                                    viewModel.initializeHomePage()
+                                }
+                            },
+                        ) { Text(stringResource(R.string.app_source_verify)) }
+                    },
                 )
             }
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp),
+            )
         }
-        ConfirmDialog(
-            visible = showSiteSwitchConfirm,
-            title = stringResource(R.string.confirm_switch_site),
-            message = "",
-            confirmText = stringResource(R.string.sure),
-            dismissText = stringResource(R.string.no),
-            onConfirm = onConfirmSiteSwitch,
-            onDismiss = onDismissSiteSwitch,
-        )
-        ConfirmDialog(
-            visible = logoutDialogCloseCurrentPage != null,
-            title = stringResource(R.string.sure_to_logout),
-            message = "",
-            confirmText = stringResource(R.string.sure),
-            dismissText = stringResource(R.string.no),
-            onConfirm = onConfirmLogout,
-            onDismiss = onDismissLogout,
-        )
-        ConfirmDialog(
-            visible = showStorageSwitchNotice,
-            title = stringResource(R.string.save_failed_title),
-            message = stringResource(R.string.save_failed_message),
-            confirmText = stringResource(R.string.understood),
-            dismissText = null,
-            onConfirm = HCacheManager::dismissStorageSwitchNotice,
-            onDismiss = HCacheManager::dismissStorageSwitchNotice,
-        )
+    }
+    ConfirmDialog(
+        visible = showSiteSwitchConfirm,
+        title = stringResource(R.string.confirm_switch_site),
+        message = "",
+        confirmText = stringResource(R.string.sure),
+        dismissText = stringResource(R.string.no),
+        onConfirm = onConfirmSiteSwitch,
+        onDismiss = onDismissSiteSwitch,
+    )
+    ConfirmDialog(
+        visible = logoutDialogCloseCurrentPage != null,
+        title = stringResource(R.string.sure_to_logout),
+        message = "",
+        confirmText = stringResource(R.string.sure),
+        dismissText = stringResource(R.string.no),
+        onConfirm = onConfirmLogout,
+        onDismiss = onDismissLogout,
+    )
+    ConfirmDialog(
+        visible = showStorageSwitchNotice,
+        title = stringResource(R.string.save_failed_title),
+        message = stringResource(R.string.save_failed_message),
+        confirmText = stringResource(R.string.understood),
+        dismissText = null,
+        onConfirm = HCacheManager::dismissStorageSwitchNotice,
+        onDismiss = HCacheManager::dismissStorageSwitchNotice,
+    )
 }
 
 @Composable

@@ -8,11 +8,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerState
@@ -23,14 +27,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.PermanentDrawerSheet
-import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -69,6 +75,12 @@ fun MainActivityScaffold(
         targetValue = if (drawerState.currentValue == DrawerValue.Open || drawerState.targetValue == DrawerValue.Open) 1f else 0f,
         label = "drawer_fraction",
     )
+    val currentContent by rememberUpdatedState(content)
+    val movableContent = remember {
+        movableContentOf {
+            currentContent()
+        }
+    }
 
     val drawerContent: @Composable ColumnScope.() -> Unit = {
         MainDrawerContent(
@@ -87,20 +99,30 @@ fun MainActivityScaffold(
     }
 
     if (permanentDrawer) {
-        PermanentNavigationDrawer(
-            drawerContent = {
-                PermanentDrawerSheet(
-                    modifier = Modifier.width(280.dp),
-                    drawerContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    windowInsets = WindowInsets(0, 0, 0, 0),
-                    content = drawerContent,
-                )
-            },
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(HanimeDefaults.Colors.pageSurface)
+                .windowInsetsPadding(
+                    WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
+                ),
         ) {
-            MainDrawerBody(drawerFraction = 0f, content = content)
+            PermanentDrawerSheet(
+                modifier = Modifier.width(280.dp),
+                drawerContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                windowInsets = WindowInsets(0, 0, 0, 0),
+                content = drawerContent,
+            )
+            movableContent()
         }
     } else {
         ModalNavigationDrawer(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(HanimeDefaults.Colors.pageSurface)
+                .windowInsetsPadding(
+                    WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
+                ),
             gesturesEnabled = drawerEnabled,
             drawerState = drawerState,
             drawerContent = {
@@ -111,7 +133,7 @@ fun MainActivityScaffold(
                 )
             },
         ) {
-            MainDrawerBody(drawerFraction = drawerFraction, content = content)
+            MainDrawerBody(drawerFraction = drawerFraction, content = movableContent)
 
             BackHandler(
                 enabled = drawerState.currentValue == DrawerValue.Open ||
