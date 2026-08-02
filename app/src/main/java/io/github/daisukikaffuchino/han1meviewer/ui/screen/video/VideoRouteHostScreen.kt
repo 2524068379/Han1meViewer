@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -101,6 +102,8 @@ fun VideoRouteHostScreen(
     val playbackController = remember(playbackEngine) { ComposePlaybackController(playbackEngine) }
     val playbackState by playbackController.state.collectAsStateWithLifecycle()
     val appSettings by SettingsRepository.settings.collectAsStateWithLifecycle()
+    val isLargeScreenDevice =
+        LocalConfiguration.current.smallestScreenWidthDp >= LARGE_SCREEN_MIN_WIDTH_DP
     val hostUiState by viewModel.videoHostUiStateFlow.collectAsStateWithLifecycle()
     val videoState by viewModel.hanimeVideoStateFlow.collectAsStateWithLifecycle()
     val video = viewModel.hanimeVideoFlow.collectAsStateWithLifecycle().value
@@ -113,6 +116,19 @@ fun VideoRouteHostScreen(
 
     LaunchedEffect(playbackController) {
         playbackController.setPlaybackSpeed(SettingsRepository.playerSpeed)
+    }
+    LaunchedEffect(isLargeScreenDevice) {
+        val currentSettings = SettingsRepository.current
+        if (
+            isLargeScreenDevice &&
+            !currentSettings.tabletMode &&
+            !currentSettings.largeScreenTabletModeHintShown
+        ) {
+            SettingsRepository.update {
+                it.copy(largeScreenTabletModeHintShown = true)
+            }
+            SonnerToast.info(R.string.large_screen_tablet_mode_hint)
+        }
     }
     val stringLongPressShare = remember(activity) {
         activity.getString(R.string.long_press_share_to_copy)
@@ -928,3 +944,5 @@ private fun realProgressSensitivity(value: Int): Float {
     val clampedValue = value.coerceIn(1, 7)
     return 4f - (clampedValue - 1) * (3.5f / 6f)
 }
+
+private const val LARGE_SCREEN_MIN_WIDTH_DP = 600

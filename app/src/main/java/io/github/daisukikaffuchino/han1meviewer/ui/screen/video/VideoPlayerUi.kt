@@ -1226,7 +1226,7 @@ private fun BoxScope.PlayerSidePanelSheet(
                         Modifier
                     }
                 )
-                .background(Color.White.copy(alpha = 0.84f))
+                .background(Color.Black.copy(alpha = 0.72f))
         )
         LazyColumn(
             modifier = Modifier
@@ -1257,20 +1257,20 @@ private fun BoxScope.PlayerSidePanelSheet(
                         ) {
                             Text(
                                 text = marker,
-                                color = Color.Black,
+                                color = MaterialTheme.colorScheme.primary,
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = time,
-                                color = Color.Black,
+                                color = Color.White,
                                 style = MaterialTheme.typography.bodyLarge,
                             )
                         }
                         keyframe.prompt?.takeIf(String::isNotBlank)?.let { prompt ->
                             Text(
                                 text = prompt,
-                                color = Color.Black.copy(alpha = 0.68f),
+                                color = Color.White.copy(alpha = 0.68f),
                                 style = MaterialTheme.typography.bodySmall,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
@@ -1282,10 +1282,10 @@ private fun BoxScope.PlayerSidePanelSheet(
                                 horizontalArrangement = Arrangement.End,
                             ) {
                                 TextButton(onClick = { editingKeyframe = keyframe }) {
-                                    Text(stringResource(R.string.edit), color = Color.Black)
+                                    Text(stringResource(R.string.edit), color = Color.White)
                                 }
                                 TextButton(onClick = { deletingKeyframe = keyframe }) {
-                                    Text(stringResource(R.string.delete), color = Color.Black)
+                                    Text(stringResource(R.string.delete), color = Color.White)
                                 }
                             }
                         }
@@ -1295,7 +1295,7 @@ private fun BoxScope.PlayerSidePanelSheet(
                 item {
                     Text(
                         text = emptyText.orEmpty(),
-                        color = Color.Black,
+                        color = Color.White,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1311,7 +1311,7 @@ private fun BoxScope.PlayerSidePanelSheet(
                             .clickable { onSelected(index) }
                             .background(
                                 if (isSelected) {
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                                    MaterialTheme.colorScheme.secondaryContainer
                                 } else {
                                     Color.Transparent
                                 }
@@ -1321,7 +1321,11 @@ private fun BoxScope.PlayerSidePanelSheet(
                     ) {
                         Text(
                             text = option,
-                            color = Color.Black,
+                            color = if (isSelected) {
+                                MaterialTheme.colorScheme.onSecondaryContainer
+                            } else {
+                                Color.White
+                            },
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.fillMaxWidth(),

@@ -2,6 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.compone
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -92,7 +93,7 @@ private val robotoFont = FontFamily(
 private fun Han1meViewerText(
     modifier: Modifier = Modifier,
     fontSize: Int = 20,
-    maxLines: Int = Int.MAX_VALUE,
+    maxLines: Int = 1,
     overflow: TextOverflow = TextOverflow.Clip,
 ) {
     val onSurface = MaterialTheme.colorScheme.onSurface
@@ -134,8 +135,13 @@ private fun Han1meViewerText(
         style = androidx.compose.ui.text.TextStyle(
             fontSize = fontSize.sp,
         ),
+        softWrap = false,
         maxLines = maxLines,
         overflow = overflow,
+        autoSize = TextAutoSize.StepBased(
+            minFontSize = 8.sp,
+            maxFontSize = fontSize.sp,
+        ),
     )
 }
 
