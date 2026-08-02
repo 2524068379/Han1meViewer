@@ -674,14 +674,7 @@ private fun MyListDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = {
-                    if (selectedStates.none { it }) {
-                        onDismiss()
-                        SonnerToast.warning(R.string.select_at_least_one_playlist)
-                    } else {
-                        onConfirm(selectedStates)
-                    }
-                },
+                onClick = { onConfirm(selectedStates) },
             ) {
                 Text(stringResource(R.string.confirm))
             }
