@@ -156,6 +156,7 @@ object DataStoreManager : SettingsStore {
         searchGridColumnsExpanded = int("search_grid_columns_expanded", defaults.searchGridColumnsExpanded), searchGridColumnsLarge = int("search_grid_columns_large", defaults.searchGridColumnsLarge),
         horizontalCardCountNarrow = floatString("horizontal_card_count_narrow", defaults.horizontalCardCountNarrow), horizontalCardCountCompact = floatString("horizontal_card_count_compact", defaults.horizontalCardCountCompact),
         horizontalCardCountMedium = floatString("horizontal_card_count_medium", defaults.horizontalCardCountMedium), horizontalCardCountExpanded = floatString("horizontal_card_count_expanded", defaults.horizontalCardCountExpanded),
+        subscriptionArtistRows = intInRange("subscription_artist_rows", defaults.subscriptionArtistRows, 1..3),
         homeCategoryOrder = nullableString("home_category_order")?.split(',')?.filter(String::isNotBlank).orEmpty(),
         hiddenHomeCategoryKeys = nullableString("home_category_hidden")?.split(',')?.filter(String::isNotBlank)?.toSet().orEmpty(),
         alwaysShowUpdateCard = bool("developer_always_show_update_card", defaults.alwaysShowUpdateCard),
@@ -181,6 +182,7 @@ object DataStoreManager : SettingsStore {
         put("search_artist_ignore_video_type", searchArtistIgnoreVideoType); put("disable_mobile_data_warning", disableMobileDataWarning); put("fun_loading_hints", funLoadingHints); put("check_in_enabled", checkInEnabled)
         put("search_grid_columns_compact", searchGridColumnsCompact); put("search_grid_columns_medium", searchGridColumnsMedium); put("search_grid_columns_expanded", searchGridColumnsExpanded); put("search_grid_columns_large", searchGridColumnsLarge)
         put("horizontal_card_count_narrow", horizontalCardCountNarrow.toString()); put("horizontal_card_count_compact", horizontalCardCountCompact.toString()); put("horizontal_card_count_medium", horizontalCardCountMedium.toString()); put("horizontal_card_count_expanded", horizontalCardCountExpanded.toString())
+        put("subscription_artist_rows", subscriptionArtistRows)
         put("home_category_order", homeCategoryOrder.joinToString(",")); put("home_category_hidden", hiddenHomeCategoryKeys.joinToString(","))
         put("developer_always_show_update_card", alwaysShowUpdateCard); put("developer_display_density_percent", displayDensity.percent)
     }

@@ -169,6 +169,7 @@ data class AppSettings(
     val horizontalCardCountCompact: Float = 2.1f,
     val horizontalCardCountMedium: Float = 4.1f,
     val horizontalCardCountExpanded: Float = 5.1f,
+    val subscriptionArtistRows: Int = 1,
     val homeCategoryOrder: List<String> = emptyList(),
     val hiddenHomeCategoryKeys: Set<String> = emptySet(),
     val alwaysShowUpdateCard: Boolean = false,

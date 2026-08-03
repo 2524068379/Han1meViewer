@@ -368,7 +368,7 @@
     <string name="usage_notice_accept">我已阅读并同意</string>
     <string name="usage_notice_accept_countdown">请阅读 %1$d 秒</string>
     <string name="usage_notice_decline">不同意并退出</string>
-    <string name="app_source_title">你是从哪里下载的app</string>
+    <string name="app_source_title">你是从哪里下载的app？请慎重选择！</string>
     <string name="app_source_forum">论坛</string>
     <string name="app_source_telegram">Telegram</string>
     <string name="app_source_github">GitHub</string>
@@ -377,7 +377,7 @@
     <string name="app_source_douyin_tiktok">抖音/TikTok</string>
     <string name="app_source_confirm">继续</string>
     <string name="app_source_illegal_title">你的app来源非法</string>
-    <string name="app_source_illegal_message">本app禁止在公开渠道宣传，不允许搬运、引流、倒卖以及自称官方的行为。请输入完整仓库链接以完成验证，链接校验不区分大小写。</string>
+    <string name="app_source_illegal_message">本app从未在你选择的渠道发布。禁止在公开渠道宣传，不允许搬运、引流、倒卖以及自称官方的行为。请输入完整仓库链接以完成验证，链接校验不区分大小写。</string>
     <string name="app_source_repository_link">完整仓库链接</string>
     <string name="app_source_verify">验证并进入</string>
     <string name="app_lang">语言</string>
@@ -390,6 +390,8 @@
     <string name="default_video_quilty">默认分辨率</string>
     <string name="my_subscribe">我的订阅</string>
     <string name="subscribed_artists_count">已关注作者（%1$d）</string>
+    <string name="subscription_artist_rows">订阅作者行数</string>
+    <string name="subscription_artist_rows_option">%1$d 行</string>
     <string name="swipe_more">向右滑动</string>
     <string name="my_account">我的</string>
     <string name="username">用户名</string>

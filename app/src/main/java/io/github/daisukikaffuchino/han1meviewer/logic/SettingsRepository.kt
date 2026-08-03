@@ -108,6 +108,7 @@ object SettingsRepository : SettingsStore {
     val downloadSpeedLimit get() = DOWNLOAD_SPEED_BYTES[current.downloadSpeedLimitIndex]
     val searchGridColumnsConfig get() = SearchGridColumnsConfig(current.searchGridColumnsCompact, current.searchGridColumnsMedium, current.searchGridColumnsExpanded, current.searchGridColumnsLarge)
     val horizontalCardCountConfig get() = HorizontalCardCountConfig(current.horizontalCardCountNarrow, current.horizontalCardCountCompact, current.horizontalCardCountMedium, current.horizontalCardCountExpanded)
+    val subscriptionArtistRows get() = current.subscriptionArtistRows
     val alwaysShowUpdateCard get() = current.alwaysShowUpdateCard
     val displayDensity get() = current.displayDensity
 
@@ -129,6 +130,7 @@ object SettingsRepository : SettingsStore {
     suspend fun setDownloadCountLimit(value: Int) = update { it.copy(downloadCountLimit = value) }
     suspend fun setDownloadSpeedLimitIndex(value: Int) = update { it.copy(downloadSpeedLimitIndex = value.coerceIn(DOWNLOAD_SPEED_BYTES.indices)) }
     suspend fun setSlideSensitivity(value: Int) = update { it.copy(slideSensitivity = value.coerceIn(1, 7)) }
+    suspend fun setSubscriptionArtistRows(value: Int) = update { it.copy(subscriptionArtistRows = value.coerceIn(1, 3)) }
     suspend fun setHomeCategories(order: List<String>, hidden: Set<String>) = update { it.copy(homeCategoryOrder = order, hiddenHomeCategoryKeys = hidden) }
     suspend fun setCachedUpdateJson(value: String?) = update { it.copy(cachedUpdateJson = value) }
     suspend fun setIgnoredVersionCode(value: Int) = update { it.copy(ignoredVersionCode = value) }

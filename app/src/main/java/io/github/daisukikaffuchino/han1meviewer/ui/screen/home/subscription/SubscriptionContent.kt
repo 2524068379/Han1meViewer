@@ -77,6 +77,7 @@ fun SubscriptionContent(
     uiState: SubscriptionUiState,
     onEvent: (SubscriptionEvent) -> Unit,
     gridState: LazyGridState,
+    artistRows: Int,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
@@ -84,7 +85,6 @@ fun SubscriptionContent(
     val screenWidthPx = windowInfo.containerSize.width
     val screenWidthDp = with(density) { screenWidthPx.toDp() }
     val videoColumns = rememberVideoGridColumns()
-    val artistRows = 3
     val artistColumns = maxOf(
         3,
         ((screenWidthDp + SpacingNormal) / (ArtistIconSize + SpacingNormal)).toInt()
@@ -290,6 +290,7 @@ private fun PreviewSubscriptionContent() {
             ),
             onEvent = {},
             gridState = LazyGridState(),
+            artistRows = 1,
         )
     }
 }

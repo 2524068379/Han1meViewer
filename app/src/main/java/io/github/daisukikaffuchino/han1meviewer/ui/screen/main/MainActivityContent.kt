@@ -48,6 +48,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HomeRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainDrawerDestination
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.TopNavigation
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.VideoRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.handleMainIntent
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.navigateDrawerDestination
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomePageViewModel
@@ -165,6 +166,7 @@ fun MainActivityContent(
         drawerState = drawerState,
         drawerEnabled = drawerEnabled,
         permanentDrawer = permanentDrawer,
+        applyHorizontalSafeInsets = currentRoute !is VideoRoute,
         selectedDestination = selectedDrawerDestination,
         avatarUrl = headerAvatarUrl,
         username = headerUsername,
