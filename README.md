@@ -24,6 +24,24 @@ Han1meViewer 是一个使用 Kotlin 开发的 Android 客户端，用于浏览�
 
 还请大家好好看片，不要去打击用爱发电的开发者们的积极性
 
+# 📱 应用截图
+
+### 手机端
+
+| 首页 | 播放页 | 播放设置 |
+| --- | --- | --- |
+| <img src="image/screenshots/phone_home.jpg" alt="手机端首页" width="240"> | <img src="image/screenshots/phone_player_1.jpg" alt="手机端播放页" width="240"> | <img src="image/screenshots/phone_player_2.jpg" alt="手机端播放设置" width="240"> |
+| 设置 | Getchu | |
+| <img src="image/screenshots/phone_settings.jpg" alt="手机端设置" width="240"> | <img src="image/screenshots/phone_getchu.jpg" alt="手机端 Getchu" width="240"> | |
+
+### 横屏与平板端
+
+| 首页 | 列表 | 搜索 |
+| --- | --- | --- |
+| ![平板端首页](image/screenshots/tablet_home.png) | ![平板端列表](image/screenshots/tablet_list.png) | ![平板端搜索](image/screenshots/tablet_search.png) |
+| 播放页 | 播放详情 | 下载管理 |
+| ![平板端播放页](image/screenshots/tablet_palyer_1.png) | ![平板端播放详情](image/screenshots/tablet_player_2.png) | ![平板端下载管理](image/screenshots/tablet_download.png) |
+
 # 📜 目前做了什么
 
 ### 已移除
