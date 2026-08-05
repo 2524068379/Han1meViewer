@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
@@ -38,6 +39,7 @@ fun DownloadRouteScreen(
     onNavigateToLocalVideo: (String, String?) -> Unit,
 ) {
     val context = LocalContext.current
+    val externalPlayerChooserTitle = stringResource(R.string.ext_player)
     val viewModel: DownloadViewModel = viewModel()
     val scope = rememberCoroutineScope()
     val dao = remember { DownloadDatabase.instance.hanimeDownloadDao }
@@ -87,7 +89,7 @@ fun DownloadRouteScreen(
                     }
                     val chooser = Intent.createChooser(
                         intent,
-                        context.getString(R.string.ext_player),
+                        externalPlayerChooserTitle,
                     ).apply {
                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
