@@ -241,11 +241,13 @@ fun VideoRouteHostScreen(
         brightness = currentScreenBrightness(activity)
     }
 
-    fun enterFullscreen() {
+    fun enterFullscreen(forceLandscape: Boolean = false) {
         isFullscreen = true
         val engineState = playbackController.state.value.engine
         activity.requestedOrientation = if (
-            engineState.videoWidth > 0 && engineState.videoHeight > engineState.videoWidth
+            !forceLandscape &&
+            engineState.videoWidth > 0 &&
+            engineState.videoHeight > engineState.videoWidth
         ) {
             ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         } else {
@@ -381,14 +383,18 @@ fun VideoRouteHostScreen(
         }
     }
 
-    DisposableEffect(lifecycleOwner, activity, playbackController, route.videoCode) {
+    DisposableEffect(
+        lifecycleOwner,
+        activity,
+        playbackController,
+        route.videoCode,
+        appSettings.tabletMode,
+    ) {
         val orientationManager = OrientationManager(activity) { orientation ->
-            val engineState = playbackController.state.value.engine
-            val isPortraitVideo = engineState.videoWidth > 0 &&
-                    engineState.videoHeight > engineState.videoWidth
-            if (!SettingsRepository.tabletMode && !isPortraitVideo && engineState.phase == PlaybackPhase.Ready) {
-                if (orientation.isLandscape && !isFullscreen) enterFullscreen()
-                if (orientation == OrientationManager.ScreenOrientation.PORTRAIT && isFullscreen) {
+            if (!appSettings.tabletMode) {
+                if (orientation.isLandscape && !isFullscreen) {
+                    enterFullscreen(forceLandscape = true)
+                } else if (!orientation.isLandscape && isFullscreen) {
                     exitFullscreen()
                 }
             }

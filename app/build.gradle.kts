@@ -9,9 +9,8 @@ plugins {
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.com.google.devtools.ksp)
     alias(libs.plugins.compose.compiler)
-    //noinspection NewerVersionAvailable
-    id("com.mikepenz.aboutlibraries.plugin") version "14.2.0"
-    id("com.github.ben-manes.versions") version "0.56.0"
+    id("com.mikepenz.aboutlibraries.plugin") version "15.0.4"
+    id("com.github.ben-manes.versions") version "0.59.0"
 }
 
 android {
@@ -92,6 +91,12 @@ android {
     @Suppress("UnstableApiUsage")
     androidResources {
         generateLocaleConfig = true
+    }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 
 }
