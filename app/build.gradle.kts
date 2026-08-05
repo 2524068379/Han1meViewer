@@ -157,6 +157,7 @@ dependencies {
 
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.exoplayer.hls)
+    implementation(libs.media3.cast)
     implementation(libs.mpv.lib)
 
     ksp(libs.room.compiler)
