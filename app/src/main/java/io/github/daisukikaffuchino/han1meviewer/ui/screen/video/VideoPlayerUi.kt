@@ -1,10 +1,14 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.video
 
+import android.content.Context
 import android.graphics.RenderEffect
 import android.graphics.Shader
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.StateListDrawable
 import android.os.Build
 import android.os.SystemClock
 import android.text.format.DateFormat
+import android.util.StateSet
 import android.view.HapticFeedbackConstants
 import android.view.SurfaceHolder
 import android.view.SurfaceView
@@ -34,6 +38,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -91,7 +96,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.mediarouter.app.MediaRouteButton
 import coil3.compose.AsyncImage
+import com.google.android.gms.cast.framework.CastButtonFactory
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
 import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
@@ -110,7 +119,7 @@ import java.util.Date
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@kotlin.OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun VideoPlayerUi(
     modifier: Modifier = Modifier,
@@ -126,6 +135,9 @@ fun VideoPlayerUi(
     showControls: Boolean = true,
     isFullscreen: Boolean = false,
     isPlaying: Boolean = false,
+    showCastButton: Boolean = false,
+    isCasting: Boolean = false,
+    castDeviceName: String? = null,
     isLocked: Boolean = false,
     showPoster: Boolean = false,
     showResumeButton: Boolean = false,
@@ -318,7 +330,7 @@ fun VideoPlayerUi(
                     .aspectRatio(safeAspectRatio)
             }
 
-            if (playbackEngine != null) {
+            if (playbackEngine != null && !isCasting) {
                 key(playbackEngine, safeAspectRatio) {
                     Box(
                         modifier = videoModifier
@@ -357,6 +369,24 @@ fun VideoPlayerUi(
                 Box(
                     modifier = videoModifier.background(Color.Black)
                 )
+            }
+
+            if (isCasting) {
+                Surface(
+                    modifier = Modifier.offset(y = (-48).dp),
+                    shape = RoundedCornerShape(6.dp),
+                    color = Color.Black.copy(alpha = 0.72f),
+                ) {
+                    Text(
+                        text = stringResource(
+                            R.string.player_casting_to,
+                            castDeviceName ?: stringResource(R.string.player_cast_device),
+                        ),
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                    )
+                }
             }
         }
         Box(
@@ -658,6 +688,22 @@ fun VideoPlayerUi(
                     )
 
                     Spacer(modifier = Modifier.width(10.dp))
+
+                    if (showCastButton) {
+                        AndroidView(
+                            modifier = Modifier.size(24.dp),
+                            factory = { context ->
+                                MediaRouteButton(context).also { button ->
+                                    button.minimumWidth = 0
+                                    button.minimumHeight = 0
+                                    button.contentDescription = context.getString(R.string.enable_google_cast)
+                                    CastButtonFactory.setUpMediaRouteButton(context, button)
+                                    button.setRemoteIndicatorDrawable(createGoogleCastIndicator(context))
+                                }
+                            },
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                    }
 
                     if (isFullscreen) {
                         PlayerMenuChip(
@@ -1149,6 +1195,26 @@ fun VideoPlayerUi(
         }
     }
 }
+
+private fun createGoogleCastIndicator(context: Context): Drawable = StateListDrawable().apply {
+    addState(
+        intArrayOf(android.R.attr.state_checked),
+        whiteDrawable(context, androidx.media3.cast.R.drawable.media_route_button_connected),
+    )
+    addState(
+        intArrayOf(android.R.attr.state_checkable),
+        whiteDrawable(context, androidx.media3.cast.R.drawable.media_route_button_disconnected),
+    )
+    addState(
+        StateSet.WILD_CARD,
+        whiteDrawable(context, androidx.media3.cast.R.drawable.media_route_button_disconnected),
+    )
+}
+
+private fun whiteDrawable(context: Context, drawableRes: Int): Drawable =
+    requireNotNull(ContextCompat.getDrawable(context, drawableRes)).mutate().also { drawable ->
+        DrawableCompat.setTint(drawable, android.graphics.Color.WHITE)
+    }
 
 @Composable
 private fun PlayerMenuChip(
