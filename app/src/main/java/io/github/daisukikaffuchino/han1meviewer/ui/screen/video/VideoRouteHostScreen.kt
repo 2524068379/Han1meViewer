@@ -513,7 +513,11 @@ fun VideoRouteHostScreen(
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
             viewModel.loadDownloadedFlow.collect { entity ->
                 val newQuality = checkedQuality ?: return@collect
-                pendingDownloadPrompt = DownloadPromptState(newQuality, entity?.quality)
+                pendingDownloadPrompt = DownloadPromptState(
+                    newQuality = newQuality,
+                    oldQuality = entity?.quality,
+                    oldGroupId = entity?.groupId,
+                )
             }
         }
     }
@@ -757,8 +761,14 @@ fun VideoRouteHostScreen(
                     checkedQuality = quality
                     item?.let(actions::startDownloadFlow)
                 },
-                onConfirmDownloadPrompt = { item ->
-                    item?.let { actions.confirmPendingDownload(it, pendingDownloadPrompt) }
+                onConfirmDownloadPrompt = { item, autoCreateGroup ->
+                    item?.let {
+                        actions.confirmPendingDownload(
+                            it,
+                            pendingDownloadPrompt,
+                            autoCreateGroup,
+                        )
+                    }
                 },
                 onRequestOpenOfficialDownloadPage = actions::openOfficialDownloadPage,
                 onOpenWebPage = actions::openVideoWebPage,

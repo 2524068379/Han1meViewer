@@ -272,6 +272,10 @@ object DatabaseRepo {
             )
             return downloadGroupDao.insert(newGroup)
         }
+
+        suspend fun getOrCreateGroup(name: String): Int =
+            downloadGroupDao.getOrCreateGroup(name)
+
         suspend fun deleteGroup(group: DownloadGroupEntity) {
             downloadGroupDao.deleteGroup(group)
         }

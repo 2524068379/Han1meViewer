@@ -270,6 +270,7 @@
     <string name="name_with_colon">名稱：</string>
     <string name="quality_with_colon">畫質：</string>
     <string name="after_download_tips">下載完成後，可以在「下載」頁面找到下載後的影片，「設定」頁面中有詳細儲存路徑</string>
+    <string name="auto_create_same_name_download_group">自動建立同名分組</string>
     <string name="restart_or_not_working">修改 %s 需要重新啟動程式，否則不會生效！</string>
     <string name="restart_needed">需要重新啟動程式，否則不會生效！</string>
     <string name="sure_to_clear">確定要清除嗎？</string>

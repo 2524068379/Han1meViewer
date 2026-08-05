@@ -34,7 +34,7 @@ fun VideoRouteContent(
     onManageMyList: (io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo.MyList?, List<Boolean>) -> Unit,
     onQuickCheckIn: (io.github.daisukikaffuchino.han1meviewer.logic.entity.CheckInRecordEntity) -> Unit,
     onPrepareDownload: (String, io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo?) -> Unit,
-    onConfirmDownloadPrompt: (io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo?) -> Unit,
+    onConfirmDownloadPrompt: (io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo?, Boolean) -> Unit,
     onRequestOpenOfficialDownloadPage: () -> Unit,
     onOpenWebPage: () -> Unit,
     onOpenOriginalComic: (String) -> Unit,
