@@ -637,6 +637,7 @@
     <string name="invalid_ip_or_port">無效的 IPv4 位址或連接埠 (0..65535)</string>
     <string name="click_to_restart">點擊重新開始</string>
     <string name="replay">重播</string>
+    <string name="playback_finished">影片播放完畢</string>
     <string name="video_loading_failed">影片載入失敗</string>
     <string name="update_available_title">發現新版本 %1$s</string>
     <string name="force_update_notice">本次為強制更新</string>

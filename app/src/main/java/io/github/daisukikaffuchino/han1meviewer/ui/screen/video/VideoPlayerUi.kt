@@ -54,7 +54,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
@@ -104,6 +103,7 @@ import com.google.android.gms.cast.framework.CastButtonFactory
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
 import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledTonalButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledTonalIconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.player.PlaybackEngine
@@ -119,7 +119,7 @@ import java.util.Date
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
 
-@kotlin.OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun VideoPlayerUi(
     modifier: Modifier = Modifier,
@@ -135,6 +135,7 @@ fun VideoPlayerUi(
     showControls: Boolean = true,
     isFullscreen: Boolean = false,
     isPlaying: Boolean = false,
+    isPlaybackEnded: Boolean = false,
     showCastButton: Boolean = false,
     isCasting: Boolean = false,
     castDeviceName: String? = null,
@@ -144,6 +145,7 @@ fun VideoPlayerUi(
     showLoading: Boolean = false,
     showRetry: Boolean = false,
     onPlayClick: () -> Unit = {},
+    onReplay: () -> Unit = {},
     onBackClick: () -> Unit = {},
     onHomeClick: () -> Unit = {},
     onFullscreenClick: () -> Unit = {},
@@ -783,6 +785,7 @@ fun VideoPlayerUi(
                 !isLocked &&
                         activeSidePanel == null &&
                         gestureType == null &&
+                        !isPlaybackEnded &&
                         (!isPlaying || effectiveShowControls),
             enter = fadeIn(),
             exit = fadeOut(),
@@ -1028,6 +1031,44 @@ fun VideoPlayerUi(
                 shape = RoundedCornerShape(50),
             ) {
                 Text(stringResource(R.string.player_play_from_beginning))
+            }
+        }
+
+        AnimatedVisibility(
+            visible = isPlaybackEnded && activeSidePanel == null && !isLocked,
+            modifier = Modifier.align(Alignment.Center),
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = HanimeDefaults.Colors.pageSurface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                ),
+                shape = RoundedCornerShape(28.dp),
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = stringResource(R.string.playback_finished),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    FilledTonalButton(onClick = onReplay) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_refresh),
+                            contentDescription = null,
+                        )
+
+                        Spacer(modifier = Modifier.width(6.dp))
+
+                        Text(stringResource(R.string.replay))
+                    }
+                }
             }
         }
 

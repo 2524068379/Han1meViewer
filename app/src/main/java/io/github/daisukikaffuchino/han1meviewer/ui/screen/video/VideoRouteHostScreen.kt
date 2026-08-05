@@ -605,6 +605,7 @@ fun VideoRouteHostScreen(
         currentVolume = volume,
         currentBrightness = brightness,
         isPlaying = playbackState.engine.isPlaying,
+        isPlaybackEnded = playbackState.engine.phase == PlaybackPhase.Ended,
         showCastButton = playbackState.engine.isCastSupported,
         isCasting = playbackState.engine.isCasting,
         castDeviceName = playbackState.engine.castDeviceName,
@@ -616,6 +617,7 @@ fun VideoRouteHostScreen(
         showRetry = playbackState.engine.phase == PlaybackPhase.Error,
         showResumeButton = showResumeButton,
         onPlayClick = playbackController::togglePlayPause,
+        onReplay = playbackController::replay,
         onBackClick = { activity.onBackPressedDispatcher.onBackPressed() },
         onHomeClick = {
             activity.mainBackStack.popTo(HomeRoute)

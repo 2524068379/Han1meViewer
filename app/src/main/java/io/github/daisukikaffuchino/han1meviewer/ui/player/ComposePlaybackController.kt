@@ -83,6 +83,13 @@ class ComposePlaybackController(
         if (mutableState.value.engine.isPlaying) pause() else play()
     }
 
+    fun replay() {
+        val selectedIndex = mutableState.value.selectedQualityIndex
+        if (selectedIndex in mutableState.value.qualities.indices) {
+            loadQuality(selectedIndex, positionMs = 0L, playWhenReady = true)
+        }
+    }
+
     fun seekTo(positionMs: Long) = playbackEngine.seekTo(positionMs)
 
     fun seekBy(deltaMs: Long) {
