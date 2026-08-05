@@ -1297,7 +1297,7 @@ private fun BoxScope.PlayerSidePanelSheet(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 6.dp, vertical = 12.dp),
+                .padding(horizontal = 6.dp, vertical = 6.dp),
         ) {
             if (isHKeyframePanel && hKeyframes.isNotEmpty()) {
                 itemsIndexed(hKeyframes) { index, keyframe ->
@@ -1314,8 +1314,8 @@ private fun BoxScope.PlayerSidePanelSheet(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onSelected(index) }
-                            .padding(horizontal = 10.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalArrangement = Arrangement.spacedBy(1.dp),
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -1324,36 +1324,52 @@ private fun BoxScope.PlayerSidePanelSheet(
                             Text(
                                 text = marker,
                                 color = MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.labelMedium,
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = time,
                                 color = Color.White,
-                                style = MaterialTheme.typography.bodyLarge,
+                                style = MaterialTheme.typography.bodyMedium,
                             )
+                            if (isHKeyframeLocal) {
+                                Spacer(modifier = Modifier.weight(1f))
+                                IconButton(
+                                    onClick = { editingKeyframe = keyframe },
+                                    modifier = Modifier.size(28.dp),
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        contentColor = Color.White.copy(alpha = 0.76f),
+                                    ),
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_edit),
+                                        contentDescription = stringResource(R.string.edit),
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                }
+                                IconButton(
+                                    onClick = { deletingKeyframe = keyframe },
+                                    modifier = Modifier.size(28.dp),
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        contentColor = Color.White.copy(alpha = 0.76f),
+                                    ),
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_delete),
+                                        contentDescription = stringResource(R.string.delete),
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                }
+                            }
                         }
                         keyframe.prompt?.takeIf(String::isNotBlank)?.let { prompt ->
                             Text(
                                 text = prompt,
                                 color = Color.White.copy(alpha = 0.68f),
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 2,
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
-                        }
-                        if (isHKeyframeLocal) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.End,
-                            ) {
-                                TextButton(onClick = { editingKeyframe = keyframe }) {
-                                    Text(stringResource(R.string.edit), color = Color.White)
-                                }
-                                TextButton(onClick = { deletingKeyframe = keyframe }) {
-                                    Text(stringResource(R.string.delete), color = Color.White)
-                                }
-                            }
                         }
                     }
                 }
