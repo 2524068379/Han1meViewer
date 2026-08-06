@@ -270,6 +270,7 @@
     <string name="name_with_colon">名稱：</string>
     <string name="quality_with_colon">畫質：</string>
     <string name="after_download_tips">下載完成後，可以在「下載」頁面找到下載後的影片，「設定」頁面中有詳細儲存路徑</string>
+    <string name="auto_create_same_name_download_group">自動建立同名分組</string>
     <string name="restart_or_not_working">修改 %s 需要重新啟動程式，否則不會生效！</string>
     <string name="restart_needed">需要重新啟動程式，否則不會生效！</string>
     <string name="sure_to_clear">確定要清除嗎？</string>
@@ -326,6 +327,13 @@
     <string name="apply_deep_links_summary">套用後，開啟相關網頁時可快速跳轉至此 App</string>
     <string name="apply_deep_links_tips">MIUI 隱藏了此介面，因此你需要從這裡開啟並新增連結</string>
     <string name="switch_player_kernel">切換播放器核心</string>
+    <string name="enable_google_cast">啟用 Google Cast</string>
+    <string name="enable_google_cast_summary">可以讓你在 Android TV 等支援的裝置上進行投放</string>
+    <string name="google_cast_unavailable_summary">此裝置缺少 Google Play 服務，無法使用 Google Cast</string>
+    <string name="google_cast_warning">由於並不依賴手機持續傳輸畫面，傳送端的 Cloudflare 驗證、VPN 和 Hosts 等設定對接收端完全不起作用。除非你設定了全域軟路由，能讓接收端裝置自動走代理通道，否則不要嘗試播放需要 Cloudflare 驗證的影片來源，投放必然失敗。</string>
+    <string name="player_settings_controls">播放器控制</string>
+    <string name="player_settings_casting">投放</string>
+    <string name="settings_tip">提示：</string>
     <string name="switch_to_year">切換至年份</string>
     <string name="switch_to_year_month">切換至年月</string>
     <string name="subscribe">追蹤</string>
@@ -355,7 +363,7 @@
     <string name="usage_notice_accept">我已閱讀並同意</string>
     <string name="usage_notice_accept_countdown">請閱讀 %1$d 秒</string>
     <string name="usage_notice_decline">不同意並退出</string>
-    <string name="app_source_title">你是從哪裡下載的app</string>
+    <string name="app_source_title">你是從哪裡下載的app？請慎重選擇！</string>
     <string name="app_source_forum">論壇</string>
     <string name="app_source_telegram">Telegram</string>
     <string name="app_source_github">GitHub</string>
@@ -364,7 +372,7 @@
     <string name="app_source_douyin_tiktok">抖音/TikTok</string>
     <string name="app_source_confirm">繼續</string>
     <string name="app_source_illegal_title">你的app來源非法</string>
-    <string name="app_source_illegal_message">本app禁止在公開渠道宣傳，不允許搬運、引流、倒賣以及自稱官方的行為。請輸入完整倉庫連結以完成驗證，連結校驗不區分大小寫。</string>
+    <string name="app_source_illegal_message">本app從未在你選擇的通路發佈。禁止在公開渠道宣傳，不允許搬運、引流、倒賣以及自稱官方的行為。請輸入完整倉庫連結以完成驗證，連結校驗不區分大小寫。</string>
     <string name="app_source_repository_link">完整倉庫連結</string>
     <string name="app_source_verify">驗證並進入</string>
     <string name="app_lang">語言</string>
@@ -377,6 +385,8 @@
     <string name="default_video_quilty">預設解析度</string>
     <string name="my_subscribe">我的訂閱</string>
     <string name="subscribed_artists_count">已追蹤作者（%1$d）</string>
+    <string name="subscription_artist_rows">訂閱作者行數</string>
+    <string name="subscription_artist_rows_option">%1$d 行</string>
     <string name="swipe_more">向右滑動</string>
     <string name="my_account">我的</string>
     <string name="username">使用者名稱</string>
@@ -627,6 +637,7 @@
     <string name="invalid_ip_or_port">無效的 IPv4 位址或連接埠 (0..65535)</string>
     <string name="click_to_restart">點擊重新開始</string>
     <string name="replay">重播</string>
+    <string name="playback_finished">影片播放完畢</string>
     <string name="video_loading_failed">影片載入失敗</string>
     <string name="update_available_title">發現新版本 %1$s</string>
     <string name="force_update_notice">本次為強制更新</string>
@@ -656,6 +667,20 @@
     <string name="simulated_update_data">模擬的更新資料</string>
     <string name="application_dpi">應用程式 DPI 調節</string>
     <string name="display_density">顯示密度</string>
+    <string name="trigger_crash">主動崩潰</string>
+    <string name="trigger_crash_summary">立即拋出未捕獲例外，用於測試崩潰處理</string>
+    <string name="crash_page_title">Han1meViewer 發生崩潰</string>
+    <string name="crash_unexpected_title">發生了問題</string>
+    <string name="crash_unexpected_message">Han1meViewer 遇到了未處理的錯誤。你可以在重新啟動前複製以下診斷記錄。</string>
+    <string name="crash_actions">操作</string>
+    <string name="crash_copy_log">複製崩潰記錄</string>
+    <string name="crash_copy_log_summary">將裝置與例外資訊複製到剪貼簿</string>
+    <string name="crash_restart_app">重新啟動應用程式</string>
+    <string name="crash_restart_app_summary">關閉異常程序並重新開啟 Han1meViewer</string>
+    <string name="crash_exit_app">退出應用程式</string>
+    <string name="crash_exit_app_summary">關閉崩潰報告且不重新啟動</string>
+    <string name="crash_log_title">崩潰記錄</string>
+    <string name="crash_no_logs">沒有可用的崩潰記錄。</string>
     <string name="simulated_update_description">這是用於除錯首頁更新卡片的模擬資料。</string>
     <string name="accent_color">強調色</string>
     <string name="display">顯示</string>
@@ -688,6 +713,8 @@
     <string name="player_gesture_progress">進度</string>
     <string name="player_play_from_beginning">從頭開始播放</string>
     <string name="player_untitled_video">未命名影片</string>
+    <string name="player_cast_device">Google Cast</string>
+    <string name="player_casting_to">正在投放至 %1$s</string>
     <string name="perception">感知</string>
     <string-array name="loading_hints">
         <item>哼！才、才沒有讓你等很久啦！是路由器剛打了個噴嚏啦……</item>

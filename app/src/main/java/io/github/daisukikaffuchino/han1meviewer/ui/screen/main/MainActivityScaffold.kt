@@ -57,6 +57,7 @@ fun MainActivityScaffold(
     drawerState: DrawerState,
     drawerEnabled: Boolean,
     permanentDrawer: Boolean,
+    applyHorizontalSafeInsets: Boolean,
     selectedDestination: MainDrawerDestination?,
     avatarUrl: String?,
     username: String?,
@@ -81,6 +82,13 @@ fun MainActivityScaffold(
             currentContent()
         }
     }
+    val horizontalSafeInsetsModifier = if (applyHorizontalSafeInsets) {
+        Modifier.windowInsetsPadding(
+            WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
+        )
+    } else {
+        Modifier
+    }
 
     val drawerContent: @Composable ColumnScope.() -> Unit = {
         MainDrawerContent(
@@ -103,9 +111,7 @@ fun MainActivityScaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .background(HanimeDefaults.Colors.pageSurface)
-                .windowInsetsPadding(
-                    WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
-                ),
+                .then(horizontalSafeInsetsModifier),
         ) {
             PermanentDrawerSheet(
                 modifier = Modifier.width(280.dp),
@@ -120,9 +126,7 @@ fun MainActivityScaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .background(HanimeDefaults.Colors.pageSurface)
-                .windowInsetsPadding(
-                    WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
-                ),
+                .then(horizontalSafeInsetsModifier),
             gesturesEnabled = drawerEnabled,
             drawerState = drawerState,
             drawerContent = {
@@ -316,6 +320,7 @@ private fun MainActivityScaffoldPreview() {
             drawerState = rememberDrawerState(initialValue = DrawerValue.Open),
             drawerEnabled = true,
             permanentDrawer = true,
+            applyHorizontalSafeInsets = true,
             selectedDestination = MainDrawerDestination.Home,
             avatarUrl = null,
             username = "Han1meViewer",

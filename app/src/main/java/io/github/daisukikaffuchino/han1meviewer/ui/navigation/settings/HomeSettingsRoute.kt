@@ -271,6 +271,9 @@ fun HomeSettingsRouteScreen(
                 SettingsRepository.setDisplayDensity(DisplayDensity.fromPercent(percent))
             }
         },
+        onTriggerCrash = {
+            throw RuntimeException("Crash triggered from developer options")
+        },
         hKeyframeSettingsContent = {
             HKeyframeSettingsRouteScreen(
                 onNavigateToHKeyframes = onNavigateToHKeyframes,

@@ -97,7 +97,12 @@ fun VideoRouteHostScreen(
     val commentViewModel: CommentViewModel = viewModel()
     val kernel = remember { PlayerKernel.fromPreference(SettingsRepository.switchPlayerKernel) }
     val playbackEngine = remember(route.videoCode, route.localUri, kernel) {
-        PlaybackEngineFactory.create(activity, kernel)
+        PlaybackEngineFactory.create(
+            context = activity,
+            kernel = kernel,
+            allowCast = SettingsRepository.enableGoogleCast &&
+                    route.localUri == null && route.videoCode != "-1",
+        )
     }
     val playbackController = remember(playbackEngine) { ComposePlaybackController(playbackEngine) }
     val playbackState by playbackController.state.collectAsStateWithLifecycle()
@@ -236,11 +241,13 @@ fun VideoRouteHostScreen(
         brightness = currentScreenBrightness(activity)
     }
 
-    fun enterFullscreen() {
+    fun enterFullscreen(forceLandscape: Boolean = false) {
         isFullscreen = true
         val engineState = playbackController.state.value.engine
         activity.requestedOrientation = if (
-            engineState.videoWidth > 0 && engineState.videoHeight > engineState.videoWidth
+            !forceLandscape &&
+            engineState.videoWidth > 0 &&
+            engineState.videoHeight > engineState.videoWidth
         ) {
             ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         } else {
@@ -299,7 +306,8 @@ fun VideoRouteHostScreen(
 
             override fun shouldEnterPip(): Boolean {
                 val state = playbackController.state.value.engine
-                return state.phase == PlaybackPhase.Ready &&
+                return !state.isCasting &&
+                        state.phase == PlaybackPhase.Ready &&
                         (state.isPlaying || state.positionMs > 0L)
             }
 
@@ -375,14 +383,18 @@ fun VideoRouteHostScreen(
         }
     }
 
-    DisposableEffect(lifecycleOwner, activity, playbackController, route.videoCode) {
+    DisposableEffect(
+        lifecycleOwner,
+        activity,
+        playbackController,
+        route.videoCode,
+        appSettings.tabletMode,
+    ) {
         val orientationManager = OrientationManager(activity) { orientation ->
-            val engineState = playbackController.state.value.engine
-            val isPortraitVideo = engineState.videoWidth > 0 &&
-                    engineState.videoHeight > engineState.videoWidth
-            if (!SettingsRepository.tabletMode && !isPortraitVideo && engineState.phase == PlaybackPhase.Ready) {
-                if (orientation.isLandscape && !isFullscreen) enterFullscreen()
-                if (orientation == OrientationManager.ScreenOrientation.PORTRAIT && isFullscreen) {
+            if (!appSettings.tabletMode) {
+                if (orientation.isLandscape && !isFullscreen) {
+                    enterFullscreen(forceLandscape = true)
+                } else if (!orientation.isLandscape && isFullscreen) {
                     exitFullscreen()
                 }
             }
@@ -402,7 +414,9 @@ fun VideoRouteHostScreen(
                 }
 
                 Lifecycle.Event.ON_STOP -> {
-                    if (!activity.isInPictureInPictureMode) {
+                    if (!activity.isInPictureInPictureMode &&
+                        !playbackController.state.value.engine.isCasting
+                    ) {
                         playbackController.pause()
                         exitFullscreen()
                     }
@@ -445,7 +459,11 @@ fun VideoRouteHostScreen(
                         val info = state.info
                         videoTitle = info.title
                         val qualities = info.videoUrls.map { (label, link) ->
-                            PlaybackQuality(label = label, uri = link.link)
+                            PlaybackQuality(
+                                label = label,
+                                uri = link.link,
+                                mimeType = link.subtype?.let { "video/$it" },
+                            )
                         }
                         if (qualities.isEmpty()) {
                             SonnerToast.error(R.string.fail_to_get_video_link)
@@ -458,6 +476,7 @@ fun VideoRouteHostScreen(
                                 title = info.title,
                                 qualities = qualities,
                                 preferredQuality = SettingsRepository.videoQuality,
+                                artworkUri = info.coverUrl,
                                 startPositionMs = history?.progress ?: 0L,
                             )
                             if (!viewModel.fromDownload &&
@@ -471,6 +490,7 @@ fun VideoRouteHostScreen(
                                     title = request.title,
                                     qualities = request.qualities,
                                     preferredQuality = request.preferredQuality,
+                                    artworkUri = request.artworkUri,
                                     startPositionMs = request.startPositionMs,
                                     playWhenReady = true,
                                 )
@@ -499,7 +519,11 @@ fun VideoRouteHostScreen(
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
             viewModel.loadDownloadedFlow.collect { entity ->
                 val newQuality = checkedQuality ?: return@collect
-                pendingDownloadPrompt = DownloadPromptState(newQuality, entity?.quality)
+                pendingDownloadPrompt = DownloadPromptState(
+                    newQuality = newQuality,
+                    oldQuality = entity?.quality,
+                    oldGroupId = entity?.groupId,
+                )
             }
         }
     }
@@ -587,6 +611,10 @@ fun VideoRouteHostScreen(
         currentVolume = volume,
         currentBrightness = brightness,
         isPlaying = playbackState.engine.isPlaying,
+        isPlaybackEnded = playbackState.engine.phase == PlaybackPhase.Ended,
+        showCastButton = playbackState.engine.isCastSupported,
+        isCasting = playbackState.engine.isCasting,
+        castDeviceName = playbackState.engine.castDeviceName,
         isLocked = isPlayerLocked,
         showPoster = !playbackState.engine.hasRenderedFirstFrame,
         showLoading =
@@ -595,6 +623,7 @@ fun VideoRouteHostScreen(
         showRetry = playbackState.engine.phase == PlaybackPhase.Error,
         showResumeButton = showResumeButton,
         onPlayClick = playbackController::togglePlayPause,
+        onReplay = playbackController::replay,
         onBackClick = { activity.onBackPressedDispatcher.onBackPressed() },
         onHomeClick = {
             activity.mainBackStack.popTo(HomeRoute)
@@ -610,8 +639,15 @@ fun VideoRouteHostScreen(
         onRetry = {
             video?.let { info ->
                 val qualities =
-                    info.videoUrls.map { (label, link) -> PlaybackQuality(label, link.link) }
-                playbackController.load(info.title, qualities, SettingsRepository.videoQuality)
+                    info.videoUrls.map { (label, link) ->
+                        PlaybackQuality(label, link.link, mimeType = link.subtype?.let { "video/$it" })
+                    }
+                playbackController.load(
+                    title = info.title,
+                    qualities = qualities,
+                    preferredQuality = SettingsRepository.videoQuality,
+                    artworkUri = info.coverUrl,
+                )
             }
         },
         onResumeClick = {
@@ -626,7 +662,7 @@ fun VideoRouteHostScreen(
         playbackSpeed = playbackState.engine.playbackSpeed,
         onPlaybackSpeedSelected = playbackController::setPlaybackSpeed,
         superResolutionLabel = stringResource(R.string.player_anime4k_label),
-        superResolutionOptions = if (kernel == PlayerKernel.MpvPlayer) {
+        superResolutionOptions = if (kernel == PlayerKernel.MpvPlayer && !playbackState.engine.isCasting) {
             listOf(
                 activity.getString(R.string.super_resolution_off),
                 activity.getString(R.string.super_resolution_performance),
@@ -733,8 +769,14 @@ fun VideoRouteHostScreen(
                     checkedQuality = quality
                     item?.let(actions::startDownloadFlow)
                 },
-                onConfirmDownloadPrompt = { item ->
-                    item?.let { actions.confirmPendingDownload(it, pendingDownloadPrompt) }
+                onConfirmDownloadPrompt = { item, autoCreateGroup ->
+                    item?.let {
+                        actions.confirmPendingDownload(
+                            it,
+                            pendingDownloadPrompt,
+                            autoCreateGroup,
+                        )
+                    }
                 },
                 onRequestOpenOfficialDownloadPage = actions::openOfficialDownloadPage,
                 onOpenWebPage = actions::openVideoWebPage,
@@ -835,6 +877,7 @@ fun VideoRouteHostScreen(
                     title = it.title,
                     qualities = it.qualities,
                     preferredQuality = it.preferredQuality,
+                    artworkUri = it.artworkUri,
                     startPositionMs = it.startPositionMs,
                     playWhenReady = true,
                 )
@@ -931,6 +974,7 @@ private data class PendingPlayback(
     val title: String,
     val qualities: List<PlaybackQuality>,
     val preferredQuality: String?,
+    val artworkUri: String?,
     val startPositionMs: Long,
 )
 

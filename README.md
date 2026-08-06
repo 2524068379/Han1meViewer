@@ -6,48 +6,62 @@
 
 🔞 **R18 警告：未满 18 岁禁止下载和使用。**
 
-Han1meViewer 是一个使用 Kotlin 开发的 Android 客户端，用于浏览、搜索、播放和管理 hanime 相关公开视频页面内容。当前项目以 Jetpack Compose、Navigation Compose、ViewModel、StateFlow、Retrofit、Jsoup、Room、WorkManager、Media3/JZVD/MPV 为主要技术栈，围绕视频浏览、详情播放、搜索、用户列表、下载管理、评论、订阅、设置和隐私保护等功能组织。
+Han1meViewer 是一个使用 Kotlin 开发的 Android 客户端，用于浏览、搜索、播放和管理 hanime 相关公开视频页面内容。当前项目以 Jetpack Compose、Material 3、Navigation 3、ViewModel、StateFlow、Retrofit、Jsoup、Room、DataStore、WorkManager、Media3/MPV 为主要技术栈，围绕视频浏览、详情播放、搜索、用户列表、下载管理、评论、订阅、设置和隐私保护等功能组织。
 
 本应用没有任何官方网站。GitHub Release 是唯一下载及更新渠道。
 
-本项目[原仓库](https://github.com/misaka10032w/Han1meViewer)已归档。因为对项目弃坑感到惋惜，同时也是原项目的使用者，所以现由我进行接下来的维护。
+~~本项目[原仓库](https://github.com/misaka10032w/Han1meViewer)已归档。因为对项目弃坑感到惋惜，同时也是原项目的使用者，所以现由我进行接下来的维护。~~
 
-以下是原项目维护者的停更声明：
-
-```
-鉴于很多用户的意见，对部分功能存在较大意见，开发目标产生分歧，但是又说不出个所以然来，我又猜不到你想说什么，故：
-
-本项目将不再提供更新，仓库将归档，并已删除所有编译产物，如您需要更丰富的功能，请自行下载修改编译。
-
-有缘再见
-```
+**上游[原仓库](https://github.com/misaka10032w/Han1meViewer)已回归，本项目的诞生离不开在此之前的所有贡献者！**
 
 还请大家好好看片，不要去打击用爱发电的开发者们的积极性
 
+# 📱 应用截图
+
+### 手机端
+
+| 首页 | 播放页 | 播放设置 |
+| --- | --- | --- |
+| <img src="image/screenshots/phone_home.jpg" alt="手机端首页" width="240"> | <img src="image/screenshots/phone_player_1.jpg" alt="手机端播放页" width="240"> | <img src="image/screenshots/phone_player_2.jpg" alt="手机端播放设置" width="240"> |
+| 设置 | Getchu | |
+| <img src="image/screenshots/phone_settings.jpg" alt="手机端设置" width="240"> | <img src="image/screenshots/phone_getchu.jpg" alt="手机端 Getchu" width="240"> | |
+
+### 横屏与平板端
+
+| 首页 | 列表 | 搜索 |
+| --- | --- | --- |
+| ![平板端首页](image/screenshots/tablet_home.png) | ![平板端列表](image/screenshots/tablet_list.png) | ![平板端搜索](image/screenshots/tablet_search.png) |
+| 播放页 | 播放详情 | 下载管理 |
+| ![平板端播放页](image/screenshots/tablet_palyer_1.png) | ![平板端播放详情](image/screenshots/tablet_player_2.png) | ![平板端下载管理](image/screenshots/tablet_download.png) |
+
 # 📜 目前做了什么
 
-### 移除了
+### 已移除
 
-- GMS 和 Firebase 追踪统计模块
+- Firebase 追踪统计模块
 - CI 更新频道
 - 旧外部存储读写权限与 Android 9 以下兼容代码
 - 创作中心、日本语翻译（日本网友无法访问H站，保留日语无意义）
 - 旧的主题、多语言和依赖传统 View 的工具类
+- JZVD
 
-### 新增和重构了
+### 当前功能与重构
 
-- 恢复了上版本移除的 冲了么 功能，其小组件使用 Glance Compose 重构
-- 迁移遗留的弹窗和列表到 Compose 并清理了未引用的 xml 残留
-- 基于 MomoQR 的优秀架构，使用 Material 3 Expressive 风格完全重构了用户界面，包含全新的视觉风格和底层逻辑
-- ...
+- 使用 Material 3 和 Compose 重构主要页面、卡片、列表、弹窗和播放器界面，拥有更精致的 UI 和更好的一致性。
+- 主导航迁移至 Navigation 3，使用统一路由、顶层返回栈、页面级状态保存和预测性返回；登录、Cookie 手动导入及 Cloudflare 验证迁移到单 Activity 架构。
+- 将应用设置从 SharedPreferences 迁移到 Preferences DataStore，网络、Cookie、下载、播放器、主题、语言、签到、首页和备份等设置使用统一的数据流和仓储。
+- 完全重构的 ExoPlayer、MediaPlayer、MPV 三种播放链路，以及 Anime4K、关键 H 帧、清晰度切换、倍速、画中画、本地视频和播放手势。
+- “冲了么”小组件使用 Glance Compose 实现。
+- 播放页可选的平板模式现支持经典和分栏两种样式。
+- 支持使用 Google Cast 投屏到 Android TV 等支持的设备。
 
-### 修复和完善了
+### 近期修复和完善
 
-- 视频卡片解析适配网站结构变化，补全作者与时长显示
-- 视频播放页优化沉浸式系统栏
-- 修复退出登录后仍可浏览在线观看历史等问题
-- 强化 Cloudflare 验证后的 Cookie 主机隔离、并发等待、取消与超时处理
-- ...
+- 视频卡片解析适配网站结构变化，补全作者与时长显示，并增强解析失败、登录过期、Cloudflare 和 IP blocked 的状态提示。
+- 修复新播放器切换视频、重新挂载 Surface、暂停帧和横竖屏尺寸同步问题；修复播放器高度和页面切换时的状态同步。
+- 播放页推荐区和经典平板侧栏改用惰性列表，避免超大离屏图层导致 RenderThread 崩溃；搜索筛选标签改为连续折叠，减少滚动抖动。
+- 优化了超大字号下的标题显示和横屏挖孔区域安全边距，在所有设备上的体验更一致。
+- 强化 Cloudflare 验证后的 Cookie 主机隔离、并发等待、取消与超时处理；退出登录后及时清理相关状态。
 
 ## 🤝 贡献说明
 
@@ -58,7 +72,7 @@ Han1meViewer 是一个使用 Kotlin 开发的 Android 客户端，用于浏览�
 
 ## 🧩 TODO
 
-- 最终移除 JZVD
+- 以后再说
 
 # 📄 许可证
 

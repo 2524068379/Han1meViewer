@@ -85,6 +85,7 @@ fun HomeSettingsScreen(
     onSecureModeChange: (Boolean) -> Unit,
     onAlwaysShowUpdateCardChange: (Boolean) -> Unit,
     onDisplayDensityChange: (Int) -> Unit,
+    onTriggerCrash: () -> Unit,
     onHomeCategoryPreferencesChange: (List<String>, Set<String>) -> Unit,
     hKeyframeSettingsContent: @Composable () -> Unit,
     networkSettingsContent: @Composable () -> Unit,
@@ -492,6 +493,12 @@ fun HomeSettingsScreen(
                             iconRes = R.drawable.ic_fullscreen,
                             onClick = { activeDialog = HomeSettingsChoiceDialog.DisplayDensity },
                         )
+                        SettingNavigationItem(
+                            title = stringResource(R.string.trigger_crash),
+                            summary = stringResource(R.string.trigger_crash_summary),
+                            iconRes = R.drawable.ic_bug_report,
+                            onClick = onTriggerCrash,
+                        )
                     }
                 }
             }
@@ -603,6 +610,7 @@ private fun HomeSettingsScreenPreview() {
             onSecureModeChange = {},
             onAlwaysShowUpdateCardChange = {},
             onDisplayDensityChange = {},
+            onTriggerCrash = {},
             onHomeCategoryPreferencesChange = { _, _ -> },
             hKeyframeSettingsContent = {},
             networkSettingsContent = {},

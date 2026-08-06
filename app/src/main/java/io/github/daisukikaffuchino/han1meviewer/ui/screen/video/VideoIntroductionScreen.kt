@@ -112,6 +112,7 @@ private val previewSafeDateFormat = LocalDate.Formats.ISO
 data class DownloadPromptState(
     val newQuality: String,
     val oldQuality: String? = null,
+    val oldGroupId: Int? = null,
 )
 
 @Composable
@@ -136,7 +137,7 @@ fun VideoIntroductionScreen(
     onQuickCheckIn: (CheckInRecordEntity) -> Unit,
     onPrepareDownload: (String) -> Unit,
     onDismissDownloadPrompt: () -> Unit,
-    onConfirmDownloadPrompt: () -> Unit,
+    onConfirmDownloadPrompt: (Boolean) -> Unit,
     onRequestOpenOfficialDownloadPage: () -> Unit,
     onShare: () -> Unit,
     onCopyShareText: () -> Unit,
@@ -228,7 +229,7 @@ private fun VideoIntroductionContent(
     onQuickCheckIn: (CheckInRecordEntity) -> Unit,
     onPrepareDownload: (String) -> Unit,
     onDismissDownloadPrompt: () -> Unit,
-    onConfirmDownloadPrompt: () -> Unit,
+    onConfirmDownloadPrompt: (Boolean) -> Unit,
     onRequestOpenOfficialDownloadPage: () -> Unit,
     onShare: () -> Unit,
     onCopyShareText: () -> Unit,
@@ -509,9 +510,11 @@ private fun DownloadConfirmDialog(
     video: HanimeVideo,
     prompt: DownloadPromptState,
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
+    onConfirm: (Boolean) -> Unit,
     onOpenOfficial: () -> Unit,
 ) {
+    val view = LocalView.current
+    var autoCreateGroup by remember(prompt, video.title) { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -542,10 +545,30 @@ private fun DownloadConfirmDialog(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .toggleable(
+                            value = autoCreateGroup,
+                            onValueChange = { checked ->
+                                VibrationUtil.performHapticFeedback(view)
+                                autoCreateGroup = checked
+                            },
+                        )
+                        .padding(vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Checkbox(
+                        checked = autoCreateGroup,
+                        onCheckedChange = null,
+                    )
+                    Text(stringResource(R.string.auto_create_same_name_download_group))
+                }
             }
         },
         confirmButton = {
-            TextButton(onClick = onConfirm) {
+            TextButton(onClick = { onConfirm(autoCreateGroup) }) {
                 Text(stringResource(R.string.sure))
             }
         },
